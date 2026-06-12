@@ -1,0 +1,50 @@
+version: '3.8'
+
+services:
+  postgres:
+    image: postgres:15-alpine
+    container_name: naiva-postgres
+    restart: always
+    environment:
+      POSTGRES_USER: naiva_user
+      POSTGRES_PASSWORD: naiva_password_123
+      POSTGRES_DB: naiva_db
+    ports:
+      - '5432:5432'
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+
+  redis:
+    image: redis:7-alpine
+    container_name: naiva-redis
+    restart: always
+    ports:
+      - '6379:6379'
+    volumes:
+      - redis_data:/data
+
+  nestjs:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: naiva-backend
+    restart: always
+    ports:
+      - '3000:3000'
+    environment:
+      - PORT=3000
+      - DATABASE_URL=postgresql://naiva_user:naiva_password_123@postgres:5432/naiva_db?schema=public
+      - REDIS_HOST=redis
+      - REDIS_PORT=6379
+      - JWT_SECRET=production-ready-jwt-signing-secret-key-999
+      - OPENAI_API_KEY=mock-openai-key
+      - WHATSAPP_TOKEN=mock-wa-token
+      - WHATSAPP_PHONE_NUMBER_ID=mock-phone-id
+      - WHATSAPP_VERIFY_TOKEN=naiva-verify-token-123
+    depends_on:
+      - postgres
+      - redis
+
+volumes:
+  postgres_data:
+  redis_data:

@@ -1,0 +1,1101 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <link rel="icon" type="image/png" href="/favicon.png" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>NAIVA — Personal AI Assistant Control Center</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  </head>
+  <body>
+    <div id="app" class="app-layout">
+      <!-- Sidebar Navigation (Desktop) -->
+      <aside class="sidebar">
+        <div class="sidebar-header">
+          <div class="logo-container">
+            <img class="logo-icon" src="/logo.png" alt="NAIVA Logo" />
+            <div class="logo-text">
+              <span class="logo-title">NAIVA</span>
+              <span class="logo-subtitle">WhatsApp Second Brain</span>
+            </div>
+          </div>
+        </div>
+
+        <nav class="sidebar-nav">
+          <a href="#dashboard" class="nav-item active" data-view="dashboard">
+            <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="7"></rect><rect x="14" y="3" width="7" height="7"></rect><rect x="14" y="14" width="7" height="7"></rect><rect x="3" y="14" width="7" height="7"></rect></svg>
+            <span>Dashboard</span>
+          </a>
+          <a href="#memory" class="nav-item" data-view="memory">
+            <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 5a3 3 0 1 0-5.997.125 4 4 0 0 0-2.526 5.77 4 4 0 0 0 .556 6.588A4 4 0 1 0 12 18Z"></path><path d="M12 5a3 3 0 1 1 5.997.125 4 4 0 0 1 2.526 5.77 4 4 0 0 1-.556 6.588A4 4 0 1 1 12 18Z"></path><path d="M12 5V4"></path><path d="M12 18v1"></path><path d="M12 11h.01"></path></svg>
+            <span>Memory Center</span>
+          </a>
+          <a href="#tasks" class="nav-item" data-view="tasks">
+            <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22c5.523 0 10-4.477 10-10S17.523 2 12 2 2 6.477 2 12s4.477 10 10 10z"></path><path d="m9 12 2 2 4-4"></path></svg>
+            <span>Tasks</span>
+          </a>
+          <a href="#reminders" class="nav-item" data-view="reminders">
+            <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"></path><path d="M13.73 21a2 2 0 0 1-3.46 0"></path></svg>
+            <span>Reminders</span>
+          </a>
+          <a href="#files" class="nav-item" data-view="files">
+            <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14.5 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7.5L14.5 2z"></path><polyline points="14 2 14 8 20 8"></polyline></svg>
+            <span>Files Vault</span>
+          </a>
+          <a href="#contacts" class="nav-item" data-view="contacts">
+            <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path><circle cx="9" cy="7" r="4"></circle><path d="M23 21v-2a4 4 0 0 0-3-3.87"></path><path d="M16 3.13a4 4 0 0 1 0 7.75"></path></svg>
+            <span>Contacts</span>
+          </a>
+          <a href="#calendar" class="nav-item" data-view="calendar">
+            <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect><line x1="16" y1="2" x2="16" y2="6"></line><line x1="8" y1="2" x2="8" y2="6"></line><line x1="3" y1="10" x2="21" y2="10"></line></svg>
+            <span>Calendar</span>
+          </a>
+          <a href="#studio" class="nav-item" data-view="studio">
+            <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m12 3-1.912 5.886L4.202 9l5.886 1.912L12 17l1.912-5.886 5.886-1.912-5.886-1.912z"></path></svg>
+            <span>Assistant Studio</span>
+          </a>
+          <a href="#settings" class="nav-item" data-view="settings">
+            <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"></circle><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"></path></svg>
+            <span>Settings</span>
+          </a>
+        </nav>
+
+        <div class="sidebar-footer">
+          <div class="user-profile">
+            <div class="user-avatar">M</div>
+            <div class="user-info">
+              <div class="user-name">Muis</div>
+              <div class="user-status-container">
+                <span class="status-indicator online"></span>
+                <span class="user-status">WA Sync Active</span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </aside>
+
+      <!-- Main Layout Container -->
+      <div class="main-layout">
+        <!-- Header -->
+        <header class="app-header">
+          <div class="header-search-container">
+            <h1 id="view-title" class="view-title">Dashboard</h1>
+            <div class="sync-badge">
+              <span class="sync-dot animate-pulse"></span>
+              <span class="sync-text">Connected to WhatsApp</span>
+            </div>
+          </div>
+          <div class="header-actions" id="header-actions">
+            <!-- Dynamic Actions go here -->
+          </div>
+        </header>
+
+        <!-- View Section Containers -->
+        <div class="content-body" id="view-container">
+          
+          <!-- 1. DASHBOARD HOME VIEW -->
+          <section id="view-dashboard" class="view-section active">
+            <!-- Hero banner card -->
+            <div class="hero-card">
+              <div class="hero-content">
+                <h2 class="hero-greeting font-inter">Good Morning, Muis 👋</h2>
+                <p class="hero-tagline">Here is your personal assistant summary for today:</p>
+                <div class="hero-stats">
+                  <div class="hero-stat-pill">
+                    <span class="hero-stat-number" id="dash-reminder-count">3</span>
+                    <span class="hero-stat-label">Reminders</span>
+                  </div>
+                  <div class="hero-stat-pill">
+                    <span class="hero-stat-number" id="dash-task-count">5</span>
+                    <span class="hero-stat-label">Tasks</span>
+                  </div>
+                  <div class="hero-stat-pill">
+                    <span class="hero-stat-number" id="dash-meeting-count">2</span>
+                    <span class="hero-stat-label">Meetings</span>
+                  </div>
+                </div>
+              </div>
+              <div class="hero-visual">
+                <svg viewBox="0 0 200 200" fill="none" xmlns="http://www.w3.org/2000/svg" class="hero-waves">
+                  <circle cx="100" cy="100" r="80" stroke="rgba(255,255,255,0.15)" stroke-width="2"/>
+                  <circle cx="100" cy="100" r="50" stroke="rgba(255,255,255,0.1)" stroke-width="2"/>
+                  <path d="M40 100 C 60 70, 80 130, 100 100 C 120 70, 140 130, 160 100" stroke="url(#paint0_linear)" stroke-width="4" stroke-linecap="round"/>
+                  <defs>
+                    <linearGradient id="paint0_linear" x1="40" y1="100" x2="160" y2="100" gradientUnits="userSpaceOnUse">
+                      <stop stop-color="#FFFFFF"/>
+                      <stop offset="1" stop-color="rgba(255,255,255,0.3)"/>
+                    </linearGradient>
+                  </defs>
+                </svg>
+              </div>
+            </div>
+
+            <!-- Quick Stats Cards Grid -->
+            <div class="stats-grid">
+              <div class="stat-card" data-link="memory">
+                <div class="stat-icon-wrapper purple">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" width="20" height="20"><path d="M12 5a3 3 0 1 0-5.997.125 4 4 0 0 0-2.526 5.77 4 4 0 0 0 .556 6.588A4 4 0 1 0 12 18Z"></path><path d="M12 5a3 3 0 1 1 5.997.125 4 4 0 0 1 2.526 5.77 4 4 0 0 1-.556 6.588A4 4 0 1 1 12 18Z"></path><path d="M12 5V4"></path><path d="M12 18v1"></path><path d="M12 11h.01"></path></svg>
+                </div>
+                <div class="stat-data">
+                  <span class="stat-title">Memories Saved</span>
+                  <span class="stat-value" id="stats-memories">24</span>
+                  <span class="stat-growth text-green">+4 this week</span>
+                </div>
+              </div>
+
+              <div class="stat-card" data-link="files">
+                <div class="stat-icon-wrapper blue">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" width="20" height="20"><path d="M14.5 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7.5L14.5 2z"></path><polyline points="14 2 14 8 20 8"></polyline></svg>
+                </div>
+                <div class="stat-data">
+                  <span class="stat-title">Files Synced</span>
+                  <span class="stat-value" id="stats-files">18</span>
+                  <span class="stat-growth text-green">2.4 GB used</span>
+                </div>
+              </div>
+
+              <div class="stat-card" data-link="contacts">
+                <div class="stat-icon-wrapper teal">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" width="20" height="20"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path><circle cx="9" cy="7" r="4"></circle></svg>
+                </div>
+                <div class="stat-data">
+                  <span class="stat-title">Contacts Kept</span>
+                  <span class="stat-value" id="stats-contacts">84</span>
+                  <span class="stat-growth text-slate">WhatsApp synced</span>
+                </div>
+              </div>
+
+              <div class="stat-card" data-link="tasks">
+                <div class="stat-icon-wrapper green">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" width="20" height="20"><path d="M12 22c5.523 0 10-4.477 10-10S17.523 2 12 2 2 6.477 2 12s4.477 10 10 10z"></path><path d="m9 12 2 2 4-4"></path></svg>
+                </div>
+                <div class="stat-data">
+                  <span class="stat-title">Open Tasks</span>
+                  <span class="stat-value" id="stats-tasks">8</span>
+                  <span class="stat-growth text-orange">3 high priority</span>
+                </div>
+              </div>
+
+              <div class="stat-card" id="stat-expense-card" style="cursor: default;">
+                <div class="stat-icon-wrapper red" style="background: rgba(239, 68, 68, 0.1); color: rgb(239, 68, 68);">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" width="20" height="20"><line x1="12" y1="1" x2="12" y2="23"></line><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"></path></svg>
+                </div>
+                <div class="stat-data">
+                  <span class="stat-title">Monthly Expenses</span>
+                  <span class="stat-value" id="stats-expenses">Rp 0</span>
+                  <span class="stat-growth text-slate" id="stats-expenses-count">0 transaksi</span>
+                </div>
+              </div>
+            </div>
+
+            <!-- Agenda and Tasks split -->
+            <div class="split-grid">
+              <!-- Left: Agenda -->
+              <div class="dashboard-panel">
+                <div class="panel-header">
+                  <h3 class="panel-title">Today's Agenda</h3>
+                  <button class="panel-action-btn" id="btn-agenda-view-cal">View Calendar</button>
+                </div>
+                <div class="agenda-list" id="dash-agenda-list">
+                  <!-- Dynamic content -->
+                </div>
+              </div>
+
+              <!-- Right: Priority Tasks -->
+              <div class="dashboard-panel">
+                <div class="panel-header">
+                  <h3 class="panel-title">Priority Tasks</h3>
+                  <button class="panel-action-btn" id="btn-dash-view-tasks">Manage Tasks</button>
+                </div>
+                <div class="priority-checklist" id="dash-priority-tasks">
+                  <!-- Dynamic content -->
+                </div>
+              </div>
+            </div>
+
+            <!-- Financial Overview / Expense Panel -->
+            <div class="dashboard-panel" style="margin-top: 24px;">
+              <div class="panel-header">
+                <h3 class="panel-title">💸 Financial Overview</h3>
+                <span id="dash-total-expense" style="color: var(--text-muted); font-size: 0.9rem; font-weight: 600;">
+                  Total bulan ini: Rp 0
+                </span>
+              </div>
+              <div style="display: flex; gap: 32px; flex-wrap: wrap; margin-top: 20px;">
+                <!-- Total / Category breakdown list -->
+                <div style="flex: 1; min-width: 280px;">
+                  <h4 style="margin-bottom: 16px; color: var(--text-primary); font-size: 0.95rem; font-weight: 500;">Pengeluaran Per Kategori</h4>
+                  <div id="dash-expense-breakdown" style="display: flex; flex-direction: column; gap: 16px;">
+                    <div style="text-align: center; color: var(--text-muted); font-style: italic; padding: 20px 0;">
+                      Belum ada catatan pengeluaran bulan ini.
+                    </div>
+                  </div>
+                </div>
+                <!-- Recent Expenses List -->
+                <div id="dash-expense-list-container" style="flex: 1.5; min-width: 320px; border-left: 1px solid var(--border-color); padding-left: 32px;">
+                  <h4 style="margin-bottom: 16px; color: var(--text-primary); font-size: 0.95rem; font-weight: 500;">Catatan Transaksi Terakhir</h4>
+                  <div id="dash-expense-list" style="max-height: 220px; overflow-y: auto; display: flex; flex-direction: column; gap: 12px; padding-right: 8px;">
+                    <!-- Dynamic list -->
+                  </div>
+                </div>
+              </div>
+            </div>
+          </section>
+
+          <!-- 2. MEMORY CENTER VIEW -->
+          <section id="view-memory" class="view-section">
+            <div class="memory-search-container">
+              <div class="search-input-wrapper">
+                <svg class="search-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="20" height="20"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg>
+                <input type="text" id="memory-search-input" placeholder="Search saved memories, ideas, links, or notes..." />
+              </div>
+            </div>
+
+            <!-- Filter tabs -->
+            <div class="filter-tabs-container">
+              <div class="filter-tabs" id="memory-filter-tabs">
+                <button class="tab-pill active" data-filter="all">All</button>
+                <button class="tab-pill" data-filter="notes">Notes</button>
+                <button class="tab-pill" data-filter="links">Links</button>
+                <button class="tab-pill" data-filter="contacts">Contacts</button>
+                <button class="tab-pill" data-filter="ideas">Ideas</button>
+                <button class="tab-pill" data-filter="business">Business</button>
+              </div>
+              <button class="btn btn-primary btn-sm" id="btn-open-memory-modal">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" width="16" height="16"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg>
+                <span>Add Note</span>
+              </button>
+            </div>
+
+            <!-- Memory list (Grid) -->
+            <div class="memory-grid" id="memory-cards-grid">
+              <!-- Dynamic content -->
+            </div>
+          </section>
+
+          <!-- 3. TASKS VIEW -->
+          <section id="view-tasks" class="view-section">
+            <div class="kanban-board">
+              <!-- Todo column -->
+              <div class="kanban-column" id="kanban-todo">
+                <div class="column-header">
+                  <div class="column-title-container">
+                    <span class="column-dot todo"></span>
+                    <h3 class="column-title">Todo</h3>
+                    <span class="column-count" id="count-todo">0</span>
+                  </div>
+                  <button class="btn-add-task-inline" data-status="todo">+</button>
+                </div>
+                <div class="kanban-cards-container" id="cards-todo">
+                  <!-- Dynamic cards -->
+                </div>
+              </div>
+
+              <!-- Doing column -->
+              <div class="kanban-column" id="kanban-doing">
+                <div class="column-header">
+                  <div class="column-title-container">
+                    <span class="column-dot doing"></span>
+                    <h3 class="column-title">Doing</h3>
+                    <span class="column-count" id="count-doing">0</span>
+                  </div>
+                  <button class="btn-add-task-inline" data-status="doing">+</button>
+                </div>
+                <div class="kanban-cards-container" id="cards-doing">
+                  <!-- Dynamic cards -->
+                </div>
+              </div>
+
+              <!-- Done column -->
+              <div class="kanban-column" id="kanban-done">
+                <div class="column-header">
+                  <div class="column-title-container">
+                    <span class="column-dot done"></span>
+                    <h3 class="column-title">Done</h3>
+                    <span class="column-count" id="count-done">0</span>
+                  </div>
+                  <button class="btn-add-task-inline" data-status="done">+</button>
+                </div>
+                <div class="kanban-cards-container" id="cards-done">
+                  <!-- Dynamic cards -->
+                </div>
+              </div>
+            </div>
+          </section>
+
+          <!-- 4. REMINDERS VIEW -->
+          <section id="view-reminders" class="view-section">
+            <div class="reminder-header-bar">
+              <h3>Reminders Timeline</h3>
+              <button class="btn btn-primary btn-sm" id="btn-open-reminder-modal">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="16" height="16"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg>
+                <span>Add Reminder</span>
+              </button>
+            </div>
+            
+            <div class="timeline-container">
+              <!-- Today -->
+              <div class="timeline-section" id="timeline-today">
+                <h4 class="timeline-section-title">Today</h4>
+                <div class="timeline-items" id="reminders-today">
+                  <!-- Dynamic items -->
+                </div>
+              </div>
+
+              <!-- Tomorrow -->
+              <div class="timeline-section" id="timeline-tomorrow">
+                <h4 class="timeline-section-title">Tomorrow</h4>
+                <div class="timeline-items" id="reminders-tomorrow">
+                  <!-- Dynamic items -->
+                </div>
+              </div>
+
+              <!-- This Week -->
+              <div class="timeline-section" id="timeline-week">
+                <h4 class="timeline-section-title">This Week</h4>
+                <div class="timeline-items" id="reminders-week">
+                  <!-- Dynamic items -->
+                </div>
+              </div>
+
+              <!-- This Month -->
+              <div class="timeline-section" id="timeline-month">
+                <h4 class="timeline-section-title">This Month</h4>
+                <div class="timeline-items" id="reminders-month">
+                  <!-- Dynamic items -->
+                </div>
+              </div>
+            </div>
+          </section>
+
+          <!-- 5. FILES VIEW -->
+          <section id="view-files" class="view-section">
+            <div class="vault-header">
+              <p class="vault-tagline">Upload and summarize any documents instantly with AI.</p>
+            </div>
+
+            <!-- Upload drop zone -->
+            <div class="drop-zone" id="file-drop-zone">
+              <input type="file" id="file-input-raw" style="display:none" multiple />
+              <div class="drop-zone-content">
+                <svg class="drop-zone-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" width="24" height="24">
+                  <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+                  <polyline points="17 8 12 3 7 8"></polyline>
+                  <line x1="12" y1="3" x2="12" y2="15"></line>
+                </svg>
+                <span class="drop-zone-title">Click to upload or drag & drop files here</span>
+                <span class="drop-zone-subtitle">PDF, TXT, DOCX or Images up to 25MB</span>
+              </div>
+            </div>
+
+            <!-- Files grid -->
+            <div class="files-grid-container">
+              <h4 class="section-subtitle">Synced Vault Files</h4>
+              <div class="files-grid" id="files-cards-grid">
+                <!-- Dynamic files -->
+              </div>
+            </div>
+          </section>
+
+          <!-- 6. CONTACTS VIEW -->
+          <section id="view-contacts" class="view-section">
+            <div class="contacts-toolbar">
+              <div class="search-input-wrapper">
+                <svg class="search-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="20" height="20"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg>
+                <input type="text" id="contacts-search-input" placeholder="Search contacts by name, company, or note details..." />
+              </div>
+              <button class="btn btn-primary" id="btn-open-contact-modal">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="16" height="16"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg>
+                <span>Add Contact</span>
+              </button>
+            </div>
+
+            <div class="contacts-grid" id="contacts-cards-grid">
+              <!-- Dynamic contacts -->
+            </div>
+          </section>
+
+          <!-- 7. CALENDAR VIEW -->
+          <section id="view-calendar" class="view-section">
+            <div class="calendar-split">
+              <!-- Left side: Today's agenda & event list -->
+              <div class="calendar-agenda-panel">
+                <div class="agenda-title-bar">
+                  <h3>Today's Schedule</h3>
+                  <button class="btn btn-primary btn-sm" id="btn-open-event-modal">+ Add Event</button>
+                </div>
+                <div class="full-agenda-list" id="calendar-agenda-list">
+                  <!-- Dynamic items -->
+                </div>
+              </div>
+
+              <!-- Right side: Mini agenda summary -->
+              <div class="calendar-sidebar-panel">
+                <div class="month-card">
+                  <div class="month-header">
+                    <span class="month-name">June 2026</span>
+                  </div>
+                  <div class="calendar-mini-grid">
+                    <div class="day-label">S</div><div class="day-label">M</div><div class="day-label">T</div><div class="day-label">W</div><div class="day-label">T</div><div class="day-label">F</div><div class="day-label">S</div>
+                    <!-- Calendar days (highlighting today) -->
+                    <div class="mini-day prev-month">31</div>
+                    <div class="mini-day">1</div><div class="mini-day">2</div><div class="mini-day">3</div><div class="mini-day">4</div><div class="mini-day">5</div><div class="mini-day">6</div><div class="mini-day">7</div>
+                    <div class="mini-day">8</div><div class="mini-day">9</div><div class="mini-day">10</div><div class="mini-day active-today">11</div><div class="mini-day">12</div><div class="mini-day">13</div><div class="mini-day">14</div>
+                    <div class="mini-day">15</div><div class="mini-day">16</div><div class="mini-day">17</div><div class="mini-day">18</div><div class="mini-day">19</div><div class="mini-day">20</div><div class="mini-day">21</div>
+                    <div class="mini-day">22</div><div class="mini-day">23</div><div class="mini-day">24</div><div class="mini-day">25</div><div class="mini-day">26</div><div class="mini-day">27</div><div class="mini-day">28</div>
+                    <div class="mini-day">29</div><div class="mini-day">30</div>
+                    <div class="mini-day next-month">1</div><div class="mini-day next-month">2</div><div class="mini-day next-month">3</div><div class="mini-day next-month">4</div>
+                  </div>
+                </div>
+
+                <div class="upcoming-summary">
+                  <h4 class="summary-title">System Agendas</h4>
+                  <div class="info-bubble">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="16" height="16"><path d="M12 22c5.523 0 10-4.477 10-10S17.523 2 12 2 2 6.477 2 12s4.477 10 10 10z"></path><path d="M12 16v-4"></path><path d="M12 8h.01"></path></svg>
+                    <p>NAIVA syncs events directly from your chat message intents. You can say: <em>"Set a meeting with Client at 2pm tomorrow"</em> on WhatsApp to auto-create events here.</p>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </section>
+
+          <!-- 8. ASSISTANT STUDIO VIEW -->
+          <section id="view-studio" class="view-section">
+            <div class="studio-layout">
+              <!-- Settings Form Panel -->
+              <div class="studio-form-panel">
+                <h3 class="panel-section-title">Assistant Settings</h3>
+                
+                <!-- Identity Section -->
+                <div class="form-group">
+                  <label class="form-label">Assistant Identity</label>
+                  <div class="identity-row">
+                    <div class="avatar-preview-btn" id="studio-avatar-btn">
+                      <span id="studio-avatar-emoji">🤖</span>
+                    </div>
+                    <div class="identity-inputs">
+                      <input type="text" id="assistant-name-input" class="form-input" value="NAIVA" placeholder="Assistant Name..." />
+                      <span class="input-helper">The name your assistant will introduce itself with.</span>
+                    </div>
+                  </div>
+                </div>
+
+                <!-- Personality Section -->
+                <div class="form-group">
+                  <label class="form-label">Assistant Personality</label>
+                  <div class="personality-grid" id="personality-cards-grid">
+                    <div class="personality-card active" data-personality="friendly">
+                      <span class="personality-emoji">😊</span>
+                      <span class="personality-title">Friendly</span>
+                      <span class="personality-desc">Warm, empathetic, conversational, and highly helpful.</span>
+                    </div>
+                    <div class="personality-card" data-personality="professional">
+                      <span class="personality-emoji">💼</span>
+                      <span class="personality-title">Professional</span>
+                      <span class="personality-desc">Polite, executive tone, brief, and business-focused.</span>
+                    </div>
+                    <div class="personality-card" data-personality="islamic">
+                      <span class="personality-emoji">🌙</span>
+                      <span class="personality-title">Islamic Assistant</span>
+                      <span class="personality-desc">Includes Islamic values, prayer reminders, and daily wisdom.</span>
+                    </div>
+                    <div class="personality-card" data-personality="business_partner">
+                      <span class="personality-emoji">🤝</span>
+                      <span class="personality-title">Business Partner</span>
+                      <span class="personality-desc">Analytical, critical, strategic, and business-growth focused.</span>
+                    </div>
+                    <div class="personality-card" data-personality="grumpy_boss">
+                      <span class="personality-emoji">👿</span>
+                      <span class="personality-title">Grumpy Boss</span>
+                      <span class="personality-desc">Demanding, direct, impatient, and strict.</span>
+                    </div>
+                    <div class="personality-card" data-personality="romantic_partner">
+                      <span class="personality-emoji">❤️</span>
+                      <span class="personality-title">Romantic Partner</span>
+                      <span class="personality-desc">Warm, empathetic, supportive, calling you sayang/beb.</span>
+                    </div>
+                  </div>
+                </div>
+
+                <!-- Communication Style Section -->
+                <div class="form-group">
+                  <label class="form-label">Communication Style</label>
+                  <div class="style-selector">
+                    <button class="style-btn" data-style="short">Short & Punchy</button>
+                    <button class="style-btn active" data-style="normal">Balanced</button>
+                    <button class="style-btn" data-style="detailed">Detailed & Verbose</button>
+                  </div>
+                </div>
+
+                <!-- Language Section -->
+                <div class="form-group">
+                  <label class="form-label">Assistant Language</label>
+                  <div class="style-selector" id="studio-language-selector">
+                    <button class="style-btn lang-btn" data-lang="en">English</button>
+                    <button class="style-btn lang-btn" data-lang="id">Indonesia</button>
+                  </div>
+                </div>
+
+                <!-- Daily Briefing Section -->
+                <div class="form-group border-top pt-4">
+                  <div class="briefing-toggle-row">
+                    <div class="briefing-label-col">
+                      <span class="briefing-title">Enable Daily Briefing</span>
+                      <span class="briefing-desc">Receive a WhatsApp message every morning summarizing tasks and reminders.</span>
+                    </div>
+                    <label class="switch">
+                      <input type="checkbox" id="daily-briefing-toggle" checked>
+                      <span class="slider round"></span>
+                    </label>
+                  </div>
+                  <div class="briefing-time-container" id="briefing-time-section">
+                    <label class="form-label font-normal">Daily Briefing Time</label>
+                    <input type="time" id="briefing-time-input" class="form-input" value="07:30" />
+                  </div>
+                </div>
+
+                <!-- Smart Follow Up Section -->
+                <div class="form-group border-top pt-4">
+                  <div class="briefing-toggle-row">
+                    <div class="briefing-label-col">
+                      <span class="briefing-title">Enable Smart Follow Up</span>
+                      <span class="briefing-desc">Send proactive WhatsApp follow-ups for high priority pending tasks.</span>
+                    </div>
+                    <label class="switch">
+                      <input type="checkbox" id="smart-followup-toggle" checked>
+                      <span class="slider round"></span>
+                    </label>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Preview Mockup Panel -->
+              <div class="studio-preview-panel">
+                <div class="whatsapp-mockup">
+                  <div class="mockup-header">
+                    <div class="mockup-back-btn">
+                      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="20" height="20"><polyline points="15 18 9 12 15 6"></polyline></svg>
+                    </div>
+                    <div class="mockup-avatar" id="mockup-chat-avatar">🤖</div>
+                    <div class="mockup-user-info">
+                      <span class="mockup-username" id="mockup-chat-name">NAIVA AI</span>
+                      <span class="mockup-status">online</span>
+                    </div>
+                    <div class="mockup-actions">
+                      <svg viewBox="0 0 24 24" stroke="currentColor" fill="none" stroke-width="2" width="18" height="18"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 9.72v3z"></path></svg>
+                    </div>
+                  </div>
+
+                  <div class="mockup-chat-body" id="mockup-chat-body">
+                    <!-- Chat bubbles will go here -->
+                  </div>
+
+                  <div class="mockup-input-bar">
+                    <div class="mockup-input-actions">
+                      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="20" height="20"><circle cx="12" cy="12" r="10"></circle><line x1="12" y1="8" x2="12" y2="16"></line><line x1="8" y1="12" x2="16" y2="12"></line></svg>
+                    </div>
+                    <input type="text" class="mockup-input-field" id="mockup-chat-input" placeholder="Type a message to test..." />
+                    <button class="mockup-send-btn" id="mockup-chat-send-btn">
+                      <svg viewBox="0 0 24 24" fill="currentColor" width="18" height="18"><path d="m2 21 21-9L2 3v7l15 2-15 2v7z"></path></svg>
+                    </button>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </section>
+
+          <!-- 9. SETTINGS VIEW -->
+          <section id="view-settings" class="view-section">
+            <div class="settings-layout">
+              <!-- Left side tabs list -->
+              <div class="settings-sidebar">
+                <button class="settings-tab-btn active" data-tab="profile">
+                  <svg class="settings-tab-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path><circle cx="12" cy="7" r="4"></circle></svg>
+                  <span>Profile Settings</span>
+                </button>
+                <button class="settings-tab-btn" data-tab="security">
+                  <svg class="settings-tab-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect><path d="M7 11V7a5 5 0 0 1 10 0v4"></path></svg>
+                  <span>Security & Privacy</span>
+                </button>
+                <button class="settings-tab-btn" data-tab="integrations">
+                  <svg class="settings-tab-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"></path><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"></path></svg>
+                  <span>Integrations</span>
+                </button>
+                <button class="settings-tab-btn" data-tab="subscription">
+                  <svg class="settings-tab-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="5" width="20" height="14" rx="2" ry="2"></rect><line x1="2" y1="10" x2="22" y2="10"></line></svg>
+                  <span>Subscription</span>
+                </button>
+              </div>
+
+              <!-- Right side content panel -->
+              <div class="settings-content-panel">
+                <!-- Profile Tab -->
+                <div class="settings-tab-pane active" id="settings-pane-profile">
+                  <h3 class="panel-section-title">Profile Settings</h3>
+                  <div class="settings-form-card">
+                    <div class="form-group">
+                      <label class="form-label">Name</label>
+                      <div class="input-icon-container">
+                        <svg class="input-field-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path><circle cx="12" cy="7" r="4"></circle></svg>
+                        <input type="text" class="form-input icon-padded" value="Muis" id="settings-username" />
+                      </div>
+                    </div>
+                    <div class="form-group">
+                      <label class="form-label">WhatsApp Phone Number</label>
+                      <div class="input-phone-container">
+                        <span class="phone-prefix">+62</span>
+                        <input type="tel" class="form-input" value="8123456789" id="settings-phone" />
+                      </div>
+                      <span class="input-helper">The phone number registered with NAIVA assistant.</span>
+                    </div>
+                    <button class="btn btn-primary" id="btn-save-profile">Save Settings</button>
+                  </div>
+                </div>
+
+                <!-- Security Tab -->
+                <div class="settings-tab-pane" id="settings-pane-security">
+                  <h3 class="panel-section-title">Security & Encryption</h3>
+                  
+                  <div class="security-shield-card">
+                    <div class="shield-card-glow"></div>
+                    <div class="shield-icon-wrapper">
+                      <svg class="shield-svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path>
+                        <polyline points="9 11 11 13 15 9"></polyline>
+                      </svg>
+                    </div>
+                    <div class="shield-details">
+                      <h4>End-to-End Encryption</h4>
+                      <p>All data and messages saved by NAIVA are encrypted using AES-256 before storing. Your privacy is fully secured.</p>
+                    </div>
+                  </div>
+
+                  <div class="form-group mt-6">
+                    <div class="briefing-toggle-row">
+                      <div>
+                        <span class="briefing-title">Store Chat Backups</span>
+                        <span class="briefing-desc">Keep raw text histories of your messages inside the database. Turn off to only store processed memories.</span>
+                      </div>
+                      <label class="switch">
+                        <input type="checkbox" id="backup-toggle" checked>
+                        <span class="slider round"></span>
+                      </label>
+                    </div>
+                  </div>
+                </div>
+
+                <!-- Integrations Tab -->
+                <div class="settings-tab-pane" id="settings-pane-integrations">
+                  <h3 class="panel-section-title">Connected Integrations</h3>
+                  <p class="section-desc">Connect external services to allow NAIVA to manage calendars, sync files, and summarize emails.</p>
+                  
+                  <div class="integrations-list">
+                    <!-- Google Calendar -->
+                    <div class="integration-card">
+                      <div class="integration-brand">
+                        <div class="brand-logo-container">
+                          <svg class="brand-logo-svg" viewBox="0 0 24 24" width="40" height="40">
+                            <rect x="2" y="4" width="20" height="18" rx="4" fill="#4285F4"/>
+                            <path d="M2 8h20V4c0-1.1-.9-2-2-2H4c-1.1 0-2 .9-2 2v4z" fill="#3367D6"/>
+                            <text x="12" y="17" font-family="Inter, sans-serif" font-size="10" font-weight="700" fill="#FFFFFF" text-anchor="middle">31</text>
+                          </svg>
+                        </div>
+                        <div class="brand-details">
+                          <span class="brand-name">Google Calendar</span>
+                          <span class="brand-status" id="status-gcal">Disconnected</span>
+                        </div>
+                      </div>
+                      <button class="btn btn-outline btn-sm btn-connect-int" data-int="gcal">Connect</button>
+                    </div>
+
+                    <!-- Google Drive -->
+                    <div class="integration-card">
+                      <div class="integration-brand">
+                        <div class="brand-logo-container">
+                          <svg class="brand-logo-svg" viewBox="0 0 24 24" width="40" height="40">
+                            <path d="M19 13H5L2.5 8.5 7.5 0h9l5 8.5L19 13z" fill="none"/>
+                            <path d="m2.5 8.5 5-8.5h9l-5 8.5h-9z" fill="#000000" opacity="0.05"/>
+                            <path d="M8.5 15.5 5 9.5 12.5.5h7L16 6.5l-7.5 9z" fill="#0F9D58"/>
+                            <path d="M12.5.5 16 6.5h7.5l-3.5-6h-7.5z" fill="#FFC107"/>
+                            <path d="M2 9.5h15l3.5 6H5.5L2 9.5z" fill="#4285F4"/>
+                          </svg>
+                        </div>
+                        <div class="brand-details">
+                          <span class="brand-name">Google Drive</span>
+                          <span class="brand-status" id="status-gdrive">Disconnected</span>
+                        </div>
+                      </div>
+                      <button class="btn btn-outline btn-sm btn-connect-int" data-int="gdrive">Connect</button>
+                    </div>
+
+                    <!-- Google Contacts -->
+                    <div class="integration-card">
+                      <div class="integration-brand">
+                        <div class="brand-logo-container">
+                          <svg class="brand-logo-svg" viewBox="0 0 24 24" width="40" height="40">
+                            <rect x="2" y="2" width="20" height="20" rx="4" fill="#2979FF"/>
+                            <circle cx="12" cy="9" r="3" fill="#FFFFFF"/>
+                            <path d="M6 18c0-2 4-3.5 6-3.5s6 1.5 6 3.5v1H6v-1z" fill="#FFFFFF"/>
+                            <rect x="4" y="5" width="2" height="1" rx="0.5" fill="#1565C0"/>
+                            <rect x="4" y="8" width="2" height="1" rx="0.5" fill="#1565C0"/>
+                            <rect x="4" y="11" width="2" height="1" rx="0.5" fill="#1565C0"/>
+                          </svg>
+                        </div>
+                        <div class="brand-details">
+                          <span class="brand-name">Google Contacts</span>
+                          <span class="brand-status" id="status-gcontacts">Disconnected</span>
+                        </div>
+                      </div>
+                      <button class="btn btn-outline btn-sm btn-connect-int" data-int="gcontacts">Connect</button>
+                    </div>
+
+                    <!-- Gmail -->
+                    <div class="integration-card">
+                      <div class="integration-brand">
+                        <div class="brand-logo-container">
+                          <svg class="brand-logo-svg" viewBox="0 0 24 24" width="40" height="40">
+                            <rect x="2" y="4" width="20" height="16" rx="3" fill="#F44336"/>
+                            <path d="M2 4l10 7.5L22 4" fill="none" stroke="#FFFFFF" stroke-width="2" stroke-linecap="round"/>
+                            <path d="M2 20V8l10 7.5L22 8v12" fill="none"/>
+                            <path d="M2.2 4.5c.2-.3.5-.5.8-.5h18c.3 0 .6.2.8.5L12 12 2.2 4.5z" fill="#E53935"/>
+                            <path d="M2 8v11.5c0 .8.7 1.5 1.5 1.5H7v-9l5 3.75 5-3.75v9h3.5c.8 0 1.5-.7 1.5-1.5V8l-10 7.5L2 8z" fill="#FFFFFF"/>
+                            <path d="M2 8v11.5c0 .8.7 1.5 1.5 1.5H5v-9l7 5.25 7-5.25v9h1.5c.8 0 1.5-.7 1.5-1.5V8l-10 7.5L2 8z" fill="#D32F2F" opacity="0.08"/>
+                          </svg>
+                        </div>
+                        <div class="brand-details">
+                          <span class="brand-name">Gmail</span>
+                          <span class="brand-status" id="status-gmail">Disconnected</span>
+                        </div>
+                      </div>
+                      <button class="btn btn-outline btn-sm btn-connect-int" data-int="gmail">Connect</button>
+                    </div>
+                  </div>
+                </div>
+
+                <!-- Subscription Tab -->
+                <div class="settings-tab-pane" id="settings-pane-subscription">
+                  <h3 class="panel-section-title">Subscription Plan</h3>
+                  <div class="subscription-obsidian-card">
+                    <div class="obsidian-card-glow"></div>
+                    <div class="sub-header">
+                      <div class="plan-info">
+                        <span class="plan-badge-obsidian">PRO ACCESS</span>
+                        <h4 class="plan-name-title">Obsidian Premium</h4>
+                      </div>
+                      <span class="sub-cost">$15<span class="cost-period">/month</span></span>
+                    </div>
+                    <div class="sub-details">
+                      <p class="sub-renewal-text">Your subscription is active and will renew on <strong>July 11, 2026</strong>.</p>
+                      <ul class="sub-features-list">
+                        <li>
+                          <svg class="bullet-check-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"></polyline></svg>
+                          <span>Unlimited memories saved (encrypted)</span>
+                        </li>
+                        <li>
+                          <svg class="bullet-check-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"></polyline></svg>
+                          <span>Advanced AI summarization (RAG enabled)</span>
+                        </li>
+                        <li>
+                          <svg class="bullet-check-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"></polyline></svg>
+                          <span>Daily smart briefings via WhatsApp</span>
+                        </li>
+                        <li>
+                          <svg class="bullet-check-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"></polyline></svg>
+                          <span>Bi-directional Google Workspace integration</span>
+                        </li>
+                      </ul>
+                    </div>
+                    <div class="sub-actions">
+                      <button class="btn btn-obsidian-billing">Manage Billing & Invoices</button>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </section>
+
+        </div>
+      </div>
+
+      <!-- Mobile Bottom Navigation -->
+      <nav class="bottom-nav">
+        <a href="#dashboard" class="bottom-nav-item active" data-view="dashboard">
+          <svg class="bottom-nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" width="18" height="18"><rect x="3" y="3" width="7" height="7"></rect><rect x="14" y="3" width="7" height="7"></rect><rect x="14" y="14" width="7" height="7"></rect><rect x="3" y="14" width="7" height="7"></rect></svg>
+          <span>Home</span>
+        </a>
+        <a href="#memory" class="bottom-nav-item" data-view="memory">
+          <svg class="bottom-nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" width="18" height="18"><path d="M12 5a3 3 0 1 0-5.997.125 4 4 0 0 0-2.526 5.77 4 4 0 0 0 .556 6.588A4 4 0 1 0 12 18Z"></path><path d="M12 5a3 3 0 1 1 5.997.125 4 4 0 0 1 2.526 5.77 4 4 0 0 1-.556 6.588A4 4 0 1 1 12 18Z"></path><path d="M12 5V4"></path><path d="M12 18v1"></path><path d="M12 11h.01"></path></svg>
+          <span>Memory</span>
+        </a>
+        <a href="#tasks" class="bottom-nav-item" data-view="tasks">
+          <svg class="bottom-nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" width="18" height="18"><path d="M12 22c5.523 0 10-4.477 10-10S17.523 2 12 2 2 6.477 2 12s4.477 10 10 10z"></path><path d="m9 12 2 2 4-4"></path></svg>
+          <span>Tasks</span>
+        </a>
+        <a href="#files" class="bottom-nav-item" data-view="files">
+          <svg class="bottom-nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" width="18" height="18"><path d="M14.5 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7.5L14.5 2z"></path><polyline points="14 2 14 8 20 8"></polyline></svg>
+          <span>Files</span>
+        </a>
+        <a href="#studio" class="bottom-nav-item" data-view="studio">
+          <svg class="bottom-nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" width="18" height="18"><path d="m12 3-1.912 5.886L4.202 9l5.886 1.912L12 17l1.912-5.886 5.886-1.912-5.886-1.912z"></path></svg>
+          <span>Studio</span>
+        </a>
+      </nav>
+    </div>
+
+    <!-- Modals & Drawers -->
+    <!-- 1. Add Memory Modal -->
+    <div class="modal-overlay" id="modal-memory">
+      <div class="modal-card">
+        <div class="modal-header">
+          <h3>Add New Memory / Note</h3>
+          <button class="modal-close-btn" id="close-memory-modal">&times;</button>
+        </div>
+        <div class="modal-body">
+          <div class="form-group">
+            <label class="form-label">Title</label>
+            <input type="text" id="new-memory-title" class="form-input" placeholder="e.g. Brainstorming Project X" />
+          </div>
+          <div class="form-group">
+            <label class="form-label">Content</label>
+            <textarea id="new-memory-content" class="form-input" rows="4" placeholder="Type memory details here..."></textarea>
+          </div>
+          <div class="form-group">
+            <label class="form-label">Category</label>
+            <select id="new-memory-category" class="form-input">
+              <option value="Notes">Notes</option>
+              <option value="Links">Links</option>
+              <option value="Contacts">Contacts</option>
+              <option value="Ideas">Ideas</option>
+              <option value="Business">Business</option>
+            </select>
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button class="btn btn-outline" id="btn-cancel-memory">Cancel</button>
+          <button class="btn btn-primary" id="btn-save-memory">Save Memory</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- 2. Add Task Modal -->
+    <div class="modal-overlay" id="modal-task">
+      <div class="modal-card">
+        <div class="modal-header">
+          <h3>Add New Task</h3>
+          <button class="modal-close-btn" id="close-task-modal">&times;</button>
+        </div>
+        <div class="modal-body">
+          <input type="hidden" id="new-task-status" value="todo" />
+          <div class="form-group">
+            <label class="form-label">Task Name</label>
+            <input type="text" id="new-task-name" class="form-input" placeholder="e.g. Design UI Mockups" />
+          </div>
+          <div class="form-group">
+            <label class="form-label">Tag</label>
+            <input type="text" id="new-task-tag" class="form-input" placeholder="e.g. Design, Coding, Marketing" />
+          </div>
+          <div class="form-group">
+            <label class="form-label">Priority</label>
+            <select id="new-task-priority" class="form-input">
+              <option value="High">High</option>
+              <option value="Medium" selected>Medium</option>
+              <option value="Low">Low</option>
+            </select>
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button class="btn btn-outline" id="btn-cancel-task">Cancel</button>
+          <button class="btn btn-primary" id="btn-save-task">Create Task</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- 3. Add Reminder Modal -->
+    <div class="modal-overlay" id="modal-reminder">
+      <div class="modal-card">
+        <div class="modal-header">
+          <h3>Add New Reminder</h3>
+          <button class="modal-close-btn" id="close-reminder-modal">&times;</button>
+        </div>
+        <div class="modal-body">
+          <div class="form-group">
+            <label class="form-label">Reminder Text</label>
+            <input type="text" id="new-reminder-text" class="form-input" placeholder="e.g. Call client about invoice" />
+          </div>
+          <div class="form-group">
+            <label class="form-label">Date Group</label>
+            <select id="new-reminder-timegroup" class="form-input">
+              <option value="Today">Today</option>
+              <option value="Tomorrow">Tomorrow</option>
+              <option value="This Week">This Week</option>
+              <option value="This Month">This Month</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label class="form-label">Specific Time</label>
+            <input type="time" id="new-reminder-time" class="form-input" value="09:00" />
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button class="btn btn-outline" id="btn-cancel-reminder">Cancel</button>
+          <button class="btn btn-primary" id="btn-save-reminder">Add Reminder</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- 4. Add Contact Modal -->
+    <div class="modal-overlay" id="modal-contact">
+      <div class="modal-card">
+        <div class="modal-header">
+          <h3>Add New Contact</h3>
+          <button class="modal-close-btn" id="close-contact-modal">&times;</button>
+        </div>
+        <div class="modal-body">
+          <div class="form-group">
+            <label class="form-label">Name</label>
+            <input type="text" id="new-contact-name" class="form-input" placeholder="e.g. John Doe" />
+          </div>
+          <div class="form-group">
+            <label class="form-label">Company</label>
+            <input type="text" id="new-contact-company" class="form-input" placeholder="e.g. Acme Corp" />
+          </div>
+          <div class="form-group">
+            <label class="form-label">Phone</label>
+            <input type="tel" id="new-contact-phone" class="form-input" placeholder="e.g. +1 555-0199" />
+          </div>
+          <div class="form-group">
+            <label class="form-label">Email</label>
+            <input type="email" id="new-contact-email" class="form-input" placeholder="e.g. john@acme.com" />
+          </div>
+          <div class="form-group">
+            <label class="form-label">Instagram Username</label>
+            <input type="text" id="new-contact-insta" class="form-input" placeholder="e.g. johndoe" />
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button class="btn btn-outline" id="btn-cancel-contact">Cancel</button>
+          <button class="btn btn-primary" id="btn-save-contact">Save Contact</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- 5. Add Calendar Event Modal -->
+    <div class="modal-overlay" id="modal-event">
+      <div class="modal-card">
+        <div class="modal-header">
+          <h3>Create Schedule Event</h3>
+          <button class="modal-close-btn" id="close-event-modal">&times;</button>
+        </div>
+        <div class="modal-body">
+          <div class="form-group">
+            <label class="form-label">Event Title</label>
+            <input type="text" id="new-event-title" class="form-input" placeholder="e.g. Weekly Sync Meeting" />
+          </div>
+          <div class="form-group">
+            <label class="form-label">Time</label>
+            <input type="time" id="new-event-time" class="form-input" value="10:00" />
+          </div>
+          <div class="form-group">
+            <label class="form-label">Details / Notes</label>
+            <input type="text" id="new-event-details" class="form-input" placeholder="e.g. discussing Q3 plans" />
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button class="btn btn-outline" id="btn-cancel-event">Cancel</button>
+          <button class="btn btn-primary" id="btn-save-event">Create Event</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- 6. File Details Side Drawer -->
+    <div class="drawer-overlay" id="drawer-file-details">
+      <div class="drawer-panel">
+        <div class="drawer-header">
+          <h3 id="drawer-file-name">file_name.pdf</h3>
+          <button class="drawer-close-btn" id="close-file-drawer">&times;</button>
+        </div>
+        <div class="drawer-body">
+          <!-- File info summary -->
+          <div class="drawer-info-grid">
+            <div class="info-item">
+              <span class="info-label">Type</span>
+              <span class="info-value text-uppercase" id="drawer-file-type">PDF</span>
+            </div>
+            <div class="info-item">
+              <span class="info-label">Uploaded</span>
+              <span class="info-value" id="drawer-file-date">June 11, 2026</span>
+            </div>
+          </div>
+
+          <div class="drawer-section border-top">
+            <h4 class="drawer-subtitle">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="16" height="16" class="ai-spark-icon"><path d="m12 3-1.912 5.886L4.202 9l5.886 1.912L12 17l1.912-5.886 5.886-1.912-5.886-1.912z"></path></svg>
+              AI Summary
+            </h4>
+            <p class="drawer-summary-text" id="drawer-file-summary">Summarizing your document...</p>
+          </div>
+
+          <div class="drawer-section">
+            <h4 class="drawer-subtitle">Key Points</h4>
+            <ul class="drawer-list" id="drawer-file-points">
+              <!-- Bullet points -->
+            </ul>
+          </div>
+
+          <div class="drawer-section">
+            <h4 class="drawer-subtitle">Action Items</h4>
+            <ul class="drawer-list action-list" id="drawer-file-actions">
+              <!-- Action items -->
+            </ul>
+          </div>
+        </div>
+        <div class="drawer-footer">
+          <button class="btn btn-outline w-full" id="btn-close-drawer-bottom">Close Panel</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- 7. Emoji Picker Modal -->
+    <div class="modal-overlay" id="modal-emoji-picker">
+      <div class="modal-card" style="max-width: 340px;">
+        <div class="modal-header">
+          <h3>Select Avatar Emoji</h3>
+          <button class="modal-close-btn" id="close-emoji-modal">&times;</button>
+        </div>
+        <div class="modal-body">
+          <div class="emoji-picker-grid" id="emoji-picker-grid" style="display: grid; grid-template-columns: repeat(6, 1fr); gap: 8px; padding: 8px 0;">
+            <span class="emoji-picker-item" data-emoji="🤖">🤖</span>
+            <span class="emoji-picker-item" data-emoji="👩‍💼">👩‍💼</span>
+            <span class="emoji-picker-item" data-emoji="🧑‍💻">🧑‍💻</span>
+            <span class="emoji-picker-item" data-emoji="🌙">🌙</span>
+            <span class="emoji-picker-item" data-emoji="🦁">🦁</span>
+            <span class="emoji-picker-item" data-emoji="🧠">🧠</span>
+            <span class="emoji-picker-item" data-emoji="✨">✨</span>
+            <span class="emoji-picker-item" data-emoji="🦉">🦉</span>
+            <span class="emoji-picker-item" data-emoji="🦊">🦊</span>
+            <span class="emoji-picker-item" data-emoji="🐼">🐼</span>
+            <span class="emoji-picker-item" data-emoji="🚀">🚀</span>
+            <span class="emoji-picker-item" data-emoji="💡">💡</span>
+            <span class="emoji-picker-item" data-emoji="🔥">🔥</span>
+            <span class="emoji-picker-item" data-emoji="🍀">🍀</span>
+            <span class="emoji-picker-item" data-emoji="🎯">🎯</span>
+            <span class="emoji-picker-item" data-emoji="👾">👾</span>
+            <span class="emoji-picker-item" data-emoji="🦄">🦄</span>
+            <span class="emoji-picker-item" data-emoji="🍕">🍕</span>
+            <span class="emoji-picker-item" data-emoji="🐱">🐱</span>
+            <span class="emoji-picker-item" data-emoji="🐶">🐶</span>
+            <span class="emoji-picker-item" data-emoji="🎨">🎨</span>
+            <span class="emoji-picker-item" data-emoji="🎮">🎮</span>
+            <span class="emoji-picker-item" data-emoji="☕">☕</span>
+            <span class="emoji-picker-item" data-emoji="🥑">🥑</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Script Entrypoint -->
+    <script type="module" src="/src/main.js"></script>
+  </body>
+</html>

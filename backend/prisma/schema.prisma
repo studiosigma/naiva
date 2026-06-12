@@ -1,0 +1,180 @@
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+model User {
+  id           String   @id @default(uuid())
+  email        String   @unique
+  passwordHash String?  @map("password_hash")
+  googleId     String?  @map("google_id")
+  name         String?
+  avatar       String?
+  waNumber     String?  @unique @map("wa_number")
+  plan         String   @default("free") // free, pro
+  status       String   @default("active") // active, suspended
+  persona      String   @default("professional") // friendly, professional, islamic, business_partner, grumpy_boss, romantic_partner
+  gcalConnected       Boolean  @default(false) @map("gcal_connected")
+  gdriveConnected     Boolean  @default(false) @map("gdrive_connected")
+  contactsSyncEnabled Boolean  @default(false) @map("contacts_sync_enabled")
+  gmailConnected      Boolean  @default(false) @map("gmail_connected")
+  briefingEnabled     Boolean  @default(true)  @map("briefing_enabled")
+  briefingTime        String   @default("07:30") @map("briefing_time")
+  followupEnabled     Boolean  @default(true)  @map("followup_enabled")
+  createdAt    DateTime @default(now()) @map("created_at")
+  updatedAt    DateTime @updatedAt @map("updated_at")
+
+  memories      Memory[]
+  reminders     Reminder[]
+  tasks         Task[]
+  contacts      Contact[]
+  files         File[]
+  conversations Conversation[]
+  usageLogs     UsageLog[]
+  expenses      Expense[]
+
+  @@map("users")
+}
+
+model Conversation {
+  id        String   @id @default(uuid())
+  userId    String   @map("user_id")
+  waRoomId  String   @map("wa_room_id")
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  user     User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  messages Message[]
+
+  @@unique([userId, waRoomId])
+  @@map("conversations")
+}
+
+model Message {
+  id             String   @id @default(uuid())
+  conversationId String   @map("conversation_id")
+  senderType     String   @map("sender_type") // user, assistant
+  text           String?
+  mediaUrl       String?  @map("media_url")
+  mimeType       String?  @map("mime_type")
+  createdAt      DateTime @default(now()) @map("created_at")
+
+  conversation Conversation @relation(fields: [conversationId], references: [id], onDelete: Cascade)
+
+  @@map("messages")
+}
+
+model Memory {
+  id        String   @id @default(uuid())
+  userId    String   @map("user_id")
+  title     String
+  content   String
+  category  String // Notes, Links, Ideas, Business, Contacts
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+  @@map("memories")
+}
+
+model Reminder {
+  id          String   @id @default(uuid())
+  userId      String   @map("user_id")
+  title       String
+  description String?
+  scheduledAt DateTime @map("scheduled_at")
+  repeatType  String   @default("once") @map("repeat_type") // once, daily, weekly, monthly, yearly
+  status      String   @default("pending") // pending, sent, failed, cancelled
+  createdAt   DateTime @default(now()) @map("created_at")
+  updatedAt   DateTime @updatedAt @map("updated_at")
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+  @@map("reminders")
+}
+
+model Task {
+  id          String    @id @default(uuid())
+  userId      String    @map("user_id")
+  title       String
+  description String?
+  status      String    @default("todo") // todo, doing, done
+  deadline    DateTime?
+  priority    String    @default("medium") // low, medium, high
+  createdAt   DateTime  @default(now()) @map("created_at")
+  updatedAt   DateTime  @updatedAt @map("updated_at")
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+  @@map("tasks")
+}
+
+model Contact {
+  id        String   @id @default(uuid())
+  userId    String   @map("user_id")
+  name      String
+  phone     String
+  email     String?
+  instagram String?
+  company   String?
+  notes     String?
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+  @@map("contacts")
+}
+
+model File {
+  id          String   @id @default(uuid())
+  userId      String   @map("user_id")
+  filename    String
+  mimeType    String   @map("mime_type")
+  size        Int // size in bytes
+  storagePath String   @map("storage_path") // S3 path
+  gdrivePath  String?  @map("gdrive_path")  // Google Drive path reference
+  createdAt   DateTime @default(now()) @map("created_at")
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+  @@map("files")
+}
+
+model UsageLog {
+  id          String   @id @default(uuid())
+  userId      String   @map("user_id")
+  actionType  String   @map("action_type") // WHATSAPP_MESSAGE, FILE_UPLOAD, SUMMARY, SEMANTIC_SEARCH
+  description String?
+  ipAddress   String?  @map("ip_address")
+  createdAt   DateTime @default(now()) @map("created_at")
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+  @@map("usage_logs")
+}
+
+model Expense {
+  id          String   @id @default(uuid())
+  userId      String   @map("user_id")
+  user        User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  amount      Float
+  description String
+  category    String   @default("Other")
+  createdAt   DateTime @default(now()) @map("created_at")
+  updatedAt   DateTime @updatedAt @map("updated_at")
+
+  @@index([userId])
+  @@map("expenses")
+}
