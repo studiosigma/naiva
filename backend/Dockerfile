@@ -3,6 +3,9 @@ FROM node:20-alpine AS builder
 
 WORKDIR /usr/src/app
 
+# Install OpenSSL required by Prisma schema engine
+RUN apk add --no-cache openssl
+
 COPY package*.json ./
 COPY prisma ./prisma/
 
@@ -20,6 +23,9 @@ FROM node:20-alpine AS runner
 
 WORKDIR /usr/src/app
 
+# Install OpenSSL required by Prisma at runtime
+RUN apk add --no-cache openssl
+
 COPY package*.json ./
 COPY prisma ./prisma/
 
@@ -35,3 +41,4 @@ ENV NODE_ENV=production
 
 # Run migrations and start app
 CMD ["sh", "-c", "npm run prisma:migrate && npm run start:prod"]
+
