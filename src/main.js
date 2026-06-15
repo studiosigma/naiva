@@ -16,110 +16,31 @@ window.fetch = function (input, init) {
    NAIVA CORE APPLICATION LOGIC
    ========================================================================== */
 
-// --- INITIAL MOCK DATA ---
-const DEFAULT_MEMORIES = [
-  { id: 'm1', title: 'WhatsApp Marketing Strategy', content: 'Use personal broadcast lists instead of groups to keep it personal. Limit sending to 1-2 times a week. Emphasize value first.', category: 'Business', date: 'June 10, 2026' },
-  { id: 'm2', title: 'Vercel Deployment Guide', content: 'https://vercel.com/docs/deployments/overview - Check setting up custom domains and env variables before triggering production builds.', category: 'Links', date: 'June 09, 2026' },
-  { id: 'm3', title: 'Gift ideas for Sarah', content: 'Loves pastel stationery, ceramic coffee mugs, and botanical illustration books. Check local craft stores.', category: 'Ideas', date: 'June 07, 2026' },
-  { id: 'm4', title: 'Client Feedback: Closa AI', content: 'They loved the auto-handoff logic. Requested faster response times in super admin centers. Set next call for next Thursday.', category: 'Notes', date: 'June 05, 2026' },
-  { id: 'm5', title: 'John - Coffee Supplier', content: 'Contact details: +628991234567, email: john@javacoffee.co, works at Java Beans Corp.', category: 'Contacts', date: 'June 02, 2026' }
-];
+// --- PERSONA NAME MAPPING (Bug #9: consistent naming) ---
+const PERSONA_MAP = {
+  friendly: 'Friendly',
+  professional: 'Professional',
+  islamic: 'Islamic Assistant',
+  business_partner: 'Business Partner',
+  grumpy_boss: 'Grumpy Boss',
+  romantic_partner: 'Romantic Partner'
+};
 
-const DEFAULT_TASKS = [
-  { id: 't1', title: 'Finalize Landing Page Copy', tags: ['Design', 'Copy'], priority: 'High', status: 'todo' },
-  { id: 't2', title: 'Review Client Proposal for Naiva', tags: ['Business'], priority: 'High', status: 'todo' },
-  { id: 't3', title: 'Integrate Midtrans Checkout Gateway', tags: ['Coding'], priority: 'Medium', status: 'doing' },
-  { id: 't4', title: 'Setup DNS and SSL for naiva.ai', tags: ['Tech'], priority: 'Low', status: 'done' },
-  { id: 't5', title: 'Create pitch deck slides', tags: ['Business', 'Design'], priority: 'Medium', status: 'todo' },
-  { id: 't6', title: 'Test WhatsApp webhook reception', tags: ['Coding'], priority: 'High', status: 'done' }
-];
-
-const DEFAULT_REMINDERS = [
-  { id: 'r1', text: 'Call John about coffee shipment status', timegroup: 'Today', time: '14:30', completed: false },
-  { id: 'r2', text: 'Review contract proposal with legal team', timegroup: 'Tomorrow', time: '10:00', completed: false },
-  { id: 'r3', text: 'Pay internet and cloud hosting invoice', timegroup: 'This Week', time: '09:00', completed: false },
-  { id: 'r4', text: 'Renew SaaS business registration license', timegroup: 'This Month', time: '17:00', completed: false }
-];
-
-const DEFAULT_FILES = [
-  { 
-    id: 'f1', 
-    name: 'project_specification_naiva.pdf', 
-    type: 'pdf', 
-    size: '1.8 MB', 
-    date: 'June 10, 2026', 
-    summary: 'This document details the functional specifications of NAIVA, a personal AI second brain hosted on WhatsApp. Key components include the memory retrieval engine, OpenAI integration, and background sync logic.',
-    points: [
-      'NAIVA acts as a text-based storage and reminder assistant for WhatsApp users.',
-      'Integration requires Midtrans for subscription handling and a super admin center for tracking.',
-      'Data encryption is handled via AES-256 in SQL databases.'
-    ],
-    actions: [
-      'Finalize webhook setup in WhatsApp Business Platform',
-      'Test message encryption speed with 10k concurrent users'
-    ]
-  },
-  { 
-    id: 'f2', 
-    name: 'javanese_coffee_beans.csv', 
-    type: 'txt', 
-    size: '45 KB', 
-    date: 'June 09, 2026', 
-    summary: 'A list containing suppliers, prices, roast profiles, and stock status for premium coffee beans imported from Java. Highlighting Arabica grades.',
-    points: [
-      'Arabica Java Preanger has the highest rating (86) and is priced at $12/kg.',
-      'Currently, 4 supplier records are active with email contacts.',
-      'Stock levels for Robusta beans are currently low.'
-    ],
-    actions: [
-      'Contact supplier John to reorder Arabica Preanger'
-    ]
-  },
-  { 
-    id: 'f3', 
-    name: 'design_system_tokens.docx', 
-    type: 'doc', 
-    size: '420 KB', 
-    date: 'June 05, 2026', 
-    summary: 'Defines the NAIVA design system style guidelines, including WhatsApp-style primary colors, typography choices, and glassmorphic shadow values.',
-    points: [
-      'Primary color tokens: WhatsApp green (#25D366) and secondary teal (#128C7E).',
-      'Inter or Geist used for headings and clean layout feel.',
-      'Rounded corner standards are set to 10px (md) and 16px (lg).'
-    ],
-    actions: [
-      'Apply new borders and shadows in dashboard component styles'
-    ]
-  }
-];
-
-const DEFAULT_CONTACTS = [
-  { id: 'c1', name: 'John Doe', company: 'Javacoffee Co', phone: '+62 899-1234-567', email: 'john@javacoffee.co', insta: 'john_coffee' },
-  { id: 'c2', name: 'Sarah Connor', company: 'Cyberdyne Systems', phone: '+1 555-0199', email: 'sarah@cyberdyne.io', insta: 'connor_sarah' },
-  { id: 'c3', name: 'Zack Lee', company: 'TechVibe Agency', phone: '+62 812-9876-543', email: 'zack@techvibe.com', insta: 'zack_vibe' },
-  { id: 'c4', name: 'Maryam Amina', company: 'Madina Designs', phone: '+62 821-2233-445', email: 'maryam@madina.org', insta: 'maryam_design' }
-];
-
-const DEFAULT_EVENTS = [
-  { id: 'e1', title: 'Product Launch Align', date: new Date().toISOString().split('T')[0], time: '09:00', details: 'discussing landing page deployment with team' },
-  { id: 'e2', title: 'Coffee supplier catch-up', date: new Date().toISOString().split('T')[0], time: '14:00', details: 'check Arabica Preanger stock availability with John' },
-  { id: 'e3', title: 'Weekly Code Review', date: new Date().toISOString().split('T')[0], time: '17:00', details: 'review Midtrans integration code and error handling' }
-];
-
-const DEFAULT_EXPENSES = [
-  { id: 'xp1', description: 'Beli Kopi Susu', amount: 25000, category: 'Makanan', date: 'June 11, 2026' },
-  { id: 'xp2', description: 'Makan Siang Nasi Padang', amount: 35000, category: 'Makanan', date: 'June 10, 2026' },
-  { id: 'xp3', description: 'Tagihan WiFi Indihome', amount: 385000, category: 'Tagihan', date: 'June 08, 2026' },
-  { id: 'xp4', description: 'Bensin Shell V-Power', amount: 150000, category: 'Transportasi', date: 'June 07, 2026' },
-  { id: 'xp5', description: 'Belanja Kaos Uniqlo', amount: 299000, category: 'Belanja', date: 'June 05, 2026' }
-];
+// --- INITIAL DATA (empty defaults for fresh users) ---
+const DEFAULT_MEMORIES = [];
+const DEFAULT_TASKS = [];
+const DEFAULT_REMINDERS = [];
+const DEFAULT_FILES = [];
+const DEFAULT_CONTACTS = [];
+const DEFAULT_EVENTS = [];
+const DEFAULT_EXPENSES = [];
 
 let emojiPickerTarget = 'studio';
 let activeOauthKey = null;
 let activeSettingsKey = null;
 
 let dashSimChatLog = [
-  { sender: 'assistant', text: 'Halo Muis! Saya asisten AI NAIVA. Kirimkan pesan atau perintah WhatsApp di sini untuk disimulasikan.', time: '09:00' }
+  { sender: 'assistant', text: 'Halo! Saya asisten AI NAIVA. Kirimkan pesan atau perintah WhatsApp di sini untuk disimulasikan.', time: '09:00' }
 ];
 
 // --- STATE MANAGEMENT ---
@@ -152,8 +73,8 @@ class AppState {
     });
 
     this.profile = this.load('profile', {
-      username: 'Muis',
-      phone: '8123456789',
+      username: 'User',
+      phone: '',
       backupEnabled: true,
       plan: 'free'
     });
@@ -188,7 +109,7 @@ class AppState {
       if (profileData.success && profileData.user) {
         const user = profileData.user;
         this.profile = {
-          username: user.name || 'Muis',
+          username: user.name || 'User',
           phone: user.waNumber || '8123456789',
           avatar: user.avatar || '🤖',
           email: user.email || 'muis@naiva.ai',
@@ -803,10 +724,11 @@ function renderDashboard() {
 
   if (todaysEvents.length === 0) {
     agendaList.innerHTML = `
-      <div class="empty-state">
-        <span class="empty-icon">📅</span>
-        <span class="empty-title">All clear today</span>
-        <span class="empty-desc">No upcoming meetings or agendas are scheduled for today.</span>
+      <div class="empty-state compact">
+        <span class="empty-state-icon">📅</span>
+        <span class="empty-state-title">Belum ada agenda hari ini</span>
+        <span class="empty-state-desc">Tambahkan event di kalender atau kirim pesan via WhatsApp.</span>
+        <a href="#calendar" class="empty-state-cta">Buka Kalender</a>
       </div>`;
   } else {
     // Sort events by time
@@ -831,10 +753,11 @@ function renderDashboard() {
   const priorities = state.tasks.filter(t => t.status !== 'done').slice(0, 4); // Limit to top 4 incomplete
   if (priorities.length === 0) {
     checklist.innerHTML = `
-      <div class="empty-state">
-        <span class="empty-icon">🎉</span>
-        <span class="empty-title">All tasks completed!</span>
-        <span class="empty-desc">You don't have any pending priority tasks.</span>
+      <div class="empty-state compact">
+        <span class="empty-state-icon">✅</span>
+        <span class="empty-state-title">Belum ada tugas</span>
+        <span class="empty-state-desc">Buat tugas pertama Anda atau kirim via WhatsApp.</span>
+        <a href="#tasks" class="empty-state-cta">Buat Tugas</a>
       </div>`;
   } else {
     priorities.forEach(task => {
@@ -989,10 +912,10 @@ function renderMemoryCenter() {
 
   if (filtered.length === 0) {
     grid.innerHTML = `
-      <div class="empty-state" style="grid-column: span 3; padding: 80px 0;">
-        <span class="empty-icon">🧠</span>
-        <span class="empty-title">No memories found</span>
-        <span class="empty-desc">Try searching for other terms or adding a new note memory.</span>
+      <div class="empty-state" style="grid-column: 1 / -1; margin: 40px auto;">
+        <span class="empty-state-icon">🧠</span>
+        <span class="empty-state-title">Belum ada memori</span>
+        <span class="empty-state-desc">Simpan catatan penting, insight, atau draf langsung dari chat WhatsApp Anda ke Memory Center.</span>
       </div>`;
     return;
   }
@@ -1044,9 +967,10 @@ function renderTasksBoard() {
 
     if (filtered.length === 0) {
       container.innerHTML = `
-        <div class="empty-state" style="padding: 24px 10px;">
-          <span class="empty-icon">📋</span>
-          <span class="empty-title">Empty column</span>
+        <div class="empty-state compact" style="margin: 20px 10px;">
+          <span class="empty-state-icon">📋</span>
+          <span class="empty-state-title">Kosong</span>
+          <span class="empty-state-desc">Belum ada tugas di tahap ini.</span>
         </div>`;
       return;
     }
@@ -1227,10 +1151,10 @@ function renderFilesVault() {
 
   if (filtered.length === 0) {
     grid.innerHTML = `
-      <div class="empty-state" style="grid-column: span 4; padding: 60px 0;">
-        <span class="empty-icon">📂</span>
-        <span class="empty-title">No files found</span>
-        <span class="empty-desc">Upload document files to get started or adjust your filters.</span>
+      <div class="empty-state" style="grid-column: 1 / -1; margin: 40px auto;">
+        <span class="empty-state-icon">📂</span>
+        <span class="empty-state-title">Belum ada file</span>
+        <span class="empty-state-desc">Upload dokumen atau gambar referensi untuk diakses NAIVA saat menjawab chat Anda.</span>
       </div>`;
     return;
   }
@@ -1449,10 +1373,10 @@ function renderContactsManager() {
 
   if (filtered.length === 0) {
     grid.innerHTML = `
-      <div class="empty-state" style="grid-column: span 3; padding: 60px 0;">
-        <span class="empty-icon">👥</span>
-        <span class="empty-title">No contacts found</span>
-        <span class="empty-desc">Add contacts manually or mention them in WhatsApp chats to store.</span>
+      <div class="empty-state" style="grid-column: 1 / -1; margin: 40px auto;">
+        <span class="empty-state-icon">👥</span>
+        <span class="empty-state-title">Belum ada kontak</span>
+        <span class="empty-state-desc">Data klien atau rekan kerja akan otomatis tersimpan di sini dari interaksi WhatsApp Anda.</span>
       </div>`;
     return;
   }
@@ -1703,7 +1627,7 @@ let studioChatLog = [];
 const PERSONALITY_RESPONSES = {
   en: {
     friendly: {
-      greeting: "Hi Muis! I'm here to help you remember everything. Today is looking productive!",
+      greeting: `Hi ${state.profile.username}! I'm here to help you remember everything. Today is looking productive!`,
       agenda: "Here's what you have going on today: You've got 2 meetings coming up. Let's make it a great one!",
       default: "Got it! I've logged that in your memory center. Let me know if you need to set a task or request a summary."
     },
@@ -1713,7 +1637,7 @@ const PERSONALITY_RESPONSES = {
       default: "Understood. The memory entry has been successfully recorded in the secure vault."
     },
     islamic: {
-      greeting: "Assalamualaikum Muis. Below is your schedule. Don't forget your daily prayers. Have a blessed day!",
+      greeting: `Assalamualaikum ${state.profile.username}. Below is your schedule. Don't forget your daily prayers. Have a blessed day!`,
       agenda: "Today's schedule contains 2 meetings. Praying that Allah bestows barakah in your work today.",
       default: "Insya Allah, I have saved this in your memory center. May your day be filled with blessings."
     },
@@ -1735,7 +1659,7 @@ const PERSONALITY_RESPONSES = {
   },
   id: {
     friendly: {
-      greeting: "Halo Muis! Aku di sini untuk membantumu mengingat segalanya. Hari ini tampak produktif!",
+      greeting: `Halo ${state.profile.username}! Aku di sini untuk membantumu mengingat segalanya. Hari ini tampak produktif!`,
       agenda: "Berikut adalah agenda Anda hari ini: Anda memiliki 2 pertemuan. Mari kita buat hari ini menyenangkan!",
       default: "Siap! Catatan Anda sudah disimpan di Memory Center. Beritahu aku jika butuh ringkasan atau tugas baru."
     },
@@ -1745,7 +1669,7 @@ const PERSONALITY_RESPONSES = {
       default: "Baik, catatan memori tersebut telah berhasil disimpan dengan aman di dalam sistem."
     },
     islamic: {
-      greeting: "Assalamualaikum Muis. Berikut adalah jadwal Anda hari ini. Jangan lupa shalat 5 waktu ya. Semoga harimu berkah!",
+      greeting: `Assalamualaikum ${state.profile.username}. Berikut adalah jadwal Anda hari ini. Jangan lupa shalat 5 waktu ya. Semoga harimu berkah!`,
       agenda: "Jadwal hari ini berisi 2 pertemuan. Semoga Allah memberikan kelancaran dan berkah pada pekerjaan Anda hari ini.",
       default: "Insya Allah, ini sudah saya simpan di Memory Center Anda. Semoga harimu berkah."
     },
@@ -2165,7 +2089,7 @@ async function handleStudioSendMessage() {
       if (config.personality === 'motivator') {
         replyText = `Get up! Here are your pending tasks:\n${pendingTasks}\n\nPick one and execute! No excuses!`;
       } else if (config.personality === 'islamic') {
-        replyText = `Here are your pending tasks, Muis:\n${pendingTasks}\n\nMay Allah grant you ease in completing them.`;
+        replyText = `Here are your pending tasks, ${state.profile.username}:\n${pendingTasks}\n\nMay Allah grant you ease in completing them.`;
       } else {
         replyText = `Here is your current pending checklist:\n${pendingTasks}`;
       }
@@ -2196,7 +2120,7 @@ async function renderSettingsPage() {
         const data = await res.json();
         if (data.success && data.user) {
           state.profile = {
-            username: data.user.name || 'Muis',
+            username: data.user.name || 'User',
             phone: data.user.waNumber || '8123456789',
             avatar: data.user.avatar || '🤖',
             email: data.user.email || 'muis@naiva.ai',
@@ -2359,7 +2283,7 @@ async function handleIntegrationConnect(key) {
     const nameEl = document.getElementById('oauth-name-display');
     const emailEl = document.getElementById('oauth-email-display');
     if (avatarEl) avatarEl.textContent = state.profile.avatar || '🤖';
-    if (nameEl) nameEl.textContent = state.profile.username || 'Muis';
+    if (nameEl) nameEl.textContent = state.profile.username || 'User';
     if (emailEl) emailEl.textContent = state.profile.email || 'muis@naiva.ai';
 
     // Populate scope check cards
@@ -2452,12 +2376,23 @@ function initEventListeners() {
 
       if (errorEl) errorEl.style.display = 'none';
       if (successEl) successEl.style.display = 'none';
+
+      // Validate WA number format (digits only, 10-15 chars)
+      const waClean = waNumber.replace(/\D/g, '');
+      if (waClean.length < 10 || waClean.length > 15) {
+        if (errorEl) {
+          errorEl.textContent = 'Nomor WhatsApp harus berisi 10-15 digit angka (contoh: 628123456789).';
+          errorEl.style.display = 'block';
+        }
+        return;
+      }
+
       if (submitBtn) {
         submitBtn.disabled = true;
         submitBtn.textContent = 'Memproses...';
       }
 
-      const res = await state.signupWithEmail(name, email, waNumber, password);
+      const res = await state.signupWithEmail(name, email, waClean, password);
 
       if (submitBtn) {
         submitBtn.disabled = false;
@@ -3255,7 +3190,7 @@ function initEventListeners() {
         appName: "NAIVA",
         exportDate: new Date().toISOString(),
         profile: {
-          username: state.profile.username || "Muis",
+          username: state.profile.username || "User",
           phone: state.profile.phone || "+628123456789",
           plan: state.profile.plan || "free",
           backupEnabled: state.profile.backupEnabled !== false,
@@ -3575,9 +3510,9 @@ function initEventListeners() {
         
         let briefingText = '';
         if (langVal === 'en') {
-          briefingText = `☀️ *NAIVA DAILY BRIEFING* ☀️\n\nGood morning Muis! Here is your schedule for today:\n\n📅 *Today's Schedule*:\n- 09:00: Product Launch Align\n- 14:00: Catch-up Meeting\n\n📋 *Priority Tasks*:\n- Complete API documentation\n- Send JavaCoffee invoice\n\nHave a productive day! 🚀`;
+          briefingText = `☀️ *NAIVA DAILY BRIEFING* ☀️\n\nGood morning ${state.profile.username}! Here is your schedule for today:\n\n📅 *Today's Schedule*:\n- 09:00: Product Launch Align\n- 14:00: Catch-up Meeting\n\n📋 *Priority Tasks*:\n- Complete API documentation\n- Send JavaCoffee invoice\n\nHave a productive day! 🚀`;
         } else {
-          briefingText = `☀️ *DAILY BRIEFING NAIVA* ☀️\n\nSelamat pagi Muis! Berikut ringkasan agenda Anda hari ini:\n\n📅 *Agenda Hari Ini*:\n- 09:00: Product Launch Align\n- 14:00: Catch-up Meeting\n\n📋 *Tugas Prioritas*:\n- Menyelesaikan dokumentasi API\n- Mengirimkan invoice JavaCoffee\n\nSemoga hari Anda produktif! 🚀`;
+          briefingText = `☀️ *DAILY BRIEFING NAIVA* ☀️\n\nSelamat pagi ${state.profile.username}! Berikut ringkasan agenda Anda hari ini:\n\n📅 *Agenda Hari Ini*:\n- 09:00: Product Launch Align\n- 14:00: Catch-up Meeting\n\n📋 *Tugas Prioritas*:\n- Menyelesaikan dokumentasi API\n- Mengirimkan invoice JavaCoffee\n\nSemoga hari Anda produktif! 🚀`;
         }
         
         briefingText = formatMessageByStyle(briefingText, state.studio.style);
@@ -3613,9 +3548,9 @@ function initEventListeners() {
           
           let followUpText = '';
           if (langVal === 'en') {
-            followUpText = `⏳ *Smart Follow Up*:\n\nHi Muis, just a quick friendly reminder to complete your high-priority task: *Complete API documentation*. It's marked as pending. Let me know if you need any help!`;
+            followUpText = `⏳ *Smart Follow Up*:\n\nHi ${state.profile.username}, just a quick friendly reminder to complete your high-priority task: *Complete API documentation*. It's marked as pending. Let me know if you need any help!`;
           } else {
-            followUpText = `⏳ *Smart Follow Up*:\n\nHalo Muis, sekadar mengingatkan tugas prioritas tinggi Anda: *Menyelesaikan dokumentasi API*. Statusnya masih tertunda. Kabari saya jika butuh bantuan ya!`;
+            followUpText = `⏳ *Smart Follow Up*:\n\nHalo ${state.profile.username}, sekadar mengingatkan tugas prioritas tinggi Anda: *Menyelesaikan dokumentasi API*. Statusnya masih tertunda. Kabari saya jika butuh bantuan ya!`;
           }
           
           followUpText = formatMessageByStyle(followUpText, state.studio.style);
@@ -4130,7 +4065,7 @@ function playSuccessChime() {
 }
 
 function syncSidebarProfile() {
-  const profile = state.profile || { username: 'Muis', phone: '8123456789' };
+  const profile = state.profile || { username: 'User', phone: '' };
   const sidebarNameEl = document.querySelector('.sidebar .user-name');
   if (sidebarNameEl) sidebarNameEl.textContent = profile.username;
   const sidebarAvatarEl = document.querySelector('.sidebar .user-avatar');
@@ -4140,7 +4075,7 @@ function syncSidebarProfile() {
 }
 
 async function saveUserProfile() {
-  const username = document.getElementById('settings-username').value.trim() || 'Muis';
+  const username = document.getElementById('settings-username').value.trim() || 'User';
   const phone = document.getElementById('settings-phone').value.trim() || '8123456789';
   const bio = document.getElementById('settings-bio').value.trim();
 
@@ -4246,7 +4181,7 @@ function formatMessageByStyle(text, style) {
   if (!text) return '';
   if (style === 'short') {
     if (text.includes('Assalamualaikum')) {
-      return 'Assalamualaikum Muis. Hari ini ada 2 meeting. Semoga berkah!';
+      return `Assalamualaikum ${state.profile.username}. Hari ini ada 2 meeting. Semoga berkah!`;
     }
     if (text.includes('sayang') || text.includes('beb')) {
       return 'Halo sayang! Semangat hari ini ya beb! ❤️';
