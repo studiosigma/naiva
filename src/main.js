@@ -1,10 +1,13 @@
 import './style.css';
 
+// API Base URL — reads from Vite env: localhost for dev, Koyeb for production
+const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:3000';
+
 // Auto-inject /api prefix for backend requests (fixes NestJS global API prefix routing mismatch)
 const originalFetch = window.fetch;
 window.fetch = function (input, init) {
-  if (typeof input === 'string' && input.startsWith('http://localhost:3000/') && !input.startsWith('http://localhost:3000/api/')) {
-    input = input.replace('http://localhost:3000/', 'http://localhost:3000/api/');
+  if (typeof input === 'string' && input.startsWith(`${API_BASE_URL}/`) && !input.startsWith(`${API_BASE_URL}/api/`)) {
+    input = input.replace(`${API_BASE_URL}/`, `${API_BASE_URL}/api/`);
   }
   return originalFetch(input, init);
 };
@@ -165,7 +168,7 @@ class AppState {
     }
 
     try {
-      const profileRes = await fetch('http://localhost:3000/users/profile', {
+      const profileRes = await fetch(`${API_BASE_URL}/users/profile`, {
         headers: {
           'Authorization': `Bearer ${this.token}`,
         },
@@ -218,7 +221,7 @@ class AppState {
       }
 
       const fetchBackend = async (path) => {
-        const res = await fetch(`http://localhost:3000${path}`, {
+        const res = await fetch(`${API_BASE_URL}${path}`, {
           headers: {
             'Authorization': `Bearer ${this.token}`,
           },
@@ -349,7 +352,7 @@ class AppState {
 
   async loginWithEmail(email, password) {
     try {
-      const res = await fetch('http://localhost:3000/auth/login', {
+      const res = await fetch(`${API_BASE_URL}/auth/login`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -375,7 +378,7 @@ class AppState {
 
   async signupWithEmail(name, email, waNumber, password) {
     try {
-      const res = await fetch('http://localhost:3000/auth/signup', {
+      const res = await fetch(`${API_BASE_URL}/auth/signup`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -401,7 +404,7 @@ class AppState {
 
   async devLoginInstant() {
     try {
-      const res = await fetch('http://localhost:3000/auth/dev-login', {
+      const res = await fetch(`${API_BASE_URL}/auth/dev-login`, {
         method: 'POST',
       });
       const data = await res.json();
@@ -424,7 +427,7 @@ class AppState {
   async apiPost(path, body) {
     if (!this.token) return null;
     try {
-      const res = await fetch(`http://localhost:3000${path}`, {
+      const res = await fetch(`${API_BASE_URL}${path}`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -442,7 +445,7 @@ class AppState {
   async apiDelete(path) {
     if (!this.token) return false;
     try {
-      const res = await fetch(`http://localhost:3000${path}`, {
+      const res = await fetch(`${API_BASE_URL}${path}`, {
         method: 'DELETE',
         headers: {
           'Authorization': `Bearer ${this.token}`,
@@ -458,7 +461,7 @@ class AppState {
   async apiPatch(path, body) {
     if (!this.token) return null;
     try {
-      const res = await fetch(`http://localhost:3000${path}`, {
+      const res = await fetch(`${API_BASE_URL}${path}`, {
         method: 'PATCH',
         headers: {
           'Content-Type': 'application/json',
@@ -524,7 +527,7 @@ class AppState {
     if (this.token) {
       try {
         if (config.personality) {
-          await fetch('http://localhost:3000/users/persona', {
+          await fetch(`${API_BASE_URL}/users/persona`, {
             method: 'PATCH',
             headers: {
               'Content-Type': 'application/json',
@@ -540,7 +543,7 @@ class AppState {
           if (config.briefingTime !== undefined) payload.briefingTime = config.briefingTime;
           if (config.followup !== undefined) payload.followupEnabled = config.followup;
 
-          await fetch('http://localhost:3000/users/briefing', {
+          await fetch(`${API_BASE_URL}/users/briefing`, {
             method: 'PATCH',
             headers: {
               'Content-Type': 'application/json',
@@ -567,7 +570,7 @@ class AppState {
         if (ints.gcontacts !== undefined) payload.contactsSyncEnabled = ints.gcontacts;
         if (ints.gmail !== undefined) payload.gmailConnected = ints.gmail;
 
-        await fetch('http://localhost:3000/users/integrations', {
+        await fetch(`${API_BASE_URL}/users/integrations`, {
           method: 'PATCH',
           headers: {
             'Content-Type': 'application/json',
@@ -2002,7 +2005,7 @@ async function handleStudioSendMessage() {
   // Real Backend integration
   if (state.token) {
     try {
-      const response = await fetch('http://localhost:3000/whatsapp/simulate', {
+      const response = await fetch(`${API_BASE_URL}/whatsapp/simulate`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -2184,7 +2187,7 @@ async function handleStudioSendMessage() {
 async function renderSettingsPage() {
   if (state.token) {
     try {
-      const res = await fetch('http://localhost:3000/users/profile', {
+      const res = await fetch(`${API_BASE_URL}/users/profile`, {
         headers: {
           'Authorization': `Bearer ${state.token}`
         }
@@ -2873,7 +2876,7 @@ function initEventListeners() {
   const changePlanDirectly = async (plan) => {
     if (state.token) {
       try {
-        const response = await fetch('http://localhost:3000/users/profile', {
+        const response = await fetch(`${API_BASE_URL}/users/profile`, {
           method: 'PATCH',
           headers: {
             'Content-Type': 'application/json',
@@ -2908,7 +2911,7 @@ function initEventListeners() {
   const handleCheckout = async (plan) => {
     try {
       showToast('Menghubungkan ke payment gateway...');
-      const response = await fetch('http://localhost:3000/subscription/checkout', {
+      const response = await fetch(`${API_BASE_URL}/subscription/checkout`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -3459,7 +3462,7 @@ function initEventListeners() {
         
         if (state.token) {
           try {
-            await fetch('http://localhost:3000/users/profile', {
+            await fetch(`${API_BASE_URL}/users/profile`, {
               method: 'PATCH',
               headers: {
                 'Content-Type': 'application/json',
@@ -3780,7 +3783,7 @@ function handleFileProcessing(filesList) {
       const formData = new FormData();
       formData.append('file', f);
 
-      const promise = fetch('http://localhost:3000/file/upload', {
+      const promise = fetch(`${API_BASE_URL}/file/upload`, {
         method: 'POST',
         headers: {
           'Authorization': `Bearer ${state.token}`
@@ -4149,7 +4152,7 @@ async function saveUserProfile() {
   
   if (state.token) {
     try {
-      const response = await fetch('http://localhost:3000/users/profile', {
+      const response = await fetch(`${API_BASE_URL}/users/profile`, {
         method: 'PATCH',
         headers: {
           'Content-Type': 'application/json',
