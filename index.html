@@ -64,9 +64,9 @@
 
         <div class="sidebar-footer">
           <div class="user-profile">
-            <div class="user-avatar">M</div>
+            <div class="user-avatar" id="sidebar-user-avatar">M</div>
             <div class="user-info">
-              <div class="user-name">Muis</div>
+              <div class="user-name" id="sidebar-user-name">Muis</div>
               <div class="user-status-container">
                 <span class="status-indicator online"></span>
                 <span class="user-status">WA Sync Active</span>
@@ -81,6 +81,20 @@
         <!-- Header -->
         <header class="app-header">
           <div class="header-search-container">
+            <button class="sidebar-toggle-btn" id="sidebar-toggle" title="Minimize/Maximize Sidebar">
+              <!-- Close icon (when sidebar is open) -->
+              <svg class="toggle-icon-close" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <rect width="18" height="18" x="3" y="3" rx="2"></rect>
+                <path d="M9 3v18"></path>
+                <path d="m16 15-3-3 3-3"></path>
+              </svg>
+              <!-- Open icon (when sidebar is minimized) -->
+              <svg class="toggle-icon-open" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <rect width="18" height="18" x="3" y="3" rx="2"></rect>
+                <path d="M9 3v18"></path>
+                <path d="m14 9 3 3-3 3"></path>
+              </svg>
+            </button>
             <h1 id="view-title" class="view-title">Dashboard</h1>
             <div class="sync-badge">
               <span class="sync-dot animate-pulse"></span>
@@ -93,8 +107,400 @@
         </header>
 
         <!-- View Section Containers -->
+        <!-- View Section Containers -->
         <div class="content-body" id="view-container">
           
+          <!-- 0. LANDING PAGE VIEW -->
+          <section id="view-landing" class="view-section">
+            <!-- Landing Navigation -->
+            <nav class="landing-nav">
+              <div class="landing-nav-container">
+                <div class="landing-logo">
+                  <img src="/logo.png" alt="NAIVA Logo" class="landing-logo-img" />
+                  <span class="landing-logo-text">NAIVA</span>
+                </div>
+                <div class="landing-nav-links">
+                  <a href="#view-landing" class="landing-nav-link">Home</a>
+                  <a href="#landing-features" class="landing-nav-link">Fitur Utama</a>
+                  <a href="#landing-integrations" class="landing-nav-link">Integrasi</a>
+                  <a href="#landing-steps" class="landing-nav-link">Cara Kerja</a>
+                </div>
+                <a href="#dashboard" class="landing-btn-cta">Buka Dashboard</a>
+              </div>
+            </nav>
+
+            <!-- Landing Hero Section -->
+            <header class="landing-hero">
+              <div class="landing-hero-grid">
+                <div class="landing-hero-text">
+                  <div class="landing-badge">
+                    <span class="landing-badge-dot"></span> WhatsApp Second Brain
+                  </div>
+                  <h1 class="landing-hero-title">
+                    Asisten AI Pribadi <br/>
+                    <span class="gradient-text">Di WhatsApp Anda</span>
+                  </h1>
+                  <p class="landing-hero-desc">
+                    NAIVA menghubungkan WhatsApp Anda menjadi "Second Brain". Catat pengeluaran keuangan, jadwalkan tugas harian, simpan memori penting, dan terima briefing pagi secara otomatis lewat chat biasa.
+                  </p>
+                  <div class="landing-hero-actions">
+                    <a href="#dashboard" class="landing-btn-primary">Mulai Sekarang</a>
+                    <a href="#landing-features" class="landing-btn-secondary">Tinjau Fitur Resmi</a>
+                  </div>
+                </div>
+
+                <!-- Interactive Hero Mockup -->
+                <div class="landing-hero-mockup">
+                  <div class="whatsapp-mockup-landing">
+                    <div class="mockup-status-bar">
+                      <span class="status-time">09:41</span>
+                      <span class="notch"></span>
+                      <span class="status-icons">
+                        <svg width="12" height="12" viewBox="0 0 24 24" fill="currentColor"><path d="M1 9l2 2c4.97-4.97 13.03-4.97 18 0l2-2C16.93 2.93 7.08 2.93 1 9zm8 8l3 3 3-3c-1.65-1.66-4.34-1.66-6 0zm-4-4l2 2c2.76-2.76 7.24-2.76 10 0l2-2C15.14 9.14 8.87 9.14 5 13z"/></svg>
+                        <svg width="12" height="12" viewBox="0 0 24 24" fill="currentColor"><rect x="2" y="7" width="3" height="10" rx="1"/><rect x="7" y="5" width="3" height="12" rx="1"/><rect x="12" y="3" width="3" height="14" rx="1"/><rect x="17" y="1" width="3" height="16" rx="1"/></svg>
+                        <svg width="16" height="12" viewBox="0 0 24 14" fill="currentColor"><rect x="0" y="1" width="20" height="12" rx="2" stroke="currentColor" stroke-width="1.5" fill="none"/><rect x="21" y="4" width="2" height="6" rx="1"/><rect x="2" y="3" width="14" height="8" rx="1" fill="currentColor"/></svg>
+                      </span>
+                    </div>
+                    <div class="mockup-header">
+                      <div class="mockup-back-btn">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="20" height="20"><polyline points="15 18 9 12 15 6"></polyline></svg>
+                      </div>
+                      <div class="mockup-avatar">🤖</div>
+                      <div class="mockup-user-info">
+                        <span class="mockup-username">NAIVA AI</span>
+                        <span class="mockup-status">online</span>
+                      </div>
+                      <div class="mockup-actions">
+                        <svg viewBox="0 0 24 24" stroke="currentColor" fill="none" stroke-width="2" width="18" height="18"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 9.72v3z"></path></svg>
+                      </div>
+                    </div>
+                    <div class="mockup-chat-body-landing">
+                      <div class="chat-date-separator"><span>HARI INI</span></div>
+                      <div class="chat-bubble outgoing">
+                        <span>Catat pengeluaran 75rb makan siang</span>
+                        <div class="chat-bubble-time">12:30 <span class="read-receipt">✓✓</span></div>
+                      </div>
+                      <div class="chat-bubble incoming">
+                        <span>Catatan Keuangan: Pengeluaran sebesar Rp75.000 untuk "makan siang" telah berhasil dicatat. 📝</span>
+                        <div class="chat-bubble-time">12:30</div>
+                      </div>
+                      <div class="chat-bubble outgoing">
+                        <span>Ingatkan rapat besok jam 10 pagi</span>
+                        <div class="chat-bubble-time">12:32 <span class="read-receipt">✓✓</span></div>
+                      </div>
+                      <div class="chat-bubble incoming">
+                        <span>Pengingat Ditambahkan: "Rapat" dijadwalkan besok pada pukul 10:00 WIB. Saya akan mengirimkan briefing di pagi hari! ⏰</span>
+                        <div class="chat-bubble-time">12:32</div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </header>
+
+            <!-- Features Grid Section -->
+            <section id="landing-features" class="landing-features-sec">
+              <div class="landing-sec-header">
+                <h2 class="landing-sec-title">Fitur Kontrol Dashboard & WhatsApp</h2>
+                <p class="landing-sec-desc">Seluruh operasional asisten Anda terintegrasi secara penuh antara chat WhatsApp dan panel dashboard NAIVA.</p>
+              </div>
+
+              <div class="landing-features-grid">
+                <!-- 1. WhatsApp Second Brain -->
+                <div class="l-feature-card">
+                  <div class="l-feature-icon">💬</div>
+                  <h3 class="l-feature-title">WhatsApp AI Second Brain</h3>
+                  <p class="l-feature-desc">Mengobrol langsung dengan asisten AI di WhatsApp Anda layaknya kontak biasa. Pilih gaya singkat, berimbang, atau detail.</p>
+                </div>
+
+                <!-- 2. Memory Center -->
+                <div class="l-feature-card">
+                  <div class="l-feature-icon">🧠</div>
+                  <h3 class="l-feature-title">Personal Memory Center</h3>
+                  <p class="l-feature-desc">AI mengingat fakta penting tentang profil Anda, preferensi, dan catatan penting dari setiap obrolan agar percakapan terus berkesinambungan.</p>
+                </div>
+
+                <!-- 3. Task & Expense Tracking -->
+                <div class="l-feature-card">
+                  <div class="l-feature-icon">💰</div>
+                  <h3 class="l-feature-title">Pencatat Tugas & Keuangan</h3>
+                  <p class="l-feature-desc">Cukup ketik pengeluaran keuangan atau daftar tugas baru di chat WhatsApp. Semuanya otomatis dicatat, dianalisis, dan tersaji rapi di dashboard.</p>
+                </div>
+
+                <!-- 4. Daily Briefing -->
+                <div class="l-feature-card">
+                  <div class="l-feature-icon">📅</div>
+                  <h3 class="l-feature-title">Briefing Harian Otomatis</h3>
+                  <p class="l-feature-desc">Terima pesan rangkuman di WhatsApp setiap pagi berisi daftar acara kalender, pengingat penting, dan tugas-tugas tertunda Anda.</p>
+                </div>
+
+                <!-- 5. Smart Follow-Up -->
+                <div class="l-feature-card">
+                  <div class="l-feature-icon">🚨</div>
+                  <h3 class="l-feature-title">Smart Follow-Up Pengingat</h3>
+                  <p class="l-feature-desc">Asisten secara proaktif mengirimkan peringatan follow-up melalui pesan WhatsApp untuk tugas tertunda dengan prioritas tinggi.</p>
+                </div>
+
+                <!-- 6. Files Vault -->
+                <div class="l-feature-card">
+                  <div class="l-feature-icon">📁</div>
+                  <h3 class="l-feature-title">Files Vault & Analisis File</h3>
+                  <p class="l-feature-desc">Unggah file dokumen Anda langsung ke kubah dokumen untuk diringkas dan dianalisis secara instan oleh kecerdasan buatan.</p>
+                </div>
+              </div>
+            </section>
+            <!-- Interactive Personality Showcase Section -->
+            <section id="landing-personalities" class="landing-personalities-sec">
+              <div class="landing-sec-header">
+                <div class="landing-badge">
+                  <span class="landing-badge-dot"></span> Unique Selling Point (USP)
+                </div>
+                <h2 class="landing-sec-title">Asisten dengan 6 Kepribadian Unik</h2>
+                <p class="landing-sec-desc">Salah satu fitur andalan NAIVA adalah fleksibilitas kepribadian asisten Anda. Kustomisasi nama, avatar emoji, gaya bahasa, dan rasakan cara asisten merespons pesan harian Anda.</p>
+              </div>
+
+              <div class="personality-showcase-container">
+                <!-- Selector Tab Buttons -->
+                <div class="personality-tab-nav">
+                  <button class="p-tab-btn active" data-p-target="friendly">
+                    <span class="p-tab-emoji">😊</span>
+                    <span class="p-tab-name">Friendly</span>
+                  </button>
+                  <button class="p-tab-btn" data-p-target="professional">
+                    <span class="p-tab-emoji">💼</span>
+                    <span class="p-tab-name">Professional</span>
+                  </button>
+                  <button class="p-tab-btn" data-p-target="islamic">
+                    <span class="p-tab-emoji">🌙</span>
+                    <span class="p-tab-name">Islamic Assistant</span>
+                  </button>
+                  <button class="p-tab-btn" data-p-target="business">
+                    <span class="p-tab-emoji">🤝</span>
+                    <span class="p-tab-name">Business Partner</span>
+                  </button>
+                  <button class="p-tab-btn" data-p-target="grumpy">
+                    <span class="p-tab-emoji">👿</span>
+                    <span class="p-tab-name">Grumpy Boss</span>
+                  </button>
+                  <button class="p-tab-btn" data-p-target="romantic">
+                    <span class="p-tab-emoji">❤️</span>
+                    <span class="p-tab-name">Romantic Partner</span>
+                  </button>
+                </div>
+
+                <!-- Showcase Frame -->
+                <div class="personality-showcase-frame">
+                  <div class="personality-info-panel">
+                    <h3 id="p-info-title" class="p-info-title">Friendly 😊</h3>
+                    <p id="p-info-desc" class="p-info-desc">Asisten yang hangat, berempati, dan siap membantu keseharian Anda dengan nada bicara yang ramah dan santun.</p>
+                    <div class="p-features-list">
+                      <div class="p-feature-item"><span class="check-icon">✓</span> Nada bicara santun & bersahabat</div>
+                      <div class="p-feature-item"><span class="check-icon">✓</span> Memberikan apresiasi & motivasi harian</div>
+                      <div class="p-feature-item"><span class="check-icon">✓</span> Cocok untuk rekan obrolan sehari-hari</div>
+                    </div>
+                  </div>
+
+                  <div class="personality-chat-mockup">
+                    <div class="whatsapp-mockup-landing small-mockup">
+                      <div class="mockup-header">
+                        <div class="mockup-avatar" id="p-mockup-avatar">😊</div>
+                        <div class="mockup-user-info">
+                          <span class="mockup-username" id="p-mockup-name">NAIVA (Friendly)</span>
+                          <span class="mockup-status">online</span>
+                        </div>
+                      </div>
+                      <div class="mockup-chat-body-landing" id="p-mockup-chat-body">
+                        <!-- Default Chat for Friendly -->
+                        <div class="chat-bubble outgoing">
+                          <span>Naiva, tolong ingetin jemput adik nanti sore jam 5 ya.</span>
+                          <div class="chat-bubble-time">16:45 <span class="read-receipt">✓✓</span></div>
+                        </div>
+                        <div class="chat-bubble incoming">
+                          <span>Siap! Rencana jemput adik jam 17:00 sore nanti sudah aku catat ke agenda harianmu ya. Nanti jam 16:45 aku ingetin lagi biar nggak telat. Semangat ya harinya! ✨</span>
+                          <div class="chat-bubble-time">16:45</div>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </section>
+
+            <!-- Integrations Section -->
+            <section id="landing-integrations" class="landing-integrations-sec">
+              <div class="landing-sec-header">
+                <h2 class="landing-sec-title">Integrasi Google & Gmail Resmi</h2>
+                <p class="landing-sec-desc">Hubungkan asisten virtual Anda dengan layanan digital penting untuk sinkronisasi otomatis.</p>
+              </div>
+
+              <div class="landing-integrations-grid">
+                <!-- Calendar -->
+                <div class="l-integration-card">
+                  <div class="l-int-icon">📅</div>
+                  <h4>Google Calendar</h4>
+                  <p>Sinkronisasi tugas harian dan acara langsung ke kalender Anda.</p>
+                </div>
+                <!-- Drive -->
+                <div class="l-integration-card">
+                  <div class="l-int-icon">💾</div>
+                  <h4>Google Drive</h4>
+                  <p>Akses dan ringkas file Anda secara langsung dari folder Drive.</p>
+                </div>
+                <!-- Contacts -->
+                <div class="l-integration-card">
+                  <div class="l-int-icon">👤</div>
+                  <h4>Google Contacts</h4>
+                  <p>Kelola kontak relasi Anda langsung melalui integrasi asisten.</p>
+                </div>
+                <!-- Gmail -->
+                <div class="l-integration-card">
+                  <div class="l-int-icon">✉️</div>
+                  <h4>Gmail</h4>
+                  <p>Membaca ringkasan email penting harian Anda tanpa membuka inbox.</p>
+                </div>
+              </div>
+            </section>
+
+            <!-- How It Works Section -->
+            <section id="landing-steps" class="landing-steps-sec">
+              <div class="landing-sec-header">
+                <h2 class="landing-sec-title">3 Langkah Mudah Memulai</h2>
+                <p class="landing-sec-desc">Hanya butuh beberapa menit untuk menyetel asisten pribadi Anda.</p>
+              </div>
+
+              <div class="landing-steps-grid">
+                <div class="l-step-card">
+                  <div class="l-step-num">1</div>
+                  <h3>Hubungkan WhatsApp</h3>
+                  <p>Buka kontrol panel dashboard dan otentikasi nomor WhatsApp Anda agar asisten mulai aktif mendengarkan chat.</p>
+                </div>
+                <div class="l-step-card">
+                  <div class="l-step-num">2</div>
+                  <h3>Sesuaikan di Studio</h3>
+                  <p>Pilih kepribadian asisten Anda (Friendly, Professional, Islamic, dll.) dan atur waktu briefing harian Anda.</p>
+                </div>
+                <div class="l-step-card">
+                  <div class="l-step-num">3</div>
+                  <h3>Chatting & Simpan</h3>
+                  <p>Mulailah mengirimkan memo suara atau teks untuk menyimpan keuangan, tugas, atau memori pribadi secara otomatis.</p>
+                </div>
+              </div>
+            </section>
+
+            <!-- CTA Footer Section -->
+            <section class="landing-footer-cta">
+              <div class="landing-cta-box">
+                <h2>Siap memiliki WhatsApp Second Brain Anda sendiri?</h2>
+                <p>Mulai kelola tugas, keuangan, dan memori pribadi secara cerdas menggunakan asisten NAIVA.</p>
+                <a href="#dashboard" class="landing-btn-cta-large">Buka Kontrol Dashboard</a>
+              </div>
+            </section>
+
+            <!-- Landing Footer -->
+            <footer class="landing-footer">
+              <div class="landing-footer-container">
+                <span class="footer-brand">NAIVA © 2026. Hak Cipta Dilindungi Undang-Undang.</span>
+                <span class="footer-sub">WhatsApp Second Brain Personal Assistant</span>
+              </div>
+            </footer>
+          </section>
+
+          <!-- ==========================================
+               LOGIN VIEW
+               ========================================== -->
+          <section id="view-login" class="view-section">
+            <div class="login-wrapper">
+              <div class="login-card">
+                <div class="login-logo-container">
+                  <img src="/logo.png" alt="NAIVA Logo" class="login-logo-img" />
+                  <h2>NAIVA</h2>
+                  <p>Asisten AI Pribadi & WhatsApp Second Brain</p>
+                </div>
+
+                <div class="login-alert error" id="login-error-alert" style="display:none"></div>
+
+                <!-- Google OAuth Login (PRIMARY OPTION) -->
+                <div class="google-auth-wrapper">
+                  <a href="http://localhost:3000/api/auth/google" class="btn-google-login" id="btn-google-login">
+                    <svg class="google-icon" viewBox="0 0 24 24" width="20" height="20">
+                      <path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/>
+                      <path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.56-2.77c-.98.66-2.23 1.06-3.72 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/>
+                      <path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.06H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.94l2.85-2.22.81-.63z"/>
+                      <path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.06l3.66 2.84c.87-2.6 3.3-4.52 6.16-4.52z"/>
+                    </svg>
+                    <span>Lanjutkan dengan Gmail</span>
+                  </a>
+                  <p class="google-notice">Direkomendasikan untuk sinkronisasi Google Calendar & Gmail</p>
+                </div>
+
+                <div class="login-divider">
+                  <span>atau masuk dengan email</span>
+                </div>
+
+                <!-- Email & Password Form -->
+                <form id="form-login-email" class="login-form">
+                  <div class="form-group-login">
+                    <label for="login-email">Alamat Email</label>
+                    <input type="email" id="login-email" required placeholder="nama@email.com" />
+                  </div>
+                  <div class="form-group-login">
+                    <label for="login-password">Kata Sandi</label>
+                    <input type="password" id="login-password" required placeholder="••••••••" />
+                  </div>
+                  <button type="submit" class="btn btn-primary w-full" id="btn-login-submit">Masuk</button>
+                </form>
+
+                <div class="login-footer-links">
+                  Belum punya akun? <a href="#signup" class="link-switch-auth">Daftar Sekarang</a>
+                </div>
+              </div>
+            </div>
+          </section>
+
+          <!-- ==========================================
+               SIGN UP VIEW
+               ========================================== -->
+          <section id="view-signup" class="view-section">
+            <div class="login-wrapper">
+              <div class="login-card">
+                <div class="login-logo-container">
+                  <img src="/logo.png" alt="NAIVA Logo" class="login-logo-img" />
+                  <h2>Daftar NAIVA</h2>
+                  <p>Buat akun asisten WhatsApp Second Brain Anda</p>
+                </div>
+
+                <div class="login-alert error" id="signup-error-alert" style="display:none"></div>
+                <div class="login-alert success" id="signup-success-alert" style="display:none"></div>
+
+                <!-- Signup Form -->
+                <form id="form-signup" class="login-form">
+                  <div class="form-group-login">
+                    <label for="signup-name">Nama Lengkap</label>
+                    <input type="text" id="signup-name" required placeholder="Muis Closa" />
+                  </div>
+                  <div class="form-group-login">
+                    <label for="signup-email">Alamat Email</label>
+                    <input type="email" id="signup-email" required placeholder="nama@email.com" />
+                  </div>
+                  <div class="form-group-login">
+                    <label for="signup-wa">Nomor WhatsApp (dengan kode negara)</label>
+                    <input type="text" id="signup-wa" required placeholder="628123456789" />
+                    <p class="input-hint">Digunakan untuk menerima notifikasi & sinkronisasi chat</p>
+                  </div>
+                  <div class="form-group-login">
+                    <label for="signup-password">Kata Sandi</label>
+                    <input type="password" id="signup-password" required placeholder="••••••••" />
+                  </div>
+                  <button type="submit" class="btn btn-primary w-full" id="btn-signup-submit">Buat Akun</button>
+                </form>
+
+                <div class="login-footer-links">
+                  Sudah memiliki akun? <a href="#login" class="link-switch-auth">Masuk di sini</a>
+                </div>
+              </div>
+            </div>
+          </section>
+
           <!-- 1. DASHBOARD HOME VIEW -->
           <section id="view-dashboard" class="view-section active">
             <!-- Hero banner card -->
@@ -376,6 +782,21 @@
               <p class="vault-tagline">Upload and summarize any documents instantly with AI.</p>
             </div>
 
+            <!-- Vault Search & Filter Toolbar -->
+            <div class="vault-toolbar" style="margin-bottom: 24px; display: flex; gap: 16px; align-items: center; justify-content: space-between; flex-wrap: wrap;">
+              <div class="search-input-wrapper" style="flex: 1; min-width: 280px; position: relative;">
+                <svg class="search-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="20" height="20" style="position: absolute; left: 14px; top: 50%; transform: translateY(-50%); color: #94A3B8;"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg>
+                <input type="text" id="files-search-input" placeholder="Search files by name, type, or date..." style="width: 100%; padding: 12px 16px 12px 48px; border-radius: var(--radius-md); border: 1px solid var(--border-color); background-color: var(--card-bg); font-size: 14px; transition: all 0.2s;" />
+              </div>
+              <div class="tab-pills-row" id="files-filter-tabs" style="display: flex; gap: 8px;">
+                <button class="tab-pill active" data-filter="all">All Files</button>
+                <button class="tab-pill" data-filter="pdf">PDFs</button>
+                <button class="tab-pill" data-filter="txt">Texts</button>
+                <button class="tab-pill" data-filter="docx,doc">Word Docs</button>
+                <button class="tab-pill" data-filter="png,jpg,jpeg">Images</button>
+              </div>
+            </div>
+
             <!-- Upload drop zone -->
             <div class="drop-zone" id="file-drop-zone">
               <input type="file" id="file-input-raw" style="display:none" multiple />
@@ -401,15 +822,18 @@
 
           <!-- 6. CONTACTS VIEW -->
           <section id="view-contacts" class="view-section">
-            <div class="contacts-toolbar">
-              <div class="search-input-wrapper">
-                <svg class="search-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="20" height="20"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg>
-                <input type="text" id="contacts-search-input" placeholder="Search contacts by name, company, or note details..." />
+            <div class="contacts-toolbar" style="margin-bottom: 24px; display: flex; gap: 16px; align-items: center; justify-content: space-between; flex-wrap: wrap;">
+              <div class="search-input-wrapper" style="flex: 1; min-width: 280px; position: relative;">
+                <svg class="search-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="20" height="20" style="position: absolute; left: 14px; top: 50%; transform: translateY(-50%); color: #94A3B8;"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg>
+                <input type="text" id="contacts-search-input" placeholder="Search contacts by name, company, or phone..." style="width: 100%; padding: 12px 16px 12px 48px; border-radius: var(--radius-md); border: 1px solid var(--border-color); background-color: var(--card-bg); font-size: 14px; transition: all 0.2s;" />
               </div>
-              <button class="btn btn-primary" id="btn-open-contact-modal">
-                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="16" height="16"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg>
-                <span>Add Contact</span>
-              </button>
+              <div class="tab-pills-row" id="contacts-filter-tabs" style="display: flex; gap: 8px;">
+                <button class="tab-pill active" data-filter="all">All Contacts</button>
+                <button class="tab-pill" data-filter="javacoffee">Javacoffee</button>
+                <button class="tab-pill" data-filter="cyberdyne">Cyberdyne</button>
+                <button class="tab-pill" data-filter="techvibe">TechVibe</button>
+                <button class="tab-pill" data-filter="others">Others</button>
+              </div>
             </div>
 
             <div class="contacts-grid" id="contacts-cards-grid">
@@ -434,19 +858,13 @@
               <!-- Right side: Mini agenda summary -->
               <div class="calendar-sidebar-panel">
                 <div class="month-card">
-                  <div class="month-header">
-                    <span class="month-name">June 2026</span>
+                  <div class="month-header" style="display: flex; align-items: center; justify-content: space-between;">
+                    <button id="btn-prev-month" class="btn btn-outline btn-sm" style="padding: 2px 8px; font-size: 14px; line-height: 1;">&larr;</button>
+                    <span class="month-name" id="calendar-month-name" style="font-weight: 700; font-size: 15px;">June 2026</span>
+                    <button id="btn-next-month" class="btn btn-outline btn-sm" style="padding: 2px 8px; font-size: 14px; line-height: 1;">&rarr;</button>
                   </div>
-                  <div class="calendar-mini-grid">
-                    <div class="day-label">S</div><div class="day-label">M</div><div class="day-label">T</div><div class="day-label">W</div><div class="day-label">T</div><div class="day-label">F</div><div class="day-label">S</div>
-                    <!-- Calendar days (highlighting today) -->
-                    <div class="mini-day prev-month">31</div>
-                    <div class="mini-day">1</div><div class="mini-day">2</div><div class="mini-day">3</div><div class="mini-day">4</div><div class="mini-day">5</div><div class="mini-day">6</div><div class="mini-day">7</div>
-                    <div class="mini-day">8</div><div class="mini-day">9</div><div class="mini-day">10</div><div class="mini-day active-today">11</div><div class="mini-day">12</div><div class="mini-day">13</div><div class="mini-day">14</div>
-                    <div class="mini-day">15</div><div class="mini-day">16</div><div class="mini-day">17</div><div class="mini-day">18</div><div class="mini-day">19</div><div class="mini-day">20</div><div class="mini-day">21</div>
-                    <div class="mini-day">22</div><div class="mini-day">23</div><div class="mini-day">24</div><div class="mini-day">25</div><div class="mini-day">26</div><div class="mini-day">27</div><div class="mini-day">28</div>
-                    <div class="mini-day">29</div><div class="mini-day">30</div>
-                    <div class="mini-day next-month">1</div><div class="mini-day next-month">2</div><div class="mini-day next-month">3</div><div class="mini-day next-month">4</div>
+                  <div class="calendar-mini-grid" id="calendar-mini-grid">
+                    <!-- Dynamic mini grid days will render here -->
                   </div>
                 </div>
 
@@ -466,8 +884,12 @@
             <div class="studio-layout">
               <!-- Settings Form Panel -->
               <div class="studio-form-panel">
-                <h3 class="panel-section-title">Assistant Settings</h3>
-                
+                <div class="studio-page-header">
+                  <h3><span class="header-icon">✨</span> Assistant Studio</h3>
+                  <p class="header-subtitle">Customize your AI assistant's personality, style, and behavior.</p>
+                </div>
+
+                <div class="studio-form-body">
                 <!-- Identity Section -->
                 <div class="form-group">
                   <label class="form-label">Assistant Identity</label>
@@ -482,9 +904,11 @@
                   </div>
                 </div>
 
+                <div class="studio-section-divider"><span>Personality</span></div>
+
                 <!-- Personality Section -->
                 <div class="form-group">
-                  <label class="form-label">Assistant Personality</label>
+                  <label class="form-label">Choose Personality</label>
                   <div class="personality-grid" id="personality-cards-grid">
                     <div class="personality-card active" data-personality="friendly">
                       <span class="personality-emoji">😊</span>
@@ -519,13 +943,15 @@
                   </div>
                 </div>
 
+                <div class="studio-section-divider"><span>Communication</span></div>
+
                 <!-- Communication Style Section -->
                 <div class="form-group">
                   <label class="form-label">Communication Style</label>
                   <div class="style-selector">
-                    <button class="style-btn" data-style="short">Short & Punchy</button>
-                    <button class="style-btn active" data-style="normal">Balanced</button>
-                    <button class="style-btn" data-style="detailed">Detailed & Verbose</button>
+                    <button class="style-btn" data-style="short"><span class="style-icon">⚡</span> Short & Punchy</button>
+                    <button class="style-btn active" data-style="normal"><span class="style-icon">⚖️</span> Balanced</button>
+                    <button class="style-btn" data-style="detailed"><span class="style-icon">📝</span> Detailed</button>
                   </div>
                 </div>
 
@@ -533,13 +959,15 @@
                 <div class="form-group">
                   <label class="form-label">Assistant Language</label>
                   <div class="style-selector" id="studio-language-selector">
-                    <button class="style-btn lang-btn" data-lang="en">English</button>
-                    <button class="style-btn lang-btn" data-lang="id">Indonesia</button>
+                    <button class="style-btn lang-btn" data-lang="en"><span class="style-icon">🇬🇧</span> English</button>
+                    <button class="style-btn lang-btn" data-lang="id"><span class="style-icon">🇮🇩</span> Indonesia</button>
                   </div>
                 </div>
 
+                <div class="studio-section-divider"><span>Automation</span></div>
+
                 <!-- Daily Briefing Section -->
-                <div class="form-group border-top pt-4">
+                <div class="form-group">
                   <div class="briefing-toggle-row">
                     <div class="briefing-label-col">
                       <span class="briefing-title">Enable Daily Briefing</span>
@@ -557,7 +985,7 @@
                 </div>
 
                 <!-- Smart Follow Up Section -->
-                <div class="form-group border-top pt-4">
+                <div class="form-group">
                   <div class="briefing-toggle-row">
                     <div class="briefing-label-col">
                       <span class="briefing-title">Enable Smart Follow Up</span>
@@ -569,11 +997,32 @@
                     </label>
                   </div>
                 </div>
+                </div>
+
+                <!-- Save Bar -->
+                <div class="studio-save-bar">
+                  <button class="btn-save-studio" id="btn-save-studio">
+                    <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"></path><polyline points="17 21 17 13 7 13 7 21"></polyline><polyline points="7 3 7 8 15 8"></polyline></svg>
+                    Save All Changes
+                  </button>
+                </div>
               </div>
 
               <!-- Preview Mockup Panel -->
               <div class="studio-preview-panel">
+                <div class="preview-label-badge">
+                  <span class="live-dot"></span> Live Preview
+                </div>
                 <div class="whatsapp-mockup">
+                  <div class="mockup-status-bar">
+                    <span class="status-time">20:30</span>
+                    <span class="notch"></span>
+                    <span class="status-icons">
+                      <svg width="12" height="12" viewBox="0 0 24 24" fill="currentColor"><path d="M1 9l2 2c4.97-4.97 13.03-4.97 18 0l2-2C16.93 2.93 7.08 2.93 1 9zm8 8l3 3 3-3c-1.65-1.66-4.34-1.66-6 0zm-4-4l2 2c2.76-2.76 7.24-2.76 10 0l2-2C15.14 9.14 8.87 9.14 5 13z"/></svg>
+                      <svg width="12" height="12" viewBox="0 0 24 24" fill="currentColor"><rect x="2" y="7" width="3" height="10" rx="1"/><rect x="7" y="5" width="3" height="12" rx="1"/><rect x="12" y="3" width="3" height="14" rx="1"/><rect x="17" y="1" width="3" height="16" rx="1"/></svg>
+                      <svg width="16" height="12" viewBox="0 0 24 14" fill="currentColor"><rect x="0" y="1" width="20" height="12" rx="2" stroke="currentColor" stroke-width="1.5" fill="none"/><rect x="21" y="4" width="2" height="6" rx="1"/><rect x="2" y="3" width="14" height="8" rx="1" fill="currentColor"/></svg>
+                    </span>
+                  </div>
                   <div class="mockup-header">
                     <div class="mockup-back-btn">
                       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="20" height="20"><polyline points="15 18 9 12 15 6"></polyline></svg>
@@ -583,7 +1032,12 @@
                       <span class="mockup-username" id="mockup-chat-name">NAIVA AI</span>
                       <span class="mockup-status">online</span>
                     </div>
-                    <div class="mockup-actions">
+                    <div class="mockup-actions" style="display: flex; gap: 12px; align-items: center;">
+                      <!-- Clear chat (trash icon) -->
+                      <button id="btn-clear-mockup-chat" style="background: none; border: none; color: #FFFFFF; opacity: 0.8; cursor: pointer; padding: 0; display: flex; align-items: center; justify-content: center;" title="Clear Chat">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="18" height="18"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path></svg>
+                      </button>
+                      <!-- Call icon -->
                       <svg viewBox="0 0 24 24" stroke="currentColor" fill="none" stroke-width="2" width="18" height="18"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 9.72v3z"></path></svg>
                     </div>
                   </div>
@@ -627,6 +1081,10 @@
                   <svg class="settings-tab-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="5" width="20" height="14" rx="2" ry="2"></rect><line x1="2" y1="10" x2="22" y2="10"></line></svg>
                   <span>Subscription</span>
                 </button>
+                <button class="settings-tab-btn" id="btn-logout" style="margin-top: auto; color: #EF4444; border: 1px dashed rgba(239, 68, 68, 0.2); background: rgba(239, 68, 68, 0.02);">
+                  <svg class="settings-tab-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="stroke: #EF4444;"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"></path><polyline points="16 17 21 12 16 7"></polyline><line x1="21" y1="12" x2="9" y2="12"></line></svg>
+                  <span style="color: #EF4444; font-weight: 600;">Logout</span>
+                </button>
               </div>
 
               <!-- Right side content panel -->
@@ -634,6 +1092,21 @@
                 <!-- Profile Tab -->
                 <div class="settings-tab-pane active" id="settings-pane-profile">
                   <h3 class="panel-section-title">Profile Settings</h3>
+                  
+                  <div class="profile-avatar-container">
+                    <div class="profile-avatar-wrapper" id="profile-avatar-trigger">
+                      <span class="profile-avatar-emoji" id="profile-avatar-emoji-display">🤖</span>
+                      <div class="profile-avatar-overlay">
+                        <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="margin-bottom:2px;"><path d="M12 20h9"></path><path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"></path></svg>
+                        <span>Edit</span>
+                      </div>
+                    </div>
+                    <div class="profile-details-summary">
+                      <div class="profile-details-name" id="profile-details-display-name">Muis</div>
+                      <div class="profile-details-role" id="profile-details-display-plan">Free Plan</div>
+                    </div>
+                  </div>
+
                   <div class="settings-form-card">
                     <div class="form-group">
                       <label class="form-label">Name</label>
@@ -643,12 +1116,24 @@
                       </div>
                     </div>
                     <div class="form-group">
+                      <label class="form-label">Email Address <span class="verified-badge">✓ Verified</span></label>
+                      <div class="input-icon-container">
+                        <svg class="input-field-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect><path d="M7 11V7a5 5 0 0 1 10 0v4"></path></svg>
+                        <input type="email" class="form-input icon-padded disabled-locked" id="settings-email" disabled />
+                      </div>
+                    </div>
+                    <div class="form-group">
                       <label class="form-label">WhatsApp Phone Number</label>
                       <div class="input-phone-container">
                         <span class="phone-prefix">+62</span>
                         <input type="tel" class="form-input" value="8123456789" id="settings-phone" />
                       </div>
                       <span class="input-helper">The phone number registered with NAIVA assistant.</span>
+                    </div>
+                    <div class="form-group">
+                      <label class="form-label">Personal Bio / AI Personalization Context</label>
+                      <textarea class="form-input" id="settings-bio" rows="3" placeholder="Tell NAIVA about yourself (your role, preferences, hobbies) so it can personalize its responses..." style="padding:10px 12px;height:auto;resize:vertical;font-family:inherit;font-size:13px;"></textarea>
+                      <span class="input-helper">This description is injected into the AI's system instructions to help it customize summaries and reminders.</span>
                     </div>
                     <button class="btn btn-primary" id="btn-save-profile">Save Settings</button>
                   </div>
@@ -672,7 +1157,96 @@
                     </div>
                   </div>
 
-                  <div class="form-group mt-6">
+                  <!-- Two-Factor Authentication -->
+                  <div class="two-factor-card">
+                    <div class="two-factor-details">
+                      <h4>Two-Factor Authentication (2FA)</h4>
+                      <p>Secure login attempts with a one-time OTP code sent directly to your registered WhatsApp number.</p>
+                    </div>
+                    <label class="switch">
+                      <input type="checkbox" id="security-2fa-toggle">
+                      <span class="slider round"></span>
+                    </label>
+                  </div>
+
+                  <!-- Change Password Section -->
+                  <div class="security-section-divider"></div>
+                  <h3 class="panel-section-title">Update Password</h3>
+                  <div class="settings-form-card">
+                    <div class="form-group">
+                      <label class="form-label">Current Password</label>
+                      <div class="password-input-wrapper">
+                        <input type="password" class="form-input password-padded" id="security-current-password" placeholder="Enter current password">
+                        <button type="button" class="password-toggle-btn" data-toggle="security-current-password">
+                          <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path><circle cx="12" cy="12" r="3"></circle></svg>
+                        </button>
+                      </div>
+                    </div>
+                    <div class="form-group">
+                      <label class="form-label">New Password</label>
+                      <div class="password-input-wrapper">
+                        <input type="password" class="form-input password-padded" id="security-new-password" placeholder="Enter new password">
+                        <button type="button" class="password-toggle-btn" data-toggle="security-new-password">
+                          <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path><circle cx="12" cy="12" r="3"></circle></svg>
+                        </button>
+                      </div>
+                    </div>
+                    <div class="form-group">
+                      <label class="form-label">Confirm New Password</label>
+                      <div class="password-input-wrapper">
+                        <input type="password" class="form-input password-padded" id="security-confirm-password" placeholder="Confirm new password">
+                        <button type="button" class="password-toggle-btn" data-toggle="security-confirm-password">
+                          <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path><circle cx="12" cy="12" r="3"></circle></svg>
+                        </button>
+                      </div>
+                    </div>
+                    <button class="btn btn-primary" id="btn-update-password">Update Password</button>
+                  </div>
+
+                  <!-- Active Sessions -->
+                  <div class="security-section-divider"></div>
+                  <div class="flex-row-between">
+                    <h3 class="panel-section-title" style="margin-bottom:0;">Active Devices & Sessions</h3>
+                    <button class="btn btn-link btn-sm" id="btn-revoke-all-sessions" style="color:#dc2626;font-size:12px;font-weight:600;padding:0;border:none;background:none;cursor:pointer;">Log Out All Other Devices</button>
+                  </div>
+                  <div class="sessions-container" id="sessions-list-container" style="margin-top:16px;">
+                    <!-- Session 1: Current Session -->
+                    <div class="session-item">
+                      <div class="session-left">
+                        <div class="session-icon">
+                          <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="3" width="20" height="14" rx="2" ry="2"></rect><line x1="8" y1="21" x2="16" y2="21"></line><line x1="12" y1="17" x2="12" y2="21"></line></svg>
+                        </div>
+                        <div class="session-info">
+                          <div class="session-device">
+                            Chrome on Linux
+                            <span class="session-badge active">Current</span>
+                          </div>
+                          <div class="session-location">Jakarta, Indonesia • IP: 182.253.14.88</div>
+                        </div>
+                      </div>
+                    </div>
+                    <!-- Session 2: Mobile Session -->
+                    <div class="session-item" id="session-device-mobile">
+                      <div class="session-left">
+                        <div class="session-icon">
+                          <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="5" y="2" width="14" height="20" rx="2" ry="2"></rect><line x1="12" y1="18" x2="12.01" y2="18"></line></svg>
+                        </div>
+                        <div class="session-info">
+                          <div class="session-device">
+                            Safari on iPhone 15 Pro
+                            <span class="session-badge inactive">Active</span>
+                          </div>
+                          <div class="session-location">Surabaya, Indonesia • IP: 110.138.8.214 • Active 2 hours ago</div>
+                        </div>
+                      </div>
+                      <button class="btn btn-outline btn-sm" id="btn-revoke-mobile" style="padding:4px 8px;font-size:11px;">Revoke</button>
+                    </div>
+                  </div>
+
+                  <!-- Privacy & Data Control (Danger Zone) -->
+                  <div class="security-section-divider"></div>
+                  <h3 class="panel-section-title">Privacy & Data Control</h3>
+                  <div class="form-group mt-4">
                     <div class="briefing-toggle-row">
                       <div>
                         <span class="briefing-title">Store Chat Backups</span>
@@ -682,6 +1256,30 @@
                         <input type="checkbox" id="backup-toggle" checked>
                         <span class="slider round"></span>
                       </label>
+                    </div>
+                  </div>
+
+                  <div class="danger-zone-card">
+                    <div class="danger-zone-row">
+                      <div class="danger-action-details">
+                        <h4>Export Personal Data</h4>
+                        <p>Download a JSON backup containing all your processed AI memories, preferences, and assistant settings.</p>
+                      </div>
+                      <button class="btn btn-outline btn-sm" id="btn-export-data" style="border-color:var(--border-color);color:var(--text-primary);">Export Data</button>
+                    </div>
+                    <div class="danger-zone-row">
+                      <div class="danger-action-details">
+                        <h4>Reset AI Memory</h4>
+                        <p>Flush all raw chat histories, vector store embeddings, and learned agent preferences. This action is irreversible.</p>
+                      </div>
+                      <button class="btn btn-outline btn-sm" id="btn-reset-memory" style="border-color:#fca5a5;color:#dc2626;">Reset Memory</button>
+                    </div>
+                    <div class="danger-zone-row">
+                      <div class="danger-action-details">
+                        <h4>Delete Account</h4>
+                        <p>Permanently remove your profile, subscription details, and all integration keys from the NAIVA database.</p>
+                      </div>
+                      <button class="btn btn-primary btn-sm" id="btn-delete-account" style="background-color:#dc2626;border-color:#dc2626;">Delete Account</button>
                     </div>
                   </div>
                 </div>
@@ -705,29 +1303,40 @@
                         <div class="brand-details">
                           <span class="brand-name">Google Calendar</span>
                           <span class="brand-status" id="status-gcal">Disconnected</span>
+                          <span class="brand-sync-info" id="sync-info-gcal">Last synced: Never</span>
                         </div>
                       </div>
-                      <button class="btn btn-outline btn-sm btn-connect-int" data-int="gcal">Connect</button>
+                      <div class="integration-actions" style="display:flex;align-items:center;">
+                        <button class="btn-settings-int" data-int="gcal" style="display:none;" title="Settings">
+                          <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2.5"><circle cx="12" cy="12" r="3"></circle><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"></path></svg>
+                        </button>
+                        <button class="btn btn-primary btn-sm btn-connect-int" data-int="gcal">Connect</button>
+                      </div>
                     </div>
 
                     <!-- Google Drive -->
                     <div class="integration-card">
                       <div class="integration-brand">
                         <div class="brand-logo-container">
-                          <svg class="brand-logo-svg" viewBox="0 0 24 24" width="40" height="40">
-                            <path d="M19 13H5L2.5 8.5 7.5 0h9l5 8.5L19 13z" fill="none"/>
-                            <path d="m2.5 8.5 5-8.5h9l-5 8.5h-9z" fill="#000000" opacity="0.05"/>
-                            <path d="M8.5 15.5 5 9.5 12.5.5h7L16 6.5l-7.5 9z" fill="#0F9D58"/>
-                            <path d="M12.5.5 16 6.5h7.5l-3.5-6h-7.5z" fill="#FFC107"/>
-                            <path d="M2 9.5h15l3.5 6H5.5L2 9.5z" fill="#4285F4"/>
+                          <svg class="brand-logo-svg" viewBox="0 0 32 32" width="40" height="40">
+                            <path d="M16.0019 12.4507L12.541 6.34297C12.6559 6.22598 12.7881 6.14924 12.9203 6.09766C11.8998 6.43355 11.4315 7.57961 11.4315 7.57961L5.10895 18.7345C5.01999 19.0843 4.99528 19.4 5.0064 19.6781H11.9072L16.0019 12.4507Z" fill="#34A853"/>
+                            <path d="M16.002 12.4507L20.0967 19.6781H26.9975C27.0086 19.4 26.9839 19.0843 26.8949 18.7345L20.5724 7.57961C20.5724 7.57961 20.1029 6.43355 19.0835 6.09766C19.2145 6.14924 19.3479 6.22598 19.4628 6.34297L16.002 12.4507Z" fill="#FBBC05"/>
+                            <path d="M11.9082 19.6782L8.48687 25.7168C8.48687 25.7168 8.3732 25.6614 8.21875 25.5469C8.70434 25.9206 9.17633 25.9998 9.17633 25.9998H22.6134C23.3547 25.9998 23.5092 25.7168 23.5092 25.7168C23.5116 25.7155 23.5129 25.7142 23.5153 25.713L20.0965 19.6782H11.9082Z" fill="#4285F4"/>
+                            <path d="M16.0019 12.4514L19.4628 6.34371C19.3479 6.22671 19.2144 6.14997 19.0835 6.09839C18.9327 6.04933 18.7709 6.01662 18.5954 6.00781H18.4125H13.5913H13.4084C13.2342 6.01536 13.0711 6.04807 12.9203 6.09839C12.7894 6.14997 12.6559 6.22671 12.541 6.34371L16.0019 12.4514Z" fill="#188038"/>
                           </svg>
                         </div>
                         <div class="brand-details">
                           <span class="brand-name">Google Drive</span>
                           <span class="brand-status" id="status-gdrive">Disconnected</span>
+                          <span class="brand-sync-info" id="sync-info-gdrive">Last synced: Never</span>
                         </div>
                       </div>
-                      <button class="btn btn-outline btn-sm btn-connect-int" data-int="gdrive">Connect</button>
+                      <div class="integration-actions" style="display:flex;align-items:center;">
+                        <button class="btn-settings-int" data-int="gdrive" style="display:none;" title="Settings">
+                          <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2.5"><circle cx="12" cy="12" r="3"></circle><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"></path></svg>
+                        </button>
+                        <button class="btn btn-primary btn-sm btn-connect-int" data-int="gdrive">Connect</button>
+                      </div>
                     </div>
 
                     <!-- Google Contacts -->
@@ -746,9 +1355,15 @@
                         <div class="brand-details">
                           <span class="brand-name">Google Contacts</span>
                           <span class="brand-status" id="status-gcontacts">Disconnected</span>
+                          <span class="brand-sync-info" id="sync-info-gcontacts">Last synced: Never</span>
                         </div>
                       </div>
-                      <button class="btn btn-outline btn-sm btn-connect-int" data-int="gcontacts">Connect</button>
+                      <div class="integration-actions" style="display:flex;align-items:center;">
+                        <button class="btn-settings-int" data-int="gcontacts" style="display:none;" title="Settings">
+                          <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2.5"><circle cx="12" cy="12" r="3"></circle><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"></path></svg>
+                        </button>
+                        <button class="btn btn-primary btn-sm btn-connect-int" data-int="gcontacts">Connect</button>
+                      </div>
                     </div>
 
                     <!-- Gmail -->
@@ -767,48 +1382,151 @@
                         <div class="brand-details">
                           <span class="brand-name">Gmail</span>
                           <span class="brand-status" id="status-gmail">Disconnected</span>
+                          <span class="brand-sync-info" id="sync-info-gmail">Last synced: Never</span>
                         </div>
                       </div>
-                      <button class="btn btn-outline btn-sm btn-connect-int" data-int="gmail">Connect</button>
+                      <div class="integration-actions" style="display:flex;align-items:center;">
+                        <button class="btn-settings-int" data-int="gmail" style="display:none;" title="Settings">
+                          <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2.5"><circle cx="12" cy="12" r="3"></circle><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"></path></svg>
+                        </button>
+                        <button class="btn btn-primary btn-sm btn-connect-int" data-int="gmail">Connect</button>
+                      </div>
                     </div>
                   </div>
                 </div>
 
                 <!-- Subscription Tab -->
                 <div class="settings-tab-pane" id="settings-pane-subscription">
-                  <h3 class="panel-section-title">Subscription Plan</h3>
-                  <div class="subscription-obsidian-card">
-                    <div class="obsidian-card-glow"></div>
-                    <div class="sub-header">
-                      <div class="plan-info">
-                        <span class="plan-badge-obsidian">PRO ACCESS</span>
-                        <h4 class="plan-name-title">Obsidian Premium</h4>
+                  <div class="pricing-container">
+                    <div class="pricing-header-row">
+                      <h2 class="pricing-title">Plan Berlangganan</h2>
+                      <p class="pricing-subtitle">Pilih plan langganan sesuai kebutuhanmu.</p>
+                    </div>
+                    
+                    <div class="pricing-plans-cols">
+                      <!-- Free Card -->
+                      <div class="pricing-plan-header-card free">
+                        <h3 class="plan-header-title">Paket Free</h3>
+                        <div class="plan-price-row">
+                          <span class="price-old" style="visibility: hidden;">Rp 0</span>
+                          <span class="price-current">Rp 0 <span class="price-period">/ 7 hari</span></span>
+                        </div>
+                        <button class="pricing-btn active-btn" id="btn-subscribe-free">Coba Gratis</button>
                       </div>
-                      <span class="sub-cost">$15<span class="cost-period">/month</span></span>
+                      
+                      <!-- Basic Card -->
+                      <div class="pricing-plan-header-card basic">
+                        <h3 class="plan-header-title">Paket Basic</h3>
+                        <div class="plan-price-row">
+                          <span class="price-old">Rp 39.000</span>
+                          <span class="price-current">Rp 25.000 <span class="price-period">/ 1 bulan</span></span>
+                        </div>
+                        <button class="pricing-btn active-btn" id="btn-subscribe-basic">Mulai Berlangganan</button>
+                      </div>
+                      
+                      <!-- Pro Card -->
+                      <div class="pricing-plan-header-card pro">
+                        <h3 class="plan-header-title">Paket Pro</h3>
+                        <div class="plan-price-row">
+                          <span class="price-old">Rp 79.000</span>
+                          <span class="price-current">Rp 49.000 <span class="price-period">/ 1 bulan</span></span>
+                        </div>
+                        <button class="pricing-btn active-btn" id="btn-subscribe-pro">Mulai Berlangganan</button>
+                      </div>
                     </div>
-                    <div class="sub-details">
-                      <p class="sub-renewal-text">Your subscription is active and will renew on <strong>July 11, 2026</strong>.</p>
-                      <ul class="sub-features-list">
-                        <li>
-                          <svg class="bullet-check-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"></polyline></svg>
-                          <span>Unlimited memories saved (encrypted)</span>
-                        </li>
-                        <li>
-                          <svg class="bullet-check-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"></polyline></svg>
-                          <span>Advanced AI summarization (RAG enabled)</span>
-                        </li>
-                        <li>
-                          <svg class="bullet-check-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"></polyline></svg>
-                          <span>Daily smart briefings via WhatsApp</span>
-                        </li>
-                        <li>
-                          <svg class="bullet-check-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"></polyline></svg>
-                          <span>Bi-directional Google Workspace integration</span>
-                        </li>
-                      </ul>
-                    </div>
-                    <div class="sub-actions">
-                      <button class="btn btn-obsidian-billing">Manage Billing & Invoices</button>
+                    
+                    <!-- Comparison Table -->
+                    <div class="pricing-table-wrapper">
+                      <table class="pricing-comparison-table">
+                        <thead>
+                          <tr>
+                            <th class="feature-col-header">Fasilitas</th>
+                            <th class="plan-col-header text-center">Paket Free</th>
+                            <th class="plan-col-header text-center">Paket Basic</th>
+                            <th class="plan-col-header text-center">Paket Pro</th>
+                          </tr>
+                        </thead>
+                        <tbody>
+                          <tr>
+                            <td class="feature-cell">Reminder/pengingat kegiatan penting harian, mingguan atau bulanan via WhatsApp</td>
+                            <td class="status-cell text-center"><div class="circle-check">✓</div></td>
+                            <td class="status-cell text-center"><div class="circle-check">✓</div></td>
+                            <td class="status-cell text-center"><div class="circle-check">✓</div></td>
+                          </tr>
+                          <tr>
+                            <td class="feature-cell">Kuota chat tidak terbatas</td>
+                            <td class="status-cell text-center"><div class="circle-cross">×</div></td>
+                            <td class="status-cell text-center"><div class="circle-check">✓</div></td>
+                            <td class="status-cell text-center"><div class="circle-check">✓</div></td>
+                          </tr>
+                          <tr>
+                            <td class="feature-cell">Simpan data penting berupa text, link, image hingga file via WhatsApp</td>
+                            <td class="status-cell text-center"><div class="circle-check">✓</div></td>
+                            <td class="status-cell text-center"><div class="circle-check">✓</div></td>
+                            <td class="status-cell text-center"><div class="circle-check">✓</div></td>
+                          </tr>
+                          <tr>
+                            <td class="feature-cell">Simpan data kontak penting (Email, WhatsApp, Instagram dll)</td>
+                            <td class="status-cell text-center"><div class="circle-check">✓</div></td>
+                            <td class="status-cell text-center"><div class="circle-check">✓</div></td>
+                            <td class="status-cell text-center"><div class="circle-check">✓</div></td>
+                          </tr>
+                          <tr>
+                            <td class="feature-cell">Ringkas dan analisa file atau berkas apapun via whatsapp</td>
+                            <td class="status-cell text-center"><div class="circle-cross">×</div></td>
+                            <td class="status-cell text-center"><div class="circle-check">✓</div></td>
+                            <td class="status-cell text-center"><div class="circle-check">✓</div></td>
+                          </tr>
+                          <tr>
+                            <td class="feature-cell">Kirim email notifikasi meeting/event atau reminder ke teman secara otomatis</td>
+                            <td class="status-cell text-center"><div class="circle-cross">×</div></td>
+                            <td class="status-cell text-center"><div class="circle-check">✓</div></td>
+                            <td class="status-cell text-center"><div class="circle-check">✓</div></td>
+                          </tr>
+                          <tr>
+                            <td class="feature-cell">Buat event / acara, meeting atau pertemuan</td>
+                            <td class="status-cell text-center"><div class="circle-cross">×</div></td>
+                            <td class="status-cell text-center"><div class="circle-check">✓</div></td>
+                            <td class="status-cell text-center"><div class="circle-check">✓</div></td>
+                          </tr>
+                          <tr>
+                            <td class="feature-cell">Terintegrasi dengan Google Meet dan Google Drive</td>
+                            <td class="status-cell text-center"><div class="circle-cross">×</div></td>
+                            <td class="status-cell text-center"><div class="circle-check">✓</div></td>
+                            <td class="status-cell text-center"><div class="circle-check">✓</div></td>
+                          </tr>
+                          <tr>
+                            <td class="feature-cell">Dashboard kelola reminder, event, kontak, todolist, data dan file penting</td>
+                            <td class="status-cell text-center"><div class="circle-check">✓</div></td>
+                            <td class="status-cell text-center"><div class="circle-check">✓</div></td>
+                            <td class="status-cell text-center"><div class="circle-check">✓</div></td>
+                          </tr>
+                          <tr>
+                            <td class="feature-cell">Dashboard Pusat Memori</td>
+                            <td class="status-cell text-center"><div class="circle-check">✓</div></td>
+                            <td class="status-cell text-center"><div class="circle-check">✓</div></td>
+                            <td class="status-cell text-center"><div class="circle-check">✓</div></td>
+                          </tr>
+                          <tr>
+                            <td class="feature-cell">Todolist sederhana</td>
+                            <td class="status-cell text-center"><div class="circle-check">✓</div></td>
+                            <td class="status-cell text-center"><div class="circle-check">✓</div></td>
+                            <td class="status-cell text-center"><div class="circle-check">✓</div></td>
+                          </tr>
+                          <tr>
+                            <td class="feature-cell">Task management via WhatsApp</td>
+                            <td class="status-cell text-center"><div class="circle-cross">×</div></td>
+                            <td class="status-cell text-center"><div class="circle-cross">×</div></td>
+                            <td class="status-cell text-center"><div class="circle-check">✓</div></td>
+                          </tr>
+                          <tr>
+                            <td class="feature-cell">Dashboard task management</td>
+                            <td class="status-cell text-center"><div class="circle-cross">×</div></td>
+                            <td class="status-cell text-center"><div class="circle-cross">×</div></td>
+                            <td class="status-cell text-center"><div class="circle-check">✓</div></td>
+                          </tr>
+                        </tbody>
+                      </table>
                     </div>
                   </div>
                 </div>
@@ -993,9 +1711,15 @@
             <label class="form-label">Event Title</label>
             <input type="text" id="new-event-title" class="form-input" placeholder="e.g. Weekly Sync Meeting" />
           </div>
-          <div class="form-group">
-            <label class="form-label">Time</label>
-            <input type="time" id="new-event-time" class="form-input" value="10:00" />
+          <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 16px;">
+            <div class="form-group" style="margin-bottom: 0;">
+              <label class="form-label">Date</label>
+              <input type="date" id="new-event-date" class="form-input" />
+            </div>
+            <div class="form-group" style="margin-bottom: 0;">
+              <label class="form-label">Time</label>
+              <input type="time" id="new-event-time" class="form-input" value="10:00" />
+            </div>
           </div>
           <div class="form-group">
             <label class="form-label">Details / Notes</label>
@@ -1057,6 +1781,124 @@
       </div>
     </div>
 
+    <!-- 6b. Memory Details Side Drawer -->
+    <div class="drawer-overlay" id="drawer-memory-details">
+      <div class="drawer-panel">
+        <div class="drawer-header">
+          <h3 id="drawer-memory-title">Memory Title</h3>
+          <button class="drawer-close-btn" id="close-memory-drawer">&times;</button>
+        </div>
+        <div class="drawer-body">
+          <!-- Memory info summary -->
+          <div class="drawer-info-grid">
+            <div class="info-item">
+              <span class="info-label">Category</span>
+              <span class="info-value" id="drawer-memory-category">Notes</span>
+            </div>
+            <div class="info-item">
+              <span class="info-label">Created At</span>
+              <span class="info-value" id="drawer-memory-date">June 11, 2026</span>
+            </div>
+          </div>
+
+          <div class="drawer-section border-top">
+            <h4 class="drawer-subtitle">Content</h4>
+            <div class="drawer-summary-text" id="drawer-memory-content" style="white-space: pre-wrap; line-height: 1.6; font-size: 14px;">Memory Content details...</div>
+          </div>
+        </div>
+        <div class="drawer-footer">
+          <button class="btn btn-outline w-full" id="btn-close-memory-drawer-bottom">Close Panel</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- 6c. Task Details Side Drawer -->
+    <div class="drawer-overlay" id="drawer-task-details">
+      <div class="drawer-panel">
+        <div class="drawer-header">
+          <h3 id="drawer-task-title-header">Task Details</h3>
+          <button class="drawer-close-btn" id="close-task-drawer">&times;</button>
+        </div>
+        <div class="drawer-body">
+          <div class="form-group">
+            <label class="form-label">Task Name</label>
+            <input type="text" id="drawer-task-title-input" class="form-input" />
+          </div>
+
+          <div class="form-group">
+            <label class="form-label">Tags (comma separated)</label>
+            <input type="text" id="drawer-task-tags-input" class="form-input" />
+          </div>
+
+          <div class="form-group-row" style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:16px;">
+            <div class="form-group" style="margin-bottom:0;">
+              <label class="form-label">Priority</label>
+              <select id="drawer-task-priority-input" class="form-input">
+                <option value="Low">Low</option>
+                <option value="Medium">Medium</option>
+                <option value="High">High</option>
+              </select>
+            </div>
+            <div class="form-group" style="margin-bottom:0;">
+              <label class="form-label">Status</label>
+              <select id="drawer-task-status-input" class="form-input">
+                <option value="todo">Todo</option>
+                <option value="doing">Doing</option>
+                <option value="done">Done</option>
+              </select>
+            </div>
+          </div>
+        </div>
+        <div class="drawer-footer" style="display:grid;grid-template-columns:1fr 1fr;gap:10px;">
+          <button class="btn btn-outline" id="btn-close-task-drawer-bottom">Close</button>
+          <button class="btn btn-primary" id="btn-save-task-drawer">Save Changes</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- 6d. Reminder Details Side Drawer -->
+    <div class="drawer-overlay" id="drawer-reminder-details">
+      <div class="drawer-panel">
+        <div class="drawer-header">
+          <h3 id="drawer-reminder-title-header">Reminder Details</h3>
+          <button class="drawer-close-btn" id="close-reminder-drawer">&times;</button>
+        </div>
+        <div class="drawer-body">
+          <div class="form-group">
+            <label class="form-label">Reminder Title / Text</label>
+            <input type="text" id="drawer-reminder-text-input" class="form-input" />
+          </div>
+
+          <div class="form-group">
+            <label class="form-label">Scheduled Time (HH:MM)</label>
+            <input type="time" id="drawer-reminder-time-input" class="form-input" />
+          </div>
+
+          <div class="form-group">
+            <label class="form-label">Timeframe Group</label>
+            <select id="drawer-reminder-group-input" class="form-input">
+              <option value="Today">Today</option>
+              <option value="Tomorrow">Tomorrow</option>
+              <option value="This Week">This Week</option>
+              <option value="This Month">This Month</option>
+            </select>
+          </div>
+
+          <div class="form-group" style="display:flex;align-items:center;justify-content:space-between;margin-top:16px;padding:12px;background:#F8FAFC;border-radius:8px;border:1px solid var(--border-color);">
+            <label class="form-label" for="drawer-reminder-completed-input" style="margin-bottom:0;cursor:pointer;font-weight:600;">Mark as Completed</label>
+            <label class="switch">
+              <input type="checkbox" id="drawer-reminder-completed-input" />
+              <span class="slider round"></span>
+            </label>
+          </div>
+        </div>
+        <div class="drawer-footer" style="display:grid;grid-template-columns:1fr 1fr;gap:10px;">
+          <button class="btn btn-outline" id="btn-close-reminder-drawer-bottom">Close</button>
+          <button class="btn btn-primary" id="btn-save-reminder-drawer">Save Changes</button>
+        </div>
+      </div>
+    </div>
+
     <!-- 7. Emoji Picker Modal -->
     <div class="modal-overlay" id="modal-emoji-picker">
       <div class="modal-card" style="max-width: 340px;">
@@ -1091,6 +1933,101 @@
             <span class="emoji-picker-item" data-emoji="☕">☕</span>
             <span class="emoji-picker-item" data-emoji="🥑">🥑</span>
           </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Reset Memory Modal -->
+    <div class="modal-overlay" id="modal-reset-memory">
+      <div class="modal-container">
+        <div class="modal-header">
+          <div class="modal-warning-icon" style="color: #dc2626; display: flex; align-items: center;">
+            <svg viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"></path><line x1="12" y1="9" x2="12" y2="13"></line><line x1="12" y1="17" x2="12.01" y2="17"></line></svg>
+          </div>
+          <div class="modal-title-wrapper" style="margin-left: 12px;">
+            <h3 style="font-size:16px;font-weight:700;margin:0;">Reset AI Memory?</h3>
+          </div>
+        </div>
+        <div class="modal-body" style="padding: 12px 24px 20px;">
+          <p style="font-size:13px;color:var(--text-secondary);line-height:1.6;margin:0;">This will permanently flush all your learned preferences, vector memory embeddings, and raw text histories. Your assistant will be reset to its default state. This action cannot be undone.</p>
+        </div>
+        <div class="modal-footer" style="padding: 16px 24px 20px; background: rgba(15, 23, 42, 0.02); display: flex; justify-content: flex-end; gap: 12px; border-top: 1px solid var(--border-color);">
+          <button class="btn btn-outline" id="btn-cancel-reset" style="padding: 8px 16px;">Cancel</button>
+          <button class="btn btn-primary" id="btn-confirm-reset" style="background-color:#dc2626;border-color:#dc2626;padding: 8px 16px;">Confirm Reset</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Delete Account Modal -->
+    <div class="modal-overlay" id="modal-delete-account">
+      <div class="modal-container">
+        <div class="modal-header">
+          <div class="modal-warning-icon" style="color: #dc2626; display: flex; align-items: center;">
+            <svg viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"></path><line x1="12" y1="9" x2="12" y2="13"></line><line x1="12" y1="17" x2="12.01" y2="17"></line></svg>
+          </div>
+          <div class="modal-title-wrapper" style="margin-left: 12px;">
+            <h3 style="font-size:16px;font-weight:700;margin:0;">Delete Account Permanently?</h3>
+          </div>
+        </div>
+        <div class="modal-body" style="padding: 12px 24px 20px;">
+          <p style="font-size:13px;color:var(--text-secondary);line-height:1.6;margin:0;">Are you sure you want to delete your NAIVA account? This will immediately terminate your subscription, wipe all credentials, and permanently delete all your data. This action is irreversible.</p>
+        </div>
+        <div class="modal-footer" style="padding: 16px 24px 20px; background: rgba(15, 23, 42, 0.02); display: flex; justify-content: flex-end; gap: 12px; border-top: 1px solid var(--border-color);">
+          <button class="btn btn-outline" id="btn-cancel-delete" style="padding: 8px 16px;">Cancel</button>
+          <button class="btn btn-primary" id="btn-confirm-delete" style="background-color:#dc2626;border-color:#dc2626;padding: 8px 16px;">Delete Account</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Google OAuth Simulation Modal -->
+    <div class="modal-overlay" id="modal-oauth-simulation">
+      <div class="google-oauth-card">
+        <div class="google-logo-box" style="margin-bottom: 20px; text-align: center; display: flex; justify-content: center; align-items: center;">
+          <svg width="40" height="40" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+            <path d="M24 12.235c0-.739-.074-1.448-.199-2.128H12.24v4.023h6.678c-.286 1.545-1.163 2.852-2.476 3.733v2.632h3.974c2.327-2.146 3.684-5.305 3.684-9.06z" fill="#4285F4"/>
+            <path d="M12.24 24c3.348 0 6.157-1.11 8.21-3.003l-3.974-2.632c-1.102.739-2.513 1.178-4.236 1.178-3.256 0-6.012-2.201-6.996-5.158H1.144v2.716C3.218 21.054 7.375 24 12.24 24z" fill="#34A853"/>
+            <path d="M5.244 14.385c-.25-.739-.387-1.536-.387-2.385s.137-1.646.387-2.385V6.899H1.144C.417 8.358 0 9.998 0 11.724s.417 3.366 1.144 4.825l4.1-2.164z" fill="#FBBC05"/>
+            <path d="M12.24 4.773c1.77 0 3.366.608 4.619 1.801l3.465-3.465C18.15 1.196 15.341 0 12.24 0 7.375 0 3.218 2.946 1.144 6.899l4.1 2.716c.984-2.957 3.74-5.158 6.996-5.158z" fill="#EA4335"/>
+          </svg>
+        </div>
+        <div class="oauth-header-title">Sign in with Google</div>
+        <div class="oauth-header-subtitle">to continue to <strong style="color:var(--primary-color)">NAIVA AI</strong></div>
+        
+        <div class="oauth-profile-card">
+          <div class="oauth-profile-avatar" id="oauth-avatar-display">🤖</div>
+          <div class="oauth-profile-info">
+            <span class="oauth-profile-name" id="oauth-name-display">Muis</span>
+            <span class="oauth-profile-email" id="oauth-email-display">muis@naiva.ai</span>
+          </div>
+        </div>
+
+        <div class="oauth-scope-section">
+          <div class="oauth-scope-section-title">Grant permissions to NAIVA:</div>
+          <div id="oauth-scopes-container">
+            <!-- Dynamic scopes go here -->
+          </div>
+        </div>
+
+        <div class="oauth-action-footer">
+          <button class="btn-oauth-action btn-oauth-deny" id="btn-oauth-deny">Deny</button>
+          <button class="btn-oauth-action btn-oauth-allow" id="btn-oauth-allow">Allow</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Dynamic Integration Settings Modal -->
+    <div class="modal-overlay" id="modal-integration-settings">
+      <div class="modal-container" style="max-width: 460px;">
+        <div class="modal-header">
+          <h3 id="int-settings-title" style="font-size:16px;font-weight:700;margin:0;">Integration Settings</h3>
+          <button class="modal-close-btn" id="close-int-settings-modal">&times;</button>
+        </div>
+        <div class="modal-body" id="int-settings-body" style="padding: 20px 24px;">
+          <!-- Dynamic settings fields go here -->
+        </div>
+        <div class="modal-footer" style="padding: 16px 24px 20px; background: rgba(15, 23, 42, 0.02); display: flex; justify-content: flex-end; gap: 12px; border-top: 1px solid var(--border-color);">
+          <button class="btn btn-outline" id="btn-cancel-int-settings" style="padding: 8px 16px;">Cancel</button>
+          <button class="btn btn-primary" id="btn-save-int-settings" style="padding: 8px 24px;">Save Settings</button>
         </div>
       </div>
     </div>

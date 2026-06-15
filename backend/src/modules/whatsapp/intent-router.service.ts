@@ -26,6 +26,28 @@ export class IntentRouterService {
     const cleanText = text.trim().toLowerCase();
     this.logger.log(`Routing message for user ${userId}: "${text}"`);
 
+    // Fetch user and plan
+    const user = await this.prisma.user.findUnique({ where: { id: userId } });
+    const plan = user?.plan || 'free';
+
+    // Enforce Chat Quota for Free plan
+    const todayStart = new Date();
+    todayStart.setHours(0, 0, 0, 0);
+
+    const messageCount = await this.prisma.usageLog.count({
+      where: {
+        userId,
+        actionType: 'WHATSAPP_MESSAGE',
+        createdAt: {
+          gte: todayStart,
+        },
+      },
+    });
+
+    if (plan === 'free' && messageCount >= 5) {
+      return `⚠️ *Batas Kuota Chat Terlampaui* ⚠️\n\nAnda telah mencapai batas 5 pesan gratis hari ini. Silakan upgrade ke paket *Basic* atau *Pro* melalui dasbor NAIVA Anda untuk menikmati kuota chat tanpa batas! 🚀`;
+    }
+
     // 1. INTENT: SEARCH MEMORIES
     // Matches: "cari...", "search..."
     if (cleanText.startsWith('cari ') || cleanText.startsWith('search ')) {
@@ -79,6 +101,9 @@ export class IntentRouterService {
       cleanText.startsWith('janji ') ||
       cleanText.startsWith('calendar ')
     ) {
+      if (plan === 'free') {
+        return `⚠️ *Fitur Penjadwalan Terbatas* ⚠️\n\nFitur pembuatan event & Google Meet link via WhatsApp hanya tersedia pada paket *Basic* atau *Pro*. Silakan upgrade paket Anda di dasbor NAIVA! 🗓️`;
+      }
       const content = text.replace(/^(jadwal|meeting|pertemuan|janji|calendar)\s+/i, '').trim();
       
       let scheduledAt = new Date(Date.now() + 60 * 60 * 1000);
@@ -94,7 +119,6 @@ export class IntentRouterService {
         title = content.replace(/nanti.*/i, '').trim();
       }
 
-      const user = await this.prisma.user.findUnique({ where: { id: userId } });
       const isGcalConnected = user?.gcalConnected || false;
 
       const isMeeting =
@@ -126,6 +150,9 @@ export class IntentRouterService {
     // 3. INTENT: CREATE TASK
     // Matches: "todo...", "task...", "buat todo..."
     if (cleanText.startsWith('todo ') || cleanText.startsWith('task ') || cleanText.startsWith('buat todo ')) {
+      if (plan === 'free' || plan === 'basic') {
+        return `⚠️ *Fitur Task Management Terbatas* ⚠️\n\nFitur manajemen tugas/To-Do list via WhatsApp hanya tersedia pada paket *Pro*. Silakan upgrade paket Anda di dasbor NAIVA! 📋`;
+      }
       let title = text.replace(/^(todo|task|buat todo)\s+/i, '').trim();
       const task = await this.taskService.create(userId, { title });
       return `📋 Task berhasil ditambahkan ke To-Do List!\n\n*Task:* ${task.title}\n*Status:* To-Do`;
@@ -202,7 +229,9 @@ export class IntentRouterService {
       cleanText.startsWith('gmail') ||
       cleanText.startsWith('email')
     ) {
-      const user = await this.prisma.user.findUnique({ where: { id: userId } });
+      if (plan === 'free') {
+        return `⚠️ *Fitur Gmail Assistant Terbatas* ⚠️\n\nFitur membaca atau mencari email via WhatsApp hanya tersedia pada paket *Basic* atau *Pro*. Silakan upgrade paket Anda di dasbor NAIVA! 📧`;
+      }
       const isGmailConnected = user?.gmailConnected || false;
 
       if (!isGmailConnected) {

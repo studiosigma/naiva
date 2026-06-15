@@ -4,6 +4,7 @@ import { JwtAuthGuard } from '../../common/guards/jwt-auth.guard';
 import { GetUser } from '../../common/decorators/get-user.decorator';
 import { UpdatePersonaDto } from './dto/update-persona.dto';
 import { UpdateIntegrationsDto, UpdateBriefingDto } from './dto/update-settings.dto';
+import { UpdateProfileDto } from './dto/update-profile.dto';
 import { ApiTags, ApiOperation, ApiResponse, ApiBearerAuth } from '@nestjs/swagger';
 
 @ApiTags('User Profile')
@@ -18,6 +19,27 @@ export class UsersController {
   @ApiResponse({ status: 200, description: 'Profile retrieved successfully.' })
   async getProfile(@GetUser('id') userId: string) {
     const user = await this.usersService.findOneById(userId);
+    const { passwordHash, ...sanitized } = user;
+    return {
+      success: true,
+      user: sanitized,
+    };
+  }
+
+  @Patch('profile')
+  @ApiOperation({ summary: 'Update user name, phone number, or subscription plan' })
+  @ApiResponse({ status: 200, description: 'Profile updated successfully.' })
+  async updateProfile(
+    @GetUser('id') userId: string,
+    @Body() dto: UpdateProfileDto,
+  ) {
+    const updateData: any = {};
+    if (dto.name !== undefined) updateData.name = dto.name;
+    if (dto.waNumber !== undefined) updateData.waNumber = dto.waNumber;
+    if (dto.plan !== undefined) updateData.plan = dto.plan;
+    if (dto.avatar !== undefined) updateData.avatar = dto.avatar;
+
+    const user = await this.usersService.update(userId, updateData);
     const { passwordHash, ...sanitized } = user;
     return {
       success: true,

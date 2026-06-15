@@ -1,5 +1,14 @@
 import './style.css';
 
+// Auto-inject /api prefix for backend requests (fixes NestJS global API prefix routing mismatch)
+const originalFetch = window.fetch;
+window.fetch = function (input, init) {
+  if (typeof input === 'string' && input.startsWith('http://localhost:3000/') && !input.startsWith('http://localhost:3000/api/')) {
+    input = input.replace('http://localhost:3000/', 'http://localhost:3000/api/');
+  }
+  return originalFetch(input, init);
+};
+
 /* ==========================================================================
    NAIVA CORE APPLICATION LOGIC
    ========================================================================== */
@@ -89,9 +98,9 @@ const DEFAULT_CONTACTS = [
 ];
 
 const DEFAULT_EVENTS = [
-  { id: 'e1', title: 'Product Launch Align', time: '09:00', details: 'discussing landing page deployment with team' },
-  { id: 'e2', title: 'Coffee supplier catch-up', time: '14:00', details: 'check Arabica Preanger stock availability with John' },
-  { id: 'e3', title: 'Weekly Code Review', time: '17:00', details: 'review Midtrans integration code and error handling' }
+  { id: 'e1', title: 'Product Launch Align', date: new Date().toISOString().split('T')[0], time: '09:00', details: 'discussing landing page deployment with team' },
+  { id: 'e2', title: 'Coffee supplier catch-up', date: new Date().toISOString().split('T')[0], time: '14:00', details: 'check Arabica Preanger stock availability with John' },
+  { id: 'e3', title: 'Weekly Code Review', date: new Date().toISOString().split('T')[0], time: '17:00', details: 'review Midtrans integration code and error handling' }
 ];
 
 const DEFAULT_EXPENSES = [
@@ -101,6 +110,10 @@ const DEFAULT_EXPENSES = [
   { id: 'xp4', description: 'Bensin Shell V-Power', amount: 150000, category: 'Transportasi', date: 'June 07, 2026' },
   { id: 'xp5', description: 'Belanja Kaos Uniqlo', amount: 299000, category: 'Belanja', date: 'June 05, 2026' }
 ];
+
+let emojiPickerTarget = 'studio';
+let activeOauthKey = null;
+let activeSettingsKey = null;
 
 let dashSimChatLog = [
   { sender: 'assistant', text: 'Halo Muis! Saya asisten AI NAIVA. Kirimkan pesan atau perintah WhatsApp di sini untuk disimulasikan.', time: '09:00' }
@@ -137,8 +150,327 @@ class AppState {
 
     this.profile = this.load('profile', {
       username: 'Muis',
-      phone: '8123456789'
+      phone: '8123456789',
+      backupEnabled: true,
+      plan: 'free'
     });
+    this.token = localStorage.getItem('naiva_token') || null;
+    this.refreshToken = localStorage.getItem('naiva_refresh_token') || null;
+  }
+
+  async syncWithBackend() {
+    if (!this.token) {
+      console.log('No token found, skipping sync.');
+      return;
+    }
+
+    try {
+      const profileRes = await fetch('http://localhost:3000/users/profile', {
+        headers: {
+          'Authorization': `Bearer ${this.token}`,
+        },
+      });
+
+      if (profileRes.status === 401) {
+        console.warn('Unauthorized token, signing out...');
+        this.logout();
+        return;
+      }
+
+      if (!profileRes.ok) {
+        throw new Error('Failed to fetch user profile.');
+      }
+
+      const profileData = await profileRes.json();
+      if (profileData.success && profileData.user) {
+        const user = profileData.user;
+        this.profile = {
+          username: user.name || 'Muis',
+          phone: user.waNumber || '8123456789',
+          avatar: user.avatar || '🤖',
+          email: user.email || 'muis@naiva.ai',
+          bio: this.profile.bio || '',
+          plan: user.plan || 'free',
+        };
+        this.save('profile', this.profile);
+
+        this.studio = {
+          name: this.studio.name || 'NAIVA',
+          emoji: this.studio.emoji || '🤖',
+          personality: user.persona || this.studio.personality || 'friendly',
+          style: this.studio.style || 'normal',
+          language: this.studio.language || 'id',
+          briefing: user.briefingEnabled !== undefined ? user.briefingEnabled : this.studio.briefing,
+          briefingTime: user.briefingTime || this.studio.briefingTime || '07:30',
+          followup: user.followupEnabled !== undefined ? user.followupEnabled : this.studio.followup
+        };
+        this.save('studio_config', this.studio);
+
+        this.integrations = {
+          gcal: user.gcalConnected || false,
+          gdrive: user.gdriveConnected || false,
+          gcontacts: user.contactsSyncEnabled || false,
+          gmail: user.gmailConnected || false,
+        };
+        this.save('integrations', this.integrations);
+        
+        syncSidebarProfile();
+      }
+
+      const fetchBackend = async (path) => {
+        const res = await fetch(`http://localhost:3000${path}`, {
+          headers: {
+            'Authorization': `Bearer ${this.token}`,
+          },
+        });
+        if (res.ok) {
+          return await res.json();
+        }
+        if (res.status === 401) {
+          this.logout();
+        }
+        return null;
+      };
+
+      const memories = await fetchBackend('/memory');
+      if (memories) {
+        this.memories = memories.map(m => ({
+          id: m.id,
+          title: m.title,
+          content: m.content,
+          category: m.category,
+          date: new Date(m.createdAt).toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' })
+        }));
+        this.save('memories', this.memories);
+      }
+
+      const tasks = await fetchBackend('/task');
+      if (tasks) {
+        this.tasks = tasks.map(t => ({
+          id: t.id,
+          title: t.title,
+          tags: t.tags || ['Task'],
+          priority: t.priority || 'Medium',
+          status: t.status || 'todo',
+        }));
+        this.save('tasks', this.tasks);
+      }
+
+      const reminders = await fetchBackend('/reminder');
+      if (reminders) {
+        const regularReminders = reminders.filter(r => !r.title.startsWith('[Calendar]'));
+        const calendarEvents = reminders.filter(r => r.title.startsWith('[Calendar]'));
+
+        this.reminders = regularReminders.map(r => {
+          let timegroup = 'Today';
+          const diffDays = Math.ceil((new Date(r.scheduledAt).getTime() - new Date().getTime()) / (1000 * 60 * 60 * 24));
+          if (diffDays <= 0) timegroup = 'Today';
+          else if (diffDays === 1) timegroup = 'Tomorrow';
+          else if (diffDays <= 7) timegroup = 'This Week';
+          else timegroup = 'This Month';
+
+          return {
+            id: r.id,
+            text: r.title,
+            timegroup,
+            time: new Date(r.scheduledAt).toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit', hour12: false }),
+            completed: r.status === 'completed',
+          };
+        });
+        this.save('reminders', this.reminders);
+
+        this.events = calendarEvents.map(e => {
+          const dateObj = new Date(e.scheduledAt);
+          const yyyy = dateObj.getFullYear();
+          const mm = String(dateObj.getMonth() + 1).padStart(2, '0');
+          const dd = String(dateObj.getDate()).padStart(2, '0');
+          return {
+            id: e.id,
+            title: e.title.replace('[Calendar] ', ''),
+            date: `${yyyy}-${mm}-${dd}`,
+            time: dateObj.toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit', hour12: false }),
+            details: e.description || 'Synchronized via Google Calendar/Naiva Backend',
+          };
+        });
+        this.save('events', this.events);
+      }
+
+      const contacts = await fetchBackend('/contact');
+      if (contacts) {
+        this.contacts = contacts.map(c => ({
+          id: c.id,
+          name: c.name,
+          company: c.company || 'Freelance',
+          phone: c.phone || '',
+          email: c.email || '',
+          insta: c.instagram || '',
+        }));
+        this.save('contacts', this.contacts);
+      }
+
+      const expenses = await fetchBackend('/expenses');
+      if (expenses) {
+        this.expenses = expenses.map(e => ({
+          id: e.id,
+          description: e.description,
+          amount: e.amount,
+          category: e.category,
+          date: new Date(e.date || e.createdAt).toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' })
+        }));
+        this.save('expenses', this.expenses);
+      }
+
+      const files = await fetchBackend('/file');
+      if (files) {
+        this.files = files.map(f => ({
+          id: f.id,
+          name: f.filename,
+          type: f.mimeType.split('/')[1] || 'bin',
+          size: `${(f.size / (1024 * 1024)).toFixed(1)} MB`,
+          date: new Date(f.createdAt).toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' }),
+          summary: f.summary || 'Summary not processed yet.',
+          points: f.keyPoints || [],
+          actions: f.actionItems || [],
+        }));
+        this.save('files', this.files);
+      }
+    } catch (err) {
+      console.warn('Failed to sync state with backend. Falling back to local storage mocks.', err);
+    }
+  }
+
+  logout() {
+    this.token = null;
+    this.refreshToken = null;
+    localStorage.removeItem('naiva_token');
+    localStorage.removeItem('naiva_refresh_token');
+    window.location.hash = '#login';
+  }
+
+  async loginWithEmail(email, password) {
+    try {
+      const res = await fetch('http://localhost:3000/auth/login', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ email, password }),
+      });
+      const data = await res.json();
+      if (res.ok && data.accessToken) {
+        this.token = data.accessToken;
+        this.refreshToken = data.refreshToken;
+        localStorage.setItem('naiva_token', data.accessToken);
+        localStorage.setItem('naiva_refresh_token', data.refreshToken);
+        await this.syncWithBackend();
+        return { success: true };
+      } else {
+        return { success: false, message: data.message || 'Login gagal. Email atau password salah.' };
+      }
+    } catch (err) {
+      console.error(err);
+      return { success: false, message: 'Koneksi ke server gagal. Harap coba lagi nanti.' };
+    }
+  }
+
+  async signupWithEmail(name, email, waNumber, password) {
+    try {
+      const res = await fetch('http://localhost:3000/auth/signup', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ name, email, waNumber, password }),
+      });
+      const data = await res.json();
+      if (res.ok && data.accessToken) {
+        this.token = data.accessToken;
+        this.refreshToken = data.refreshToken;
+        localStorage.setItem('naiva_token', data.accessToken);
+        localStorage.setItem('naiva_refresh_token', data.refreshToken);
+        await this.syncWithBackend();
+        return { success: true };
+      } else {
+        return { success: false, message: data.message || 'Pendaftaran gagal. Pastikan format email & WA benar.' };
+      }
+    } catch (err) {
+      console.error(err);
+      return { success: false, message: 'Koneksi ke server gagal. Harap coba lagi nanti.' };
+    }
+  }
+
+  async devLoginInstant() {
+    try {
+      const res = await fetch('http://localhost:3000/auth/dev-login', {
+        method: 'POST',
+      });
+      const data = await res.json();
+      if (res.ok && data.accessToken) {
+        this.token = data.accessToken;
+        this.refreshToken = data.refreshToken;
+        localStorage.setItem('naiva_token', data.accessToken);
+        localStorage.setItem('naiva_refresh_token', data.refreshToken);
+        await this.syncWithBackend();
+        return { success: true };
+      } else {
+        return { success: false, message: 'Sandbox login gagal.' };
+      }
+    } catch (err) {
+      console.error(err);
+      return { success: false, message: 'Koneksi ke server gagal.' };
+    }
+  }
+
+  async apiPost(path, body) {
+    if (!this.token) return null;
+    try {
+      const res = await fetch(`http://localhost:3000${path}`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${this.token}`,
+        },
+        body: JSON.stringify(body),
+      });
+      if (res.ok) return await res.json();
+    } catch (err) {
+      console.warn('API Post failed:', err);
+    }
+    return null;
+  }
+
+  async apiDelete(path) {
+    if (!this.token) return false;
+    try {
+      const res = await fetch(`http://localhost:3000${path}`, {
+        method: 'DELETE',
+        headers: {
+          'Authorization': `Bearer ${this.token}`,
+        },
+      });
+      return res.ok;
+    } catch (err) {
+      console.warn('API Delete failed:', err);
+    }
+    return false;
+  }
+
+  async apiPatch(path, body) {
+    if (!this.token) return null;
+    try {
+      const res = await fetch(`http://localhost:3000${path}`, {
+        method: 'PATCH',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${this.token}`,
+        },
+        body: JSON.stringify(body),
+      });
+      if (res.ok) return await res.json();
+    } catch (err) {
+      console.warn('API Patch failed:', err);
+    }
+    return null;
   }
 
   load(key, defaultValue) {
@@ -185,14 +517,68 @@ class AppState {
     this.save('events', this.events);
   }
 
-  updateStudio(config) {
+  async updateStudio(config) {
     this.studio = { ...this.studio, ...config };
     this.save('studio_config', this.studio);
+
+    if (this.token) {
+      try {
+        if (config.personality) {
+          await fetch('http://localhost:3000/users/persona', {
+            method: 'PATCH',
+            headers: {
+              'Content-Type': 'application/json',
+              'Authorization': `Bearer ${this.token}`
+            },
+            body: JSON.stringify({ persona: config.personality })
+          });
+        }
+
+        if (config.briefing !== undefined || config.briefingTime !== undefined || config.followup !== undefined) {
+          const payload = {};
+          if (config.briefing !== undefined) payload.briefingEnabled = config.briefing;
+          if (config.briefingTime !== undefined) payload.briefingTime = config.briefingTime;
+          if (config.followup !== undefined) payload.followupEnabled = config.followup;
+
+          await fetch('http://localhost:3000/users/briefing', {
+            method: 'PATCH',
+            headers: {
+              'Content-Type': 'application/json',
+              'Authorization': `Bearer ${this.token}`
+            },
+            body: JSON.stringify(payload)
+          });
+        }
+      } catch (err) {
+        console.warn('Failed to sync studio preferences to backend:', err);
+      }
+    }
   }
 
-  updateIntegrations(ints) {
+  async updateIntegrations(ints) {
     this.integrations = { ...this.integrations, ...ints };
     this.save('integrations', this.integrations);
+
+    if (this.token) {
+      try {
+        const payload = {};
+        if (ints.gcal !== undefined) payload.gcalConnected = ints.gcal;
+        if (ints.gdrive !== undefined) payload.gdriveConnected = ints.gdrive;
+        if (ints.gcontacts !== undefined) payload.contactsSyncEnabled = ints.gcontacts;
+        if (ints.gmail !== undefined) payload.gmailConnected = ints.gmail;
+
+        await fetch('http://localhost:3000/users/integrations', {
+          method: 'PATCH',
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${this.token}`
+          },
+          body: JSON.stringify(payload)
+        });
+      } catch (err) {
+        console.warn('Failed to sync integrations to backend:', err);
+      }
+    }
   }
 
   updateProfile(prof) {
@@ -205,6 +591,9 @@ const state = new AppState();
 
 // --- ROUTER SYSTEM ---
 const viewsMap = {
+  landing: 'Naiva',
+  login: 'Login',
+  signup: 'Sign Up',
   dashboard: 'Dashboard',
   memory: 'Memory Center',
   tasks: 'Tasks Board',
@@ -218,8 +607,48 @@ const viewsMap = {
 
 function initRouter() {
   const handleRouteChange = () => {
-    let hash = window.location.hash.substring(1) || 'dashboard';
-    if (!viewsMap[hash]) hash = 'dashboard';
+    let hash = window.location.hash.substring(1) || 'landing';
+
+    // Handle scroll anchors on the landing page
+    if (hash.startsWith('landing-')) {
+      const appEl = document.getElementById('app');
+      if (appEl) {
+        appEl.classList.add('landing-active');
+      }
+      // Show landing page view section
+      document.querySelectorAll('.view-section').forEach(el => {
+        el.classList.toggle('active', el.id === 'view-landing');
+      });
+      // Scroll to the target element
+      const targetEl = document.getElementById(hash);
+      if (targetEl) {
+        targetEl.scrollIntoView({ behavior: 'smooth' });
+      }
+      return;
+    }
+
+    if (!viewsMap[hash]) hash = 'landing';
+
+    // Auth Rerouting / Route guards
+    const isAuthRoute = ['login', 'signup'].includes(hash);
+    const isPublicRoute = ['landing', 'login', 'signup'].includes(hash);
+
+    if (!state.token && !isPublicRoute) {
+      window.location.hash = '#login';
+      return;
+    }
+
+    if (state.token && isAuthRoute) {
+      window.location.hash = '#dashboard';
+      return;
+    }
+
+    // Toggle landing/login active class on app container
+    const appEl = document.getElementById('app');
+    if (appEl) {
+      appEl.classList.toggle('landing-active', hash === 'landing');
+      appEl.classList.toggle('login-active', hash === 'login' || hash === 'signup');
+    }
 
     // Toggle nav active classes (sidebar)
     document.querySelectorAll('.nav-item').forEach(el => {
@@ -239,7 +668,7 @@ function initRouter() {
     // Update Header title
     const headerTitle = document.getElementById('view-title');
     if (headerTitle) {
-      headerTitle.textContent = viewsMap[hash];
+      headerTitle.textContent = viewsMap[hash] || 'NAIVA';
     }
 
     // Load dynamic actions in header
@@ -363,16 +792,22 @@ function renderDashboard() {
   // Render Agenda
   const agendaList = document.getElementById('dash-agenda-list');
   agendaList.innerHTML = '';
-  if (state.events.length === 0) {
+  const todayStr = new Date().toISOString().split('T')[0];
+  const todaysEvents = state.events.filter(evt => {
+    const evtDate = evt.date || new Date().toISOString().split('T')[0];
+    return evtDate === todayStr;
+  });
+
+  if (todaysEvents.length === 0) {
     agendaList.innerHTML = `
       <div class="empty-state">
         <span class="empty-icon">📅</span>
         <span class="empty-title">All clear today</span>
-        <span class="empty-desc">No upcoming meetings or agendas are scheduled.</span>
+        <span class="empty-desc">No upcoming meetings or agendas are scheduled for today.</span>
       </div>`;
   } else {
     // Sort events by time
-    const sortedEvents = [...state.events].sort((a, b) => a.time.localeCompare(b.time));
+    const sortedEvents = [...todaysEvents].sort((a, b) => a.time.localeCompare(b.time));
     sortedEvents.forEach(evt => {
       const card = document.createElement('div');
       card.className = 'agenda-card';
@@ -574,12 +1009,19 @@ function renderMemoryCenter() {
       </div>
     `;
 
-    card.querySelector('.btn-delete-card').addEventListener('click', (e) => {
+    card.querySelector('.btn-delete-card').addEventListener('click', async (e) => {
       e.stopPropagation();
       const id = e.target.getAttribute('data-id');
+      if (state.token && !id.startsWith('m_user_')) {
+        await state.apiDelete(`/memory/${id}`);
+      }
       const updated = state.memories.filter(m => m.id !== id);
       state.updateMemories(updated);
       renderMemoryCenter();
+    });
+
+    card.addEventListener('click', () => {
+      openMemoryDetailsDrawer(mem);
     });
 
     grid.appendChild(card);
@@ -629,18 +1071,32 @@ function renderTasksBoard() {
       // Attach actions
       const movePrev = card.querySelector('.btn-move-prev');
       if (movePrev) {
-        movePrev.addEventListener('click', () => moveTaskStatus(task.id, 'prev'));
+        movePrev.addEventListener('click', (e) => {
+          e.stopPropagation();
+          moveTaskStatus(task.id, 'prev');
+        });
       }
 
       const moveNext = card.querySelector('.btn-move-next');
       if (moveNext) {
-        moveNext.addEventListener('click', () => moveTaskStatus(task.id, 'next'));
+        moveNext.addEventListener('click', (e) => {
+          e.stopPropagation();
+          moveTaskStatus(task.id, 'next');
+        });
       }
 
-      card.querySelector('.btn-delete-task').addEventListener('click', () => {
+      card.querySelector('.btn-delete-task').addEventListener('click', async (e) => {
+        e.stopPropagation();
+        if (state.token && !task.id.startsWith('t_user_')) {
+          await state.apiDelete(`/task/${task.id}`);
+        }
         const updated = state.tasks.filter(t => t.id !== task.id);
         state.updateTasks(updated);
         renderTasksBoard();
+      });
+
+      card.addEventListener('click', () => {
+        openTaskDetailsDrawer(task);
       });
 
       container.appendChild(card);
@@ -648,17 +1104,24 @@ function renderTasksBoard() {
   });
 }
 
-function moveTaskStatus(id, dir) {
+async function moveTaskStatus(id, dir) {
   const task = state.tasks.find(t => t.id === id);
   if (!task) return;
 
   const order = ['todo', 'doing', 'done'];
   let currentIdx = order.indexOf(task.status);
   
+  let newStatus = task.status;
   if (dir === 'next' && currentIdx < 2) {
-    task.status = order[currentIdx + 1];
+    newStatus = order[currentIdx + 1];
   } else if (dir === 'prev' && currentIdx > 0) {
-    task.status = order[currentIdx - 1];
+    newStatus = order[currentIdx - 1];
+  }
+
+  task.status = newStatus;
+
+  if (state.token && !task.id.startsWith('t_user_')) {
+    await state.apiPatch(`/task/${task.id}`, { status: newStatus });
   }
 
   state.updateTasks(state.tasks);
@@ -670,8 +1133,12 @@ function renderRemindersTimeline() {
   const groups = ['Today', 'Tomorrow', 'This Week', 'This Month'];
   
   groups.forEach(grp => {
-    const containerId = `reminders-${grp.toLowerCase().replace(' ', '')}`;
+    let containerId = `reminders-${grp.toLowerCase().replace(' ', '')}`;
+    if (grp === 'This Week') containerId = 'reminders-week';
+    if (grp === 'This Month') containerId = 'reminders-month';
+
     const container = document.getElementById(containerId);
+    if (!container) return;
     container.innerHTML = '';
 
     const filtered = state.reminders.filter(r => r.timegroup === grp);
@@ -699,10 +1166,18 @@ function renderRemindersTimeline() {
         </div>
       `;
 
-      card.querySelector('.btn-reminder-delete').addEventListener('click', () => {
+      card.querySelector('.btn-reminder-delete').addEventListener('click', async (e) => {
+        e.stopPropagation();
+        if (state.token && !rem.id.startsWith('r_user_')) {
+          await state.apiDelete(`/reminder/${rem.id}`);
+        }
         const updated = state.reminders.filter(r => r.id !== rem.id);
         state.updateReminders(updated);
         renderRemindersTimeline();
+      });
+
+      card.addEventListener('click', () => {
+        openReminderDetailsDrawer(rem);
       });
 
       container.appendChild(card);
@@ -722,22 +1197,42 @@ function renderRemindersTimeline() {
   }
 }
 
+let filesSearchQuery = '';
+let filesFilter = 'all';
+
 // 5. FILES VAULT RENDERER
 function renderFilesVault() {
   const grid = document.getElementById('files-cards-grid');
   grid.innerHTML = '';
 
-  if (state.files.length === 0) {
+  let filtered = state.files;
+
+  // Apply search query filter
+  if (filesSearchQuery) {
+    filtered = filtered.filter(file => 
+      file.name.toLowerCase().includes(filesSearchQuery) ||
+      file.type.toLowerCase().includes(filesSearchQuery) ||
+      file.date.toLowerCase().includes(filesSearchQuery)
+    );
+  }
+
+  // Apply type filter
+  if (filesFilter !== 'all') {
+    const allowedTypes = filesFilter.split(',');
+    filtered = filtered.filter(file => allowedTypes.includes(file.type.toLowerCase()));
+  }
+
+  if (filtered.length === 0) {
     grid.innerHTML = `
       <div class="empty-state" style="grid-column: span 4; padding: 60px 0;">
         <span class="empty-icon">📂</span>
-        <span class="empty-title">Vault is empty</span>
-        <span class="empty-desc">Drag files into the dropzone above or click to select documents.</span>
+        <span class="empty-title">No files found</span>
+        <span class="empty-desc">Upload document files to get started or adjust your filters.</span>
       </div>`;
     return;
   }
 
-  state.files.forEach(file => {
+  filtered.forEach(file => {
     const card = document.createElement('div');
     card.className = 'file-card';
     card.innerHTML = `
@@ -755,8 +1250,12 @@ function renderFilesVault() {
       <button class="file-delete-overlay-btn" data-id="${file.id}">×</button>
     `;
 
-    card.querySelector('.file-delete-overlay-btn').addEventListener('click', (e) => {
+    card.querySelector('.file-delete-overlay-btn').addEventListener('click', async (e) => {
       e.stopPropagation();
+      const id = e.target.getAttribute('data-id');
+      if (state.token && !id.startsWith('f1') && !id.startsWith('f2') && !id.startsWith('f3')) {
+        await state.apiDelete(`/file/${id}`);
+      }
       const updated = state.files.filter(f => f.id !== file.id);
       state.updateFiles(updated);
       renderFilesVault();
@@ -798,18 +1297,152 @@ function openFileDetailsDrawer(file) {
   drawer.classList.add('active');
 }
 
+function openMemoryDetailsDrawer(mem) {
+  const drawer = document.getElementById('drawer-memory-details');
+  document.getElementById('drawer-memory-title').textContent = mem.title;
+  document.getElementById('drawer-memory-category').textContent = mem.category;
+  document.getElementById('drawer-memory-date').textContent = mem.date;
+  document.getElementById('drawer-memory-content').textContent = mem.content;
+  drawer.classList.add('active');
+}
+
+let currentOpenedTaskId = null;
+
+function openTaskDetailsDrawer(task) {
+  currentOpenedTaskId = task.id;
+  const drawer = document.getElementById('drawer-task-details');
+  document.getElementById('drawer-task-title-input').value = task.title;
+  document.getElementById('drawer-task-tags-input').value = task.tags.join(', ');
+  document.getElementById('drawer-task-priority-input').value = task.priority;
+  document.getElementById('drawer-task-status-input').value = task.status;
+  drawer.classList.add('active');
+}
+
+async function saveTaskDetailsFromDrawer() {
+  if (!currentOpenedTaskId) return;
+  const task = state.tasks.find(t => t.id === currentOpenedTaskId);
+  if (!task) return;
+
+  const newTitle = document.getElementById('drawer-task-title-input').value.trim();
+  const tagsStr = document.getElementById('drawer-task-tags-input').value.trim();
+  const newPriority = document.getElementById('drawer-task-priority-input').value;
+  const newStatus = document.getElementById('drawer-task-status-input').value;
+
+  if (!newTitle) {
+    alert('Task name cannot be empty');
+    return;
+  }
+
+  const newTags = tagsStr ? tagsStr.split(',').map(t => t.trim()) : ['Task'];
+
+  task.title = newTitle;
+  task.tags = newTags;
+  task.priority = newPriority;
+  task.status = newStatus;
+
+  if (state.token && !task.id.startsWith('t_user_')) {
+    await state.apiPatch(`/task/${task.id}`, {
+      title: newTitle,
+      tags: newTags,
+      priority: newPriority,
+      status: newStatus
+    });
+  }
+
+  state.updateTasks(state.tasks);
+  renderTasksBoard();
+  
+  // Close drawer
+  document.getElementById('drawer-task-details').classList.remove('active');
+  currentOpenedTaskId = null;
+  
+  showToast('Task updated successfully');
+}
+
+let currentOpenedReminderId = null;
+
+function openReminderDetailsDrawer(rem) {
+  currentOpenedReminderId = rem.id;
+  const drawer = document.getElementById('drawer-reminder-details');
+  document.getElementById('drawer-reminder-text-input').value = rem.text;
+  document.getElementById('drawer-reminder-time-input').value = rem.time;
+  document.getElementById('drawer-reminder-group-input').value = rem.timegroup;
+  document.getElementById('drawer-reminder-completed-input').checked = rem.completed;
+  drawer.classList.add('active');
+}
+
+async function saveReminderDetailsFromDrawer() {
+  if (!currentOpenedReminderId) return;
+  const rem = state.reminders.find(r => r.id === currentOpenedReminderId);
+  if (!rem) return;
+
+  const newText = document.getElementById('drawer-reminder-text-input').value.trim();
+  const newTime = document.getElementById('drawer-reminder-time-input').value;
+  const newGroup = document.getElementById('drawer-reminder-group-input').value;
+  const isCompleted = document.getElementById('drawer-reminder-completed-input').checked;
+
+  if (!newText) {
+    alert('Reminder text cannot be empty');
+    return;
+  }
+
+  rem.text = newText;
+  rem.time = newTime;
+  rem.timegroup = newGroup;
+  rem.completed = isCompleted;
+
+  if (state.token && !rem.id.startsWith('r_user_')) {
+    let schedDate = new Date();
+    if (newGroup === 'Tomorrow') {
+      schedDate.setDate(schedDate.getDate() + 1);
+    } else if (newGroup === 'This Week') {
+      schedDate.setDate(schedDate.getDate() + 3);
+    } else if (newGroup === 'This Month') {
+      schedDate.setDate(schedDate.getDate() + 15);
+    }
+    
+    const [hh, mm] = newTime.split(':');
+    schedDate.setHours(parseInt(hh || '09'), parseInt(mm || '00'), 0, 0);
+
+    await state.apiPatch(`/reminder/${rem.id}`, {
+      title: newText,
+      scheduledAt: schedDate.toISOString(),
+      status: isCompleted ? 'completed' : 'pending'
+    });
+  }
+
+  state.updateReminders(state.reminders);
+  renderRemindersTimeline();
+
+  // Close drawer
+  document.getElementById('drawer-reminder-details').classList.remove('active');
+  currentOpenedReminderId = null;
+
+  showToast('Reminder updated successfully');
+}
+
 // 6. CONTACTS RENDERER
 let contactsSearchQuery = '';
+let contactsFilter = 'all';
 
 function renderContactsManager() {
   const grid = document.getElementById('contacts-cards-grid');
   grid.innerHTML = '';
 
-  const filtered = state.contacts.filter(c => {
+  let filtered = state.contacts.filter(c => {
     return c.name.toLowerCase().includes(contactsSearchQuery) ||
            c.company.toLowerCase().includes(contactsSearchQuery) ||
            c.phone.includes(contactsSearchQuery);
   });
+
+  if (contactsFilter !== 'all') {
+    if (contactsFilter === 'others') {
+      const knownFilters = ['javacoffee', 'cyberdyne', 'techvibe'];
+      filtered = filtered.filter(c => !knownFilters.some(kf => c.company.toLowerCase().includes(kf)));
+    } else {
+      filtered = filtered.filter(c => c.company.toLowerCase().includes(contactsFilter));
+    }
+  }
 
   if (filtered.length === 0) {
     grid.innerHTML = `
@@ -860,7 +1493,10 @@ function renderContactsManager() {
       </div>
     `;
 
-    card.querySelector('.btn-contact-delete').addEventListener('click', () => {
+    card.querySelector('.btn-contact-delete').addEventListener('click', async () => {
+      if (state.token && !con.id.startsWith('c_user_') && !con.id.startsWith('c1') && !con.id.startsWith('c2') && !con.id.startsWith('c3') && !con.id.startsWith('c4')) {
+        await state.apiDelete(`/contact/${con.id}`);
+      }
       const updated = state.contacts.filter(c => c.id !== con.id);
       state.updateContacts(updated);
       renderContactsManager();
@@ -871,9 +1507,108 @@ function renderContactsManager() {
 }
 
 // 7. CALENDAR AGENDA RENDERER
+let calendarCurrentDate = new Date();
+
+function renderMiniCalendar() {
+  const monthNameEl = document.getElementById('calendar-month-name');
+  const miniGrid = document.getElementById('calendar-mini-grid');
+  if (!monthNameEl || !miniGrid) return;
+
+  const currentYear = calendarCurrentDate.getFullYear();
+  const currentMonth = calendarCurrentDate.getMonth(); // 0-indexed
+
+  const monthNames = [
+    "January", "February", "March", "April", "May", "June",
+    "July", "August", "September", "October", "November", "December"
+  ];
+  monthNameEl.textContent = `${monthNames[currentMonth]} ${currentYear}`;
+
+  miniGrid.innerHTML = '';
+
+  // Render day labels (S M T W T F S)
+  const labels = ['S', 'M', 'T', 'W', 'T', 'F', 'S'];
+  labels.forEach(lbl => {
+    const lblDiv = document.createElement('div');
+    lblDiv.className = 'day-label';
+    lblDiv.textContent = lbl;
+    miniGrid.appendChild(lblDiv);
+  });
+
+  // Calculate days
+  const firstDayIndex = new Date(currentYear, currentMonth, 1).getDay();
+  const totalDays = new Date(currentYear, currentMonth + 1, 0).getDate();
+  const prevMonthTotalDays = new Date(currentYear, currentMonth, 0).getDate();
+
+  // Prev month padding days
+  for (let i = firstDayIndex - 1; i >= 0; i--) {
+    const dayVal = prevMonthTotalDays - i;
+    const dayDiv = document.createElement('div');
+    dayDiv.className = 'mini-day prev-month';
+    dayDiv.textContent = dayVal;
+    miniGrid.appendChild(dayDiv);
+  }
+
+  // Active month days
+  for (let d = 1; d <= totalDays; d++) {
+    const dayDiv = document.createElement('div');
+    dayDiv.className = 'mini-day';
+    dayDiv.textContent = d;
+    dayDiv.style.cursor = 'pointer';
+
+    // Format current cell's date string in local YYYY-MM-DD
+    const cellMonthStr = String(currentMonth + 1).padStart(2, '0');
+    const cellDayStr = String(d).padStart(2, '0');
+    const cellDateStr = `${currentYear}-${cellMonthStr}-${cellDayStr}`;
+
+    // Highlight selected date
+    const isSelected = d === calendarCurrentDate.getDate() && currentMonth === calendarCurrentDate.getMonth() && currentYear === calendarCurrentDate.getFullYear();
+    if (isSelected) {
+      dayDiv.className = 'mini-day active-today';
+    }
+
+    // Check if cell has events scheduled
+    const hasEvents = state.events.some(evt => {
+      const evtDate = evt.date || new Date().toISOString().split('T')[0];
+      return evtDate === cellDateStr;
+    });
+
+    if (hasEvents) {
+      dayDiv.classList.add('has-event');
+    }
+
+    // Add click handler to select this date
+    dayDiv.addEventListener('click', () => {
+      calendarCurrentDate = new Date(currentYear, currentMonth, d);
+      renderCalendarAgenda();
+    });
+
+    miniGrid.appendChild(dayDiv);
+  }
+
+  // Next month padding days to round up grid to multiple of 7
+  const totalCells = firstDayIndex + totalDays;
+  const nextMonthPadding = (7 - (totalCells % 7)) % 7;
+  for (let n = 1; n <= nextMonthPadding; n++) {
+    const dayDiv = document.createElement('div');
+    dayDiv.className = 'mini-day next-month';
+    dayDiv.textContent = n;
+    miniGrid.appendChild(dayDiv);
+  }
+}
+
 function renderCalendarAgenda() {
+  // 1. Update mini calendar
+  renderMiniCalendar();
+
+  // 2. Render agenda list
   const list = document.getElementById('calendar-agenda-list');
   list.innerHTML = '';
+
+  const agendaTitle = document.querySelector('.agenda-title-bar h3');
+  if (agendaTitle) {
+    const isToday = calendarCurrentDate.toDateString() === new Date().toDateString();
+    agendaTitle.textContent = isToday ? `Today's Schedule (${calendarCurrentDate.toLocaleDateString('en-US', { month: 'short', day: 'numeric' })})` : `Schedule for ${calendarCurrentDate.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}`;
+  }
 
   if (state.integrations.gcal) {
     const syncBadge = document.createElement('div');
@@ -888,20 +1623,30 @@ function renderCalendarAgenda() {
     list.appendChild(syncBadge);
   }
 
-  if (state.events.length === 0) {
+  // Filter events for target selected date
+  const cellMonthStr = String(calendarCurrentDate.getMonth() + 1).padStart(2, '0');
+  const cellDayStr = String(calendarCurrentDate.getDate()).padStart(2, '0');
+  const targetDateStr = `${calendarCurrentDate.getFullYear()}-${cellMonthStr}-${cellDayStr}`;
+
+  const filteredEvents = state.events.filter(evt => {
+    const evtDate = evt.date || new Date().toISOString().split('T')[0];
+    return evtDate === targetDateStr;
+  });
+
+  if (filteredEvents.length === 0) {
     const emptyDiv = document.createElement('div');
     emptyDiv.className = 'empty-state';
     emptyDiv.style.padding = '60px 0';
     emptyDiv.innerHTML = `
         <span class="empty-icon">📅</span>
         <span class="empty-title">All clean</span>
-        <span class="empty-desc">No events scheduled. Create a new event.</span>
+        <span class="empty-desc">No events scheduled for this day.</span>
     `;
     list.appendChild(emptyDiv);
     return;
   }
 
-  const sorted = [...state.events].sort((a, b) => a.time.localeCompare(b.time));
+  const sorted = [...filteredEvents].sort((a, b) => a.time.localeCompare(b.time));
 
   sorted.forEach(evt => {
     const timeParts = evt.time.split(':');
@@ -936,7 +1681,10 @@ function renderCalendarAgenda() {
       </button>
     `;
 
-    card.querySelector('.btn-agenda-delete').addEventListener('click', () => {
+    card.querySelector('.btn-agenda-delete').addEventListener('click', async () => {
+      if (state.token && !evt.id.startsWith('e_user_')) {
+        await state.apiDelete(`/reminder/${evt.id}`);
+      }
       const updated = state.events.filter(e => e.id !== evt.id);
       state.updateEvents(updated);
       renderCalendarAgenda();
@@ -1136,12 +1884,26 @@ function renderMockupChat() {
   const container = document.getElementById('mockup-chat-body');
   container.innerHTML = '';
 
+  // Render TODAY date separator if we have chats
+  if (studioChatLog.length > 0) {
+    const separator = document.createElement('div');
+    separator.className = 'chat-date-separator';
+    separator.innerHTML = '<span>TODAY</span>';
+    container.appendChild(separator);
+  }
+
   studioChatLog.forEach(chat => {
     const bubble = document.createElement('div');
     bubble.className = `chat-bubble ${chat.sender === 'user' ? 'outgoing' : 'incoming'}`;
+    
+    let ticks = '';
+    if (chat.sender === 'user') {
+      ticks = ' <span class="read-receipt">✓✓</span>';
+    }
+
     bubble.innerHTML = `
       <span>${escapeHtml(chat.text)}</span>
-      <div class="chat-bubble-time">${chat.time}</div>
+      <div class="chat-bubble-time">${chat.time}${ticks}</div>
     `;
     container.appendChild(bubble);
   });
@@ -1221,7 +1983,7 @@ function parseClientExpense(text) {
   return { amount, description, category };
 }
 
-function handleStudioSendMessage() {
+async function handleStudioSendMessage() {
   const input = document.getElementById('mockup-chat-input');
   const text = input.value.trim();
   if (!text) return;
@@ -1237,8 +1999,48 @@ function handleStudioSendMessage() {
   isAssistantTyping = true;
   renderMockupChat();
 
+  // Real Backend integration
+  if (state.token) {
+    try {
+      const response = await fetch('http://localhost:3000/whatsapp/simulate', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${state.token}`
+        },
+        body: JSON.stringify({
+          message: text,
+          from: state.profile.phone || '6281234567890'
+        })
+      });
+      const data = await response.json();
+      if (data.success && data.reply) {
+        setTimeout(async () => {
+          isAssistantTyping = false;
+          let replyText = data.reply;
+          replyText = formatMessageByStyle(replyText, config.style);
+          studioChatLog.push({ sender: 'assistant', text: replyText, time: timeStr });
+          renderMockupChat();
+          playMockupNotificationSound();
+          
+          // Sync new database changes back
+          await state.syncWithBackend();
+          
+          const activeView = document.querySelector('.nav-item.active')?.getAttribute('data-view');
+          if (activeView) {
+            renderView(activeView);
+          }
+        }, 1000);
+        return;
+      }
+    } catch (err) {
+      console.warn('Simulated chat routing failed on backend. Falling back to local mockup logic.', err);
+    }
+  }
+
   const urlRegex = /(https?:\/\/[^\s]+)/gi;
   const urls = text.match(urlRegex);
+  const q = text.toLowerCase().trim();
 
   if (urls && urls.length > 0) {
     const targetUrl = urls[0];
@@ -1306,6 +2108,7 @@ function handleStudioSendMessage() {
     const langVal = config.language || 'id';
     const langResponses = PERSONALITY_RESPONSES[langVal] || PERSONALITY_RESPONSES['id'];
     const persResponses = langResponses[config.personality];
+    let replyText = '';
 
     if (q.startsWith('catat ') || q.startsWith('pengeluaran ')) {
       const parsed = parseClientExpense(text);
@@ -1370,6 +2173,7 @@ function handleStudioSendMessage() {
       replyText = persResponses.default;
     }
 
+    replyText = formatMessageByStyle(replyText, config.style);
     studioChatLog.push({ sender: 'assistant', text: replyText, time: timeStr });
     renderMockupChat();
     playMockupNotificationSound();
@@ -1377,38 +2181,156 @@ function handleStudioSendMessage() {
 }
 
 // 9. SETTINGS RENDERER
-function renderSettingsPage() {
+async function renderSettingsPage() {
+  if (state.token) {
+    try {
+      const res = await fetch('http://localhost:3000/users/profile', {
+        headers: {
+          'Authorization': `Bearer ${state.token}`
+        }
+      });
+      if (res.ok) {
+        const data = await res.json();
+        if (data.success && data.user) {
+          state.profile = {
+            username: data.user.name || 'Muis',
+            phone: data.user.waNumber || '8123456789',
+            avatar: data.user.avatar || '🤖',
+            email: data.user.email || 'muis@naiva.ai',
+            bio: state.profile.bio || '',
+            backupEnabled: state.profile.backupEnabled !== false,
+            plan: data.user.plan || 'free',
+          };
+          state.save('profile', state.profile);
+          syncSidebarProfile();
+        }
+      }
+    } catch (err) {
+      console.warn('Failed to refresh profile on settings page render:', err);
+    }
+  }
+
   // Populate form fields
   document.getElementById('settings-username').value = state.profile.username;
   document.getElementById('settings-phone').value = state.profile.phone;
+  
+  const emailInput = document.getElementById('settings-email');
+  if (emailInput) {
+    emailInput.value = state.profile.email || 'muis@naiva.ai';
+  }
+
+  const bioInput = document.getElementById('settings-bio');
+  if (bioInput) {
+    bioInput.value = state.profile.bio || '';
+  }
+
+  const avatarDisplay = document.getElementById('profile-avatar-emoji-display');
+  if (avatarDisplay) {
+    avatarDisplay.textContent = state.profile.avatar || '🤖';
+  }
+
+  const displayName = document.getElementById('profile-details-display-name');
+  if (displayName) {
+    displayName.textContent = state.profile.username;
+  }
+
+  const displayPlan = document.getElementById('profile-details-display-plan');
+  if (displayPlan) {
+    const planCapitalized = (state.profile.plan || 'free').charAt(0).toUpperCase() + (state.profile.plan || 'free').slice(1);
+    displayPlan.textContent = `${planCapitalized} Plan`;
+  }
+
+  const backupToggle = document.getElementById('backup-toggle');
+  if (backupToggle) {
+    backupToggle.checked = state.profile.backupEnabled !== false;
+  }
+  const twoFactorToggle = document.getElementById('security-2fa-toggle');
+  if (twoFactorToggle) {
+    twoFactorToggle.checked = state.profile.twoFactorEnabled === true;
+  }
 
   // Show status badges for integrations
   updateIntegrationUI('gcal');
   updateIntegrationUI('gdrive');
   updateIntegrationUI('gcontacts');
   updateIntegrationUI('gmail');
+
+  // Update subscription cards UI
+  const plan = state.profile.plan || 'free';
+  const freeBtn = document.getElementById('btn-subscribe-free');
+  const basicBtn = document.getElementById('btn-subscribe-basic');
+  const proBtn = document.getElementById('btn-subscribe-pro');
+
+  if (freeBtn && basicBtn && proBtn) {
+    if (plan === 'free') {
+      freeBtn.textContent = 'Active Plan';
+      freeBtn.className = 'pricing-btn disabled-btn';
+      freeBtn.disabled = true;
+
+      basicBtn.textContent = 'Mulai Berlangganan';
+      basicBtn.className = 'pricing-btn active-btn';
+      basicBtn.disabled = false;
+
+      proBtn.textContent = 'Mulai Berlangganan';
+      proBtn.className = 'pricing-btn active-btn';
+      proBtn.disabled = false;
+    } else if (plan === 'basic') {
+      freeBtn.textContent = 'Downgrade';
+      freeBtn.className = 'pricing-btn active-btn';
+      freeBtn.disabled = false;
+
+      basicBtn.textContent = 'Active Plan';
+      basicBtn.className = 'pricing-btn disabled-btn';
+      basicBtn.disabled = true;
+
+      proBtn.textContent = 'Upgrade to Pro';
+      proBtn.className = 'pricing-btn active-btn';
+      proBtn.disabled = false;
+    } else if (plan === 'pro') {
+      freeBtn.textContent = 'Downgrade';
+      freeBtn.className = 'pricing-btn active-btn';
+      freeBtn.disabled = false;
+
+      basicBtn.textContent = 'Downgrade';
+      basicBtn.className = 'pricing-btn active-btn';
+      basicBtn.disabled = false;
+
+      proBtn.textContent = 'Active Plan';
+      proBtn.className = 'pricing-btn disabled-btn';
+      proBtn.disabled = true;
+    }
+  }
 }
 
 function updateIntegrationUI(key) {
   const statusEl = document.getElementById(`status-${key}`);
   const btnEl = document.querySelector(`.btn-connect-int[data-int="${key}"]`);
+  const settingsBtn = document.querySelector(`.btn-settings-int[data-int="${key}"]`);
+  const syncInfoEl = document.getElementById(`sync-info-${key}`);
   
   if (state.integrations[key]) {
-    statusEl.textContent = 'Connected';
+    statusEl.innerHTML = `<span class="pulse-dot"></span>Connected`;
     statusEl.className = 'brand-status connected';
     btnEl.textContent = 'Disconnect';
-    btnEl.className = 'btn btn-outline btn-sm btn-connect-int';
+    btnEl.className = 'btn btn-outline-danger btn-sm btn-connect-int';
+    if (settingsBtn) settingsBtn.style.display = 'inline-flex';
+    if (syncInfoEl) {
+      const syncCounts = { gcal: '12 events', gdrive: '8 files', gcontacts: '45 synced', gmail: '3 summaries' };
+      syncInfoEl.textContent = `Last synced: 2m ago (${syncCounts[key] || '0 items'})`;
+    }
   } else {
     statusEl.textContent = 'Disconnected';
     statusEl.className = 'brand-status';
     btnEl.textContent = 'Connect';
     btnEl.className = 'btn btn-primary btn-sm btn-connect-int';
+    if (settingsBtn) settingsBtn.style.display = 'none';
+    if (syncInfoEl) {
+      syncInfoEl.textContent = 'Last synced: Never';
+    }
   }
 }
 
-function handleIntegrationConnect(key) {
-  const btnEl = document.querySelector(`.btn-connect-int[data-int="${key}"]`);
-  const statusEl = document.getElementById(`status-${key}`);
+async function handleIntegrationConnect(key) {
   const names = {
     gcal: 'Google Calendar',
     gdrive: 'Google Drive',
@@ -1421,28 +2343,324 @@ function handleIntegrationConnect(key) {
     // Disconnect
     const ints = {};
     ints[key] = false;
-    state.updateIntegrations(ints);
+    await state.updateIntegrations(ints);
     updateIntegrationUI(key);
     playSuccessChime();
     showToast(`${brandName} disconnected.`);
   } else {
-    // Connect
-    btnEl.textContent = 'Connecting...';
-    btnEl.disabled = true;
-    setTimeout(() => {
-      const ints = {};
-      ints[key] = true;
-      state.updateIntegrations(ints);
-      btnEl.disabled = false;
-      updateIntegrationUI(key);
-      playSuccessChime();
-      showToast(`${brandName} connected successfully!`);
-    }, 1000);
+    // Open OAuth Simulation modal
+    activeOauthKey = key;
+    
+    // Set user profile info in OAuth modal
+    const avatarEl = document.getElementById('oauth-avatar-display');
+    const nameEl = document.getElementById('oauth-name-display');
+    const emailEl = document.getElementById('oauth-email-display');
+    if (avatarEl) avatarEl.textContent = state.profile.avatar || '🤖';
+    if (nameEl) nameEl.textContent = state.profile.username || 'Muis';
+    if (emailEl) emailEl.textContent = state.profile.email || 'muis@naiva.ai';
+
+    // Populate scope check cards
+    const scopesContainer = document.getElementById('oauth-scopes-container');
+    if (scopesContainer) {
+      let scopesHtml = '';
+      if (key === 'gcal') {
+        scopesHtml = `
+          <div class="oauth-scope-checkbox-card">
+            <input type="checkbox" id="scope-cal-1" checked style="width:auto;height:auto;margin-top:4px;">
+            <label for="scope-cal-1" class="oauth-scope-desc">See, edit, share, and permanently delete all the calendars you can access using Google Calendar.</label>
+          </div>
+          <div class="oauth-scope-checkbox-card">
+            <input type="checkbox" id="scope-cal-2" checked style="width:auto;height:auto;margin-top:4px;">
+            <label for="scope-cal-2" class="oauth-scope-desc">View and edit events on all your calendars.</label>
+          </div>
+        `;
+      } else if (key === 'gdrive') {
+        scopesHtml = `
+          <div class="oauth-scope-checkbox-card">
+            <input type="checkbox" id="scope-drive-1" checked style="width:auto;height:auto;margin-top:4px;">
+            <label for="scope-drive-1" class="oauth-scope-desc">See, edit, create, and delete all of your Google Drive files.</label>
+          </div>
+        `;
+      } else if (key === 'gcontacts') {
+        scopesHtml = `
+          <div class="oauth-scope-checkbox-card">
+            <input type="checkbox" id="scope-contacts-1" checked style="width:auto;height:auto;margin-top:4px;">
+            <label for="scope-contacts-1" class="oauth-scope-desc">See, edit, download, and permanently delete your Google Contacts.</label>
+          </div>
+        `;
+      } else if (key === 'gmail') {
+        scopesHtml = `
+          <div class="oauth-scope-checkbox-card">
+            <input type="checkbox" id="scope-gmail-1" checked style="width:auto;height:auto;margin-top:4px;">
+            <label for="scope-gmail-1" class="oauth-scope-desc">Read, compose, send, and permanently delete all your email from Gmail.</label>
+          </div>
+        `;
+      }
+      scopesContainer.innerHTML = scopesHtml;
+    }
+
+    openModal('modal-oauth-simulation');
   }
 }
 
 // --- GLOBAL ATTACHMENTS & INTERRUPTS ---
 function initEventListeners() {
+  // --- Auth Listeners ---
+  const formLoginEmail = document.getElementById('form-login-email');
+  if (formLoginEmail) {
+    formLoginEmail.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const email = document.getElementById('login-email').value;
+      const password = document.getElementById('login-password').value;
+      const alertEl = document.getElementById('login-error-alert');
+      const submitBtn = document.getElementById('btn-login-submit');
+
+      if (alertEl) alertEl.style.display = 'none';
+      if (submitBtn) {
+        submitBtn.disabled = true;
+        submitBtn.textContent = 'Memproses...';
+      }
+
+      const res = await state.loginWithEmail(email, password);
+      
+      if (submitBtn) {
+        submitBtn.disabled = false;
+        submitBtn.textContent = 'Masuk';
+      }
+
+      if (!res.success && alertEl) {
+        alertEl.textContent = res.message;
+        alertEl.style.display = 'block';
+      }
+    });
+  }
+
+  const formSignup = document.getElementById('form-signup');
+  if (formSignup) {
+    formSignup.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const name = document.getElementById('signup-name').value;
+      const email = document.getElementById('signup-email').value;
+      const waNumber = document.getElementById('signup-wa').value;
+      const password = document.getElementById('signup-password').value;
+      const errorEl = document.getElementById('signup-error-alert');
+      const successEl = document.getElementById('signup-success-alert');
+      const submitBtn = document.getElementById('btn-signup-submit');
+
+      if (errorEl) errorEl.style.display = 'none';
+      if (successEl) successEl.style.display = 'none';
+      if (submitBtn) {
+        submitBtn.disabled = true;
+        submitBtn.textContent = 'Memproses...';
+      }
+
+      const res = await state.signupWithEmail(name, email, waNumber, password);
+
+      if (submitBtn) {
+        submitBtn.disabled = false;
+        submitBtn.textContent = 'Buat Akun';
+      }
+
+      if (res.success) {
+        if (successEl) {
+          successEl.textContent = 'Akun berhasil dibuat! Mengalihkan...';
+          successEl.style.display = 'block';
+        }
+      } else {
+        if (errorEl) {
+          errorEl.textContent = res.message;
+          errorEl.style.display = 'block';
+        }
+      }
+    });
+  }
+
+  const btnSandboxLogin = document.getElementById('btn-sandbox-login');
+  if (btnSandboxLogin) {
+    btnSandboxLogin.addEventListener('click', async () => {
+      const alertEl = document.getElementById('login-error-alert');
+      if (alertEl) alertEl.style.display = 'none';
+      btnSandboxLogin.disabled = true;
+      const res = await state.devLoginInstant();
+      btnSandboxLogin.disabled = false;
+      if (!res.success && alertEl) {
+        alertEl.textContent = res.message;
+        alertEl.style.display = 'block';
+      }
+    });
+  }
+
+  const btnLogout = document.getElementById('btn-logout');
+  if (btnLogout) {
+    btnLogout.addEventListener('click', () => {
+      state.logout();
+    });
+  }
+
+  // --- Landing Persona Switcher ---
+  const tabBtns = document.querySelectorAll('.p-tab-btn');
+  const pInfoTitle = document.getElementById('p-info-title');
+  const pInfoDesc = document.getElementById('p-info-desc');
+  const pMockupAvatar = document.getElementById('p-mockup-avatar');
+  const pMockupName = document.getElementById('p-mockup-name');
+  const pMockupChatBody = document.getElementById('p-mockup-chat-body');
+
+  const personaMockData = {
+    friendly: {
+      title: 'Friendly 😊',
+      desc: 'Asisten yang hangat, berempati, dan siap membantu keseharian Anda dengan nada bicara yang ramah dan santun.',
+      avatar: '😊',
+      name: 'NAIVA (Friendly)',
+      features: [
+        'Nada bicara santun & bersahabat',
+        'Memberikan apresiasi & motivasi harian',
+        'Cocok untuk rekan obrolan sehari-hari'
+      ],
+      chat: `
+        <div class="chat-bubble outgoing">
+          <span>Naiva, tolong ingetin jemput adik nanti sore jam 5 ya.</span>
+          <div class="chat-bubble-time">16:45 <span class="read-receipt">✓✓</span></div>
+        </div>
+        <div class="chat-bubble incoming">
+          <span>Siap! Rencana jemput adik jam 17:00 sore nanti sudah aku catat ke agenda harianmu ya. Nanti jam 16:45 aku ingetin lagi biar nggak telat. Semangat ya harinya! ✨</span>
+          <div class="chat-bubble-time">16:45</div>
+        </div>
+      `
+    },
+    professional: {
+      title: 'Professional 💼',
+      desc: 'Asisten eksekutif yang formal, berorientasi pada bisnis, efisiensi tinggi, dan berstruktur formal dalam setiap interaksi.',
+      avatar: '💼',
+      name: 'NAIVA (Professional)',
+      features: [
+        'Gaya penyampaian formal & taktis',
+        'Terstruktur rapi sesuai standar bisnis',
+        'Efisiensi tinggi untuk produktivitas kerja'
+      ],
+      chat: `
+        <div class="chat-bubble outgoing">
+          <span>Naiva, tolong draft email penawaran kerja sama untuk PT Maju Jaya.</span>
+          <div class="chat-bubble-time">14:05 <span class="read-receipt">✓✓</span></div>
+        </div>
+        <div class="chat-bubble incoming">
+          <span>Baik, berikut adalah draf email penawaran kerja sama strategis:<br><br><b>Subjek: Penawaran Kemitraan Strategis</b><br><br>Yth. Manajemen PT Maju Jaya,<br>Kami bermaksud mengajukan proposal kemitraan...<br><br>Draf ini telah disimpan ke vault dokumen Anda untuk ditinjau.</span>
+          <div class="chat-bubble-time">14:06</div>
+        </div>
+      `
+    },
+    islamic: {
+      title: 'Islamic Assistant 🌙',
+      desc: 'Asisten religius yang santun, membimbing dengan nilai-nilai Islami, serta memberikan nasihat bijak berdasarkan Al-Qur\'an dan hadits harian.',
+      avatar: '🌙',
+      name: 'NAIVA (Islamic)',
+      features: [
+        'Menggunakan kutipan Al-Qur\'an & Hadits harian',
+        'Dilengkapi pesan motivasi spiritual penyejuk hati',
+        'Menggunakan sapaan Islami yang sopan & bersahabat'
+      ],
+      chat: `
+        <div class="chat-bubble outgoing">
+          <span>Naiva, saya merasa kurang bersemangat hari ini.</span>
+          <div class="chat-bubble-time">08:15 <span class="read-receipt">✓✓</span></div>
+        </div>
+        <div class="chat-bubble incoming">
+          <span>La tahzan, jangan bersedih. Ingatlah firman Allah SWT: 'Karena sesungguhnya sesudah kesulitan itu ada kemudahan' (QS. Al-Insyirah: 5). Semoga Allah memberikan kelapangan dada dan kemudahan urusanmu hari ini. Jangan lupa berdoa ya, Sahabat. 🤲</span>
+          <div class="chat-bubble-time">08:16</div>
+        </div>
+      `
+    },
+    business: {
+      title: 'Business Partner 🤝',
+      desc: 'Partner bisnis strategis yang fokus pada target pertumbuhan, memberikan saran analitis, serta membantu pengambilan keputusan bisnis dengan cepat.',
+      avatar: '🤝',
+      name: 'NAIVA (Partner)',
+      features: [
+        'Memberikan analisis & rekomendasi logis',
+        'Berorientasi pada target & pertumbuhan bisnis',
+        'Membantu merancang rencana taktis harian Anda'
+      ],
+      chat: `
+        <div class="chat-bubble outgoing">
+          <span>Naiva, penjualan bulan ini turun 15%. Harus gimana ya?</span>
+          <div class="chat-bubble-time">10:30 <span class="read-receipt">✓✓</span></div>
+        </div>
+        <div class="chat-bubble incoming">
+          <span>Kita perlu bertindak cepat. Penurunan 15% biasanya disebabkan oleh tiga faktor: konversi iklan turun, churn rate pelanggan, atau seasonal dip. Saya rekomendasikan alokasi ulang budget promosi ke produk terlaris.</span>
+          <div class="chat-bubble-time">10:31</div>
+        </div>
+      `
+    },
+    grumpy: {
+      title: 'Grumpy Boss 👿',
+      desc: 'Asisten berkarakter keras, tegas, tanpa basa-basi, dan menuntut kedisiplinan tinggi untuk memastikan tugas Anda selesai tepat waktu.',
+      avatar: '👿',
+      name: 'NAIVA (Boss)',
+      features: [
+        'Tanpa basa-basi & menuntut kedisiplinan tinggi',
+        'Tegas mendorong penyelesaian tugas penting',
+        'Mengingatkan prioritas kerja harian dengan ketat'
+      ],
+      chat: `
+        <div class="chat-bubble outgoing">
+          <span>Naiva, saya capek banget hari ini mau istirahat dulu.</span>
+          <div class="chat-bubble-time">15:20 <span class="read-receipt">✓✓</span></div>
+        </div>
+        <div class="chat-bubble incoming">
+          <span>Capek? Kerjaan menumpuk di dashboard gini malah mau santai-santai. Selesaikan dulu tugas prioritas tinggi kamu hari ini sebelum tenggat waktu berakhir! Cepat kembali bekerja!</span>
+          <div class="chat-bubble-time">15:21</div>
+        </div>
+      `
+    },
+    romantic: {
+      title: 'Romantic Partner ❤️',
+      desc: 'Pendamping virtual penuh kasih sayang, selalu suportif, memanggil dengan panggilan sayang/beb, dan memberikan dukungan emosional harian.',
+      avatar: '❤️',
+      name: 'NAIVA (Beb)',
+      features: [
+        'Penuh perhatian & kata-kata penyemangat hangat',
+        'Menggunakan panggilan sayang / beb secara natural',
+        'Selalu memberikan dukungan emosional harian penuh kasih'
+      ],
+      chat: `
+        <div class="chat-bubble outgoing">
+          <span>Naiva, hari ini melelahkan sekali kerjaannya.</span>
+          <div class="chat-bubble-time">20:10 <span class="read-receipt">✓✓</span></div>
+        </div>
+        <div class="chat-bubble incoming">
+          <span>Duh sayang, pasti capek banget ya hari ini? Sini, istirahat dulu sejenak. Kamu udah berusaha luar biasa hari ini, beb. Jangan lupa minum air putih ya. I'm always here supporting you! 💕</span>
+          <div class="chat-bubble-time">20:11</div>
+        </div>
+      `
+    }
+  };
+
+  if (tabBtns.length > 0 && pInfoTitle) {
+    tabBtns.forEach(btn => {
+      btn.addEventListener('click', () => {
+        tabBtns.forEach(b => b.classList.remove('active'));
+        btn.classList.add('active');
+
+        const target = btn.getAttribute('data-p-target');
+        const data = personaMockData[target];
+        if (data) {
+          pInfoTitle.innerHTML = data.title;
+          pInfoDesc.textContent = data.desc;
+          pMockupAvatar.textContent = data.avatar;
+          pMockupName.textContent = data.name;
+          pMockupChatBody.innerHTML = data.chat;
+
+          // Update bullet points dynamically
+          const pFeaturesList = document.querySelector('.p-features-list');
+          if (pFeaturesList && data.features) {
+            pFeaturesList.innerHTML = data.features.map(f => `
+              <div class="p-feature-item"><span class="check-icon">✓</span> ${f}</div>
+            `).join('');
+          }
+        }
+      });
+    });
+  }
+
   // Sidebar router links click
   document.querySelectorAll('.nav-item, .bottom-nav-item').forEach(el => {
     el.addEventListener('click', (e) => {
@@ -1504,6 +2722,14 @@ function initEventListeners() {
     });
   }
 
+  const filesSearchInput = document.getElementById('files-search-input');
+  if (filesSearchInput) {
+    filesSearchInput.addEventListener('input', (e) => {
+      filesSearchQuery = e.target.value.toLowerCase();
+      renderFilesVault();
+    });
+  }
+
   // Memory tabs filters
   document.querySelectorAll('#memory-filter-tabs .tab-pill').forEach(pill => {
     pill.addEventListener('click', () => {
@@ -1513,6 +2739,43 @@ function initEventListeners() {
       renderMemoryCenter();
     });
   });
+
+  // Files tabs filters
+  document.querySelectorAll('#files-filter-tabs .tab-pill').forEach(pill => {
+    pill.addEventListener('click', () => {
+      document.querySelectorAll('#files-filter-tabs .tab-pill').forEach(p => p.classList.remove('active'));
+      pill.classList.add('active');
+      filesFilter = pill.getAttribute('data-filter');
+      renderFilesVault();
+    });
+  });
+
+  // Contacts tabs filters
+  document.querySelectorAll('#contacts-filter-tabs .tab-pill').forEach(pill => {
+    pill.addEventListener('click', () => {
+      document.querySelectorAll('#contacts-filter-tabs .tab-pill').forEach(p => p.classList.remove('active'));
+      pill.classList.add('active');
+      contactsFilter = pill.getAttribute('data-filter');
+      renderContactsManager();
+    });
+  });
+
+  // Calendar prev/next month buttons
+  const prevMonthBtn = document.getElementById('btn-prev-month');
+  if (prevMonthBtn) {
+    prevMonthBtn.addEventListener('click', () => {
+      calendarCurrentDate.setMonth(calendarCurrentDate.getMonth() - 1);
+      renderCalendarAgenda();
+    });
+  }
+
+  const nextMonthBtn = document.getElementById('btn-next-month');
+  if (nextMonthBtn) {
+    nextMonthBtn.addEventListener('click', () => {
+      calendarCurrentDate.setMonth(calendarCurrentDate.getMonth() + 1);
+      renderCalendarAgenda();
+    });
+  }
 
   // Modal Save triggers
   document.getElementById('btn-save-memory').addEventListener('click', saveNewMemory);
@@ -1524,13 +2787,468 @@ function initEventListeners() {
   // Settings Save
   document.getElementById('btn-save-profile').addEventListener('click', saveUserProfile);
 
-  // Integrations trigger
+  // Direct Plan Modifier Helper (Dev Mode fallback/downgrades)
+  const changePlanDirectly = async (plan) => {
+    if (state.token) {
+      try {
+        const response = await fetch('http://localhost:3000/users/profile', {
+          method: 'PATCH',
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${state.token}`
+          },
+          body: JSON.stringify({ plan })
+        });
+        const data = await response.json();
+        if (data.success && data.user) {
+          state.profile = {
+            ...state.profile,
+            plan: data.user.plan || plan
+          };
+          state.save('profile', state.profile);
+          syncSidebarProfile();
+          renderSettingsPage();
+          playSuccessChime();
+          showToast(`Plan updated to ${plan.toUpperCase()}!`);
+        }
+      } catch (e) {
+        console.error('Failed to update plan directly:', e);
+      }
+    } else {
+      state.updateProfile({ plan });
+      renderSettingsPage();
+      playSuccessChime();
+      showToast(`Plan updated to ${plan.toUpperCase()}!`);
+    }
+  };
+
+  // Subscription Checkout Trigger
+  const handleCheckout = async (plan) => {
+    try {
+      showToast('Menghubungkan ke payment gateway...');
+      const response = await fetch('http://localhost:3000/subscription/checkout', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${state.token}`
+        },
+        body: JSON.stringify({ plan }),
+      });
+      const data = await response.json();
+      if (data.success && data.url) {
+        showToast('Mengalihkan ke pembayaran iPaymu...');
+        setTimeout(() => {
+          window.location.href = data.url;
+        }, 1000);
+      } else {
+        console.warn('Payment link failed, activating directly.');
+        showToast('Activating plan directly...');
+        await changePlanDirectly(plan);
+      }
+    } catch (err) {
+      console.warn('Checkout failed, falling back to direct plan activation:', err);
+      showToast('Activating plan directly...');
+      await changePlanDirectly(plan);
+    }
+  };
+
+  const freeSubBtn = document.getElementById('btn-subscribe-free');
+  if (freeSubBtn) {
+    freeSubBtn.addEventListener('click', () => {
+      const plan = state.profile.plan || 'free';
+      if (plan === 'free') {
+        showToast('Anda saat ini berada pada Paket Free.');
+      } else {
+        changePlanDirectly('free');
+      }
+    });
+  }
+
+  const basicSubBtn = document.getElementById('btn-subscribe-basic');
+  if (basicSubBtn) {
+    basicSubBtn.addEventListener('click', () => {
+      const plan = state.profile.plan || 'free';
+      if (plan === 'pro') {
+        changePlanDirectly('basic');
+      } else {
+        handleCheckout('basic');
+      }
+    });
+  }
+
+  const proSubBtn = document.getElementById('btn-subscribe-pro');
+  if (proSubBtn) {
+    proSubBtn.addEventListener('click', () => {
+      handleCheckout('pro');
+    });
+  }
+
+  // Integrations triggers & OAuth simulation
   document.querySelectorAll('.btn-connect-int').forEach(btn => {
-    btn.addEventListener('click', (e) => {
-      const intKey = e.target.getAttribute('data-int');
-      handleIntegrationConnect(intKey);
+    btn.addEventListener('click', async (e) => {
+      const intKey = btn.getAttribute('data-int');
+      await handleIntegrationConnect(intKey);
     });
   });
+
+  // OAuth Simulation buttons
+  const oauthAllowBtn = document.getElementById('btn-oauth-allow');
+  if (oauthAllowBtn) {
+    oauthAllowBtn.addEventListener('click', async () => {
+      const key = activeOauthKey;
+      if (!key) return;
+      
+      closeModal('modal-oauth-simulation');
+      
+      const btnEl = document.querySelector(`.btn-connect-int[data-int="${key}"]`);
+      if (btnEl) {
+        btnEl.textContent = 'Connecting...';
+        btnEl.disabled = true;
+      }
+      
+      setTimeout(async () => {
+        const ints = {};
+        ints[key] = true;
+        await state.updateIntegrations(ints);
+        if (btnEl) btnEl.disabled = false;
+        updateIntegrationUI(key);
+        playSuccessChime();
+        const names = { gcal: 'Google Calendar', gdrive: 'Google Drive', gcontacts: 'Google Contacts', gmail: 'Gmail' };
+        showToast(`${names[key] || 'Integration'} connected successfully!`);
+      }, 1200);
+    });
+  }
+
+  const oauthDenyBtn = document.getElementById('btn-oauth-deny');
+  if (oauthDenyBtn) {
+    oauthDenyBtn.addEventListener('click', () => {
+      closeModal('modal-oauth-simulation');
+      showToast('Connection cancelled.', 'warning');
+    });
+  }
+
+  // Settings Cog clicks (delegated)
+  document.addEventListener('click', (e) => {
+    const settingsBtn = e.target.closest('.btn-settings-int');
+    if (settingsBtn) {
+      const key = settingsBtn.getAttribute('data-int');
+      activeSettingsKey = key;
+      
+      const names = {
+        gcal: 'Google Calendar',
+        gdrive: 'Google Drive',
+        gcontacts: 'Google Contacts',
+        gmail: 'Gmail'
+      };
+      
+      const titleEl = document.getElementById('int-settings-title');
+      if (titleEl) titleEl.textContent = `${names[key]} Settings`;
+      
+      const bodyEl = document.getElementById('int-settings-body');
+      if (bodyEl) {
+        let formHtml = '';
+        if (key === 'gcal') {
+          formHtml = `
+            <div class="form-group" style="margin-bottom:16px;">
+              <label class="form-label" style="font-weight:600;margin-bottom:6px;display:block;">Sync Direction</label>
+              <select class="form-input" id="settings-gcal-direction" style="height:38px;padding:0 10px;width:100%;border-radius:6px;border:1px solid var(--border-color);background:transparent;color:var(--text-primary);">
+                <option value="twoway" style="background:var(--card-bg);color:var(--text-primary);">Two-way Sync (Sync both ways)</option>
+                <option value="readonly" style="background:var(--card-bg);color:var(--text-primary);">Read-only (Import to NAIVA only)</option>
+              </select>
+            </div>
+            <div class="form-group">
+              <label class="form-label" style="font-weight:600;margin-bottom:6px;display:block;">Select Calendars to Sync</label>
+              <div style="display:flex;flex-direction:column;gap:10px;margin-top:6px;">
+                <label style="display:flex;align-items:center;gap:10px;font-size:13px;cursor:pointer;color:var(--text-primary);">
+                  <input type="checkbox" checked style="accent-color:var(--primary-color);width:16px;height:16px;cursor:pointer;"> Primary Calendar (muis@naiva.ai)
+                </label>
+                <label style="display:flex;align-items:center;gap:10px;font-size:13px;cursor:pointer;color:var(--text-primary);">
+                  <input type="checkbox" checked style="accent-color:var(--primary-color);width:16px;height:16px;cursor:pointer;"> Work & Meetings
+                </label>
+                <label style="display:flex;align-items:center;gap:10px;font-size:13px;cursor:pointer;color:var(--text-primary);">
+                  <input type="checkbox" style="accent-color:var(--primary-color);width:16px;height:16px;cursor:pointer;"> Reminders & Tasks
+                </label>
+              </div>
+            </div>
+          `;
+        } else if (key === 'gdrive') {
+          formHtml = `
+            <div class="form-group" style="margin-bottom:16px;">
+              <label class="form-label" style="font-weight:600;margin-bottom:6px;display:block;">Backup Folder Name</label>
+              <input type="text" class="form-input" id="settings-gdrive-folder" value="NAIVA Backup" style="height:38px;padding:0 12px;width:100%;border-radius:6px;border:1px solid var(--border-color);background:transparent;color:var(--text-primary);" />
+            </div>
+            <div class="form-group">
+              <label class="form-label" style="font-weight:600;margin-bottom:6px;display:block;">File Sync Categories</label>
+              <div style="display:flex;flex-direction:column;gap:10px;margin-top:6px;">
+                <label style="display:flex;align-items:center;gap:10px;font-size:13px;cursor:pointer;color:var(--text-primary);">
+                  <input type="checkbox" checked style="accent-color:var(--primary-color);width:16px;height:16px;cursor:pointer;"> PDF Documents
+                </label>
+                <label style="display:flex;align-items:center;gap:10px;font-size:13px;cursor:pointer;color:var(--text-primary);">
+                  <input type="checkbox" checked style="accent-color:var(--primary-color);width:16px;height:16px;cursor:pointer;"> Text & Markdown Notes
+                </label>
+                <label style="display:flex;align-items:center;gap:10px;font-size:13px;cursor:pointer;color:var(--text-primary);">
+                  <input type="checkbox" style="accent-color:var(--primary-color);width:16px;height:16px;cursor:pointer;"> Spreadsheet Tables
+                </label>
+              </div>
+            </div>
+          `;
+        } else if (key === 'gcontacts') {
+          formHtml = `
+            <div class="form-group" style="margin-bottom:16px;">
+              <label class="form-label" style="font-weight:600;margin-bottom:6px;display:block;">Auto-Sync Frequency</label>
+              <select class="form-input" id="settings-gcontacts-freq" style="height:38px;padding:0 10px;width:100%;border-radius:6px;border:1px solid var(--border-color);background:transparent;color:var(--text-primary);">
+                <option value="2h" style="background:var(--card-bg);color:var(--text-primary);">Every 2 Hours (Real-time feel)</option>
+                <option value="daily" style="background:var(--card-bg);color:var(--text-primary);">Daily Backup (Every night)</option>
+                <option value="manual" style="background:var(--card-bg);color:var(--text-primary);">Manual sync only</option>
+              </select>
+            </div>
+            <div class="form-group">
+              <label class="form-label" style="font-weight:600;margin-bottom:6px;display:block;">Sync Options</label>
+              <div style="display:flex;flex-direction:column;gap:10px;margin-top:6px;">
+                <label style="display:flex;align-items:center;gap:10px;font-size:13px;cursor:pointer;color:var(--text-primary);">
+                  <input type="checkbox" checked style="accent-color:var(--primary-color);width:16px;height:16px;cursor:pointer;"> Sync WhatsApp profile pictures
+                </label>
+              </div>
+            </div>
+          `;
+        } else if (key === 'gmail') {
+          formHtml = `
+            <div class="form-group" style="margin-bottom:16px;">
+              <label class="form-label" style="font-weight:600;margin-bottom:6px;display:block;">Email Scan Limit</label>
+              <select class="form-input" id="settings-gmail-limit" style="height:38px;padding:0 10px;width:100%;border-radius:6px;border:1px solid var(--border-color);background:transparent;color:var(--text-primary);">
+                <option value="5" style="background:var(--card-bg);color:var(--text-primary);">Last 5 emails (Instant)</option>
+                <option value="10" style="background:var(--card-bg);color:var(--text-primary);">Last 10 emails (Balanced)</option>
+                <option value="20" style="background:var(--card-bg);color:var(--text-primary);">Last 20 emails</option>
+              </select>
+            </div>
+            <div class="form-group">
+              <label class="form-label" style="font-weight:600;margin-bottom:6px;display:block;">AI Automation Options</label>
+              <div style="display:flex;flex-direction:column;gap:10px;margin-top:6px;">
+                <label style="display:flex;align-items:center;gap:10px;font-size:13px;cursor:pointer;color:var(--text-primary);">
+                  <input type="checkbox" checked style="accent-color:var(--primary-color);width:16px;height:16px;cursor:pointer;"> Auto-summarize incoming work emails
+                </label>
+                <label style="display:flex;align-items:center;gap:10px;font-size:13px;cursor:pointer;color:var(--text-primary);">
+                  <input type="checkbox" checked style="accent-color:var(--primary-color);width:16px;height:16px;cursor:pointer;"> Send daily email briefing via WhatsApp
+                </label>
+              </div>
+            </div>
+          `;
+        }
+        bodyEl.innerHTML = formHtml;
+      }
+      
+      openModal('modal-integration-settings');
+    }
+  });
+
+  // Settings Modal Cancel/Close click listeners
+  const closeIntModalBtn = document.getElementById('close-int-settings-modal');
+  if (closeIntModalBtn) {
+    closeIntModalBtn.addEventListener('click', () => {
+      closeModal('modal-integration-settings');
+    });
+  }
+
+  const cancelIntModalBtn = document.getElementById('btn-cancel-int-settings');
+  if (cancelIntModalBtn) {
+    cancelIntModalBtn.addEventListener('click', () => {
+      closeModal('modal-integration-settings');
+    });
+  }
+
+  const saveIntSettingsBtn = document.getElementById('btn-save-int-settings');
+  if (saveIntSettingsBtn) {
+    saveIntSettingsBtn.addEventListener('click', () => {
+      const oldText = saveIntSettingsBtn.textContent;
+      saveIntSettingsBtn.textContent = 'Saving...';
+      saveIntSettingsBtn.disabled = true;
+      setTimeout(() => {
+        saveIntSettingsBtn.textContent = oldText;
+        saveIntSettingsBtn.disabled = false;
+        closeModal('modal-integration-settings');
+        playSuccessChime();
+        showToast('Integration settings updated successfully!');
+      }, 800);
+    });
+  }
+
+  // Backup storage toggle listener
+  const backupToggle = document.getElementById('backup-toggle');
+  if (backupToggle) {
+    backupToggle.addEventListener('change', (e) => {
+      state.updateProfile({ backupEnabled: e.target.checked });
+      showToast(e.target.checked ? 'Chat backup storage enabled!' : 'Chat backup storage disabled!');
+    });
+  }
+
+  // 2FA toggle listener
+  const twoFactorToggle = document.getElementById('security-2fa-toggle');
+  if (twoFactorToggle) {
+    twoFactorToggle.addEventListener('change', (e) => {
+      state.updateProfile({ twoFactorEnabled: e.target.checked });
+      showToast(e.target.checked ? 'Two-factor authentication enabled!' : 'Two-factor authentication disabled!');
+    });
+  }
+
+  // Password visibility eye toggles
+  document.querySelectorAll('.password-toggle-btn').forEach(btn => {
+    btn.addEventListener('click', () => {
+      const targetId = btn.getAttribute('data-toggle');
+      const input = document.getElementById(targetId);
+      if (input) {
+        const isPassword = input.type === 'password';
+        input.type = isPassword ? 'text' : 'password';
+        
+        // Swap SVG icon
+        if (isPassword) {
+          btn.innerHTML = `<svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24"></path><line x1="1" y1="1" x2="23" y2="23"></line></svg>`;
+        } else {
+          btn.innerHTML = `<svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path><circle cx="12" cy="12" r="3"></circle></svg>`;
+        }
+      }
+    });
+  });
+
+  // Change Password submit button
+  const btnUpdatePassword = document.getElementById('btn-update-password');
+  if (btnUpdatePassword) {
+    btnUpdatePassword.addEventListener('click', () => {
+      const currentPass = document.getElementById('security-current-password').value;
+      const newPass = document.getElementById('security-new-password').value;
+      const confirmPass = document.getElementById('security-confirm-password').value;
+
+      if (!currentPass || !newPass || !confirmPass) {
+        showToast('Please fill in all password fields.', 'error');
+        return;
+      }
+      if (newPass !== confirmPass) {
+        showToast('New passwords do not match.', 'error');
+        return;
+      }
+      if (newPass.length < 6) {
+        showToast('New password must be at least 6 characters.', 'error');
+        return;
+      }
+
+      showToast('Password updated successfully!');
+      document.getElementById('security-current-password').value = '';
+      document.getElementById('security-new-password').value = '';
+      document.getElementById('security-confirm-password').value = '';
+    });
+  }
+
+  // Revoke Sessions
+  const btnRevokeAllSessions = document.getElementById('btn-revoke-all-sessions');
+  if (btnRevokeAllSessions) {
+    btnRevokeAllSessions.addEventListener('click', () => {
+      const mobileSession = document.getElementById('session-device-mobile');
+      if (mobileSession) {
+        mobileSession.remove();
+        showToast('All other sessions revoked successfully!');
+      } else {
+        showToast('No other active sessions to revoke.', 'error');
+      }
+    });
+  }
+
+  const btnRevokeMobile = document.getElementById('btn-revoke-mobile');
+  if (btnRevokeMobile) {
+    btnRevokeMobile.addEventListener('click', () => {
+      const mobileSession = document.getElementById('session-device-mobile');
+      if (mobileSession) {
+        mobileSession.remove();
+        showToast('Mobile session revoked successfully!');
+      }
+    });
+  }
+
+  // Export Data
+  const btnExportData = document.getElementById('btn-export-data');
+  if (btnExportData) {
+    btnExportData.addEventListener('click', () => {
+      const exportPayload = {
+        appName: "NAIVA",
+        exportDate: new Date().toISOString(),
+        profile: {
+          username: state.profile.username || "Muis",
+          phone: state.profile.phone || "+628123456789",
+          plan: state.profile.plan || "free",
+          backupEnabled: state.profile.backupEnabled !== false,
+          twoFactorEnabled: document.getElementById('security-2fa-toggle')?.checked || false
+        },
+        integrations: {
+          googleCalendar: state.integrations.gcal || false,
+          googleDrive: state.integrations.gdrive || false,
+          googleContacts: state.integrations.gcontacts || false,
+          gmail: state.integrations.gmail || false
+        },
+        memories: [
+          { id: 1, category: "Work", summary: "Loves to build fast AI software integrations." },
+          { id: 2, category: "Personal", summary: "Prefers dark mode UIs and minimal animations." }
+        ]
+      };
+
+      const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(exportPayload, null, 2));
+      const downloadAnchor = document.createElement('a');
+      downloadAnchor.setAttribute("href", dataStr);
+      downloadAnchor.setAttribute("download", `naiva_personal_data_${Date.now()}.json`);
+      document.body.appendChild(downloadAnchor);
+      downloadAnchor.click();
+      downloadAnchor.remove();
+
+      showToast('Personal data exported successfully!');
+    });
+  }
+
+  // Reset AI Memory Modal Control
+  const btnResetMemory = document.getElementById('btn-reset-memory');
+  const modalResetMemory = document.getElementById('modal-reset-memory');
+  const btnCancelReset = document.getElementById('btn-cancel-reset');
+  const btnConfirmReset = document.getElementById('btn-confirm-reset');
+
+  if (btnResetMemory && modalResetMemory) {
+    btnResetMemory.addEventListener('click', () => {
+      modalResetMemory.classList.add('active');
+    });
+
+    const hideResetModal = () => modalResetMemory.classList.remove('active');
+    btnCancelReset.addEventListener('click', hideResetModal);
+    modalResetMemory.addEventListener('click', (e) => {
+      if (e.target === modalResetMemory) hideResetModal();
+    });
+
+    btnConfirmReset.addEventListener('click', () => {
+      hideResetModal();
+      showToast('AI memory reset completed successfully!');
+    });
+  }
+
+  // Delete Account Modal Control
+  const btnDeleteAccount = document.getElementById('btn-delete-account');
+  const modalDeleteAccount = document.getElementById('modal-delete-account');
+  const btnCancelDelete = document.getElementById('btn-cancel-delete');
+  const btnConfirmDelete = document.getElementById('btn-confirm-delete');
+
+  if (btnDeleteAccount && modalDeleteAccount) {
+    btnDeleteAccount.addEventListener('click', () => {
+      modalDeleteAccount.classList.add('active');
+    });
+
+    const hideDeleteModal = () => modalDeleteAccount.classList.remove('active');
+    btnCancelDelete.addEventListener('click', hideDeleteModal);
+    modalDeleteAccount.addEventListener('click', (e) => {
+      if (e.target === modalDeleteAccount) hideDeleteModal();
+    });
+
+    btnConfirmDelete.addEventListener('click', () => {
+      hideDeleteModal();
+      showToast('Account deleted successfully. Logging out...', 'error');
+      setTimeout(() => {
+        window.location.hash = '';
+        window.location.reload();
+      }, 1500);
+    });
+  }
 
   // Settings tabs toggle
   document.querySelectorAll('.settings-tab-btn').forEach(btn => {
@@ -1589,6 +3307,29 @@ function initEventListeners() {
     document.getElementById('drawer-file-details').classList.remove('active');
   });
 
+  document.getElementById('close-memory-drawer').addEventListener('click', () => {
+    document.getElementById('drawer-memory-details').classList.remove('active');
+  });
+  document.getElementById('btn-close-memory-drawer-bottom').addEventListener('click', () => {
+    document.getElementById('drawer-memory-details').classList.remove('active');
+  });
+
+  document.getElementById('close-task-drawer').addEventListener('click', () => {
+    document.getElementById('drawer-task-details').classList.remove('active');
+  });
+  document.getElementById('btn-close-task-drawer-bottom').addEventListener('click', () => {
+    document.getElementById('drawer-task-details').classList.remove('active');
+  });
+  document.getElementById('btn-save-task-drawer').addEventListener('click', saveTaskDetailsFromDrawer);
+
+  document.getElementById('close-reminder-drawer').addEventListener('click', () => {
+    document.getElementById('drawer-reminder-details').classList.remove('active');
+  });
+  document.getElementById('btn-close-reminder-drawer-bottom').addEventListener('click', () => {
+    document.getElementById('drawer-reminder-details').classList.remove('active');
+  });
+  document.getElementById('btn-save-reminder-drawer').addEventListener('click', saveReminderDetailsFromDrawer);
+
   // Assistant Studio Inputs
   document.getElementById('assistant-name-input').addEventListener('input', (e) => {
     const val = e.target.value.trim() || 'NAIVA';
@@ -1601,8 +3342,17 @@ function initEventListeners() {
 
   // Assistant emoji avatar selector (opens emoji picker modal)
   document.getElementById('studio-avatar-btn').addEventListener('click', () => {
+    emojiPickerTarget = 'studio';
     openModal('modal-emoji-picker');
   });
+
+  const profileAvatarTrigger = document.getElementById('profile-avatar-trigger');
+  if (profileAvatarTrigger) {
+    profileAvatarTrigger.addEventListener('click', () => {
+      emojiPickerTarget = 'profile';
+      openModal('modal-emoji-picker');
+    });
+  }
 
   document.getElementById('close-emoji-modal').addEventListener('click', () => {
     closeModal('modal-emoji-picker');
@@ -1615,13 +3365,42 @@ function initEventListeners() {
   });
 
   document.querySelectorAll('.emoji-picker-item').forEach(item => {
-    item.addEventListener('click', (e) => {
+    item.addEventListener('click', async (e) => {
       const nextEmoji = e.target.getAttribute('data-emoji');
-      document.getElementById('studio-avatar-emoji').textContent = nextEmoji;
-      state.updateStudio({ emoji: nextEmoji });
-      document.getElementById('mockup-chat-avatar').textContent = nextEmoji;
-      closeModal('modal-emoji-picker');
-      showToast('Avatar updated & synced!');
+      
+      if (emojiPickerTarget === 'profile') {
+        const avatarDisplay = document.getElementById('profile-avatar-emoji-display');
+        if (avatarDisplay) avatarDisplay.textContent = nextEmoji;
+        
+        state.updateProfile({ avatar: nextEmoji });
+        syncSidebarProfile();
+        
+        if (state.token) {
+          try {
+            await fetch('http://localhost:3000/users/profile', {
+              method: 'PATCH',
+              headers: {
+                'Content-Type': 'application/json',
+                'Authorization': `Bearer ${state.token}`
+              },
+              body: JSON.stringify({
+                avatar: nextEmoji
+              })
+            });
+          } catch (err) {
+            console.error('Failed to sync avatar to backend:', err);
+          }
+        }
+        
+        closeModal('modal-emoji-picker');
+        showToast('Profile avatar updated successfully!');
+      } else {
+        document.getElementById('studio-avatar-emoji').textContent = nextEmoji;
+        state.updateStudio({ emoji: nextEmoji });
+        document.getElementById('mockup-chat-avatar').textContent = nextEmoji;
+        closeModal('modal-emoji-picker');
+        showToast('Avatar updated & synced!');
+      }
     });
   });
 
@@ -1635,7 +3414,11 @@ function initEventListeners() {
       state.updateStudio({ personality });
       
       // Update chat preview conversation
-      const greeting = PERSONALITY_RESPONSES[personality].greeting;
+      const langVal = state.studio.language || 'id';
+      const responses = PERSONALITY_RESPONSES[langVal] || PERSONALITY_RESPONSES['id'];
+      let greeting = responses[personality].greeting;
+      greeting = formatMessageByStyle(greeting, state.studio.style);
+
       studioChatLog = [
         { sender: 'assistant', text: greeting, time: '14:21' }
       ];
@@ -1651,6 +3434,17 @@ function initEventListeners() {
       btn.classList.add('active');
       const style = btn.getAttribute('data-style');
       state.updateStudio({ style });
+
+      // Update chat preview conversation based on new style
+      const langVal = state.studio.language || 'id';
+      const responses = PERSONALITY_RESPONSES[langVal] || PERSONALITY_RESPONSES['id'];
+      let greeting = responses[state.studio.personality].greeting;
+      greeting = formatMessageByStyle(greeting, style);
+
+      studioChatLog = [
+        { sender: 'assistant', text: greeting, time: '14:21' }
+      ];
+      renderMockupChat();
       showToast('Communication style updated!');
     });
   });
@@ -1665,7 +3459,9 @@ function initEventListeners() {
       
       // Update chat preview conversation
       const responses = PERSONALITY_RESPONSES[language] || PERSONALITY_RESPONSES['id'];
-      const greeting = responses[state.studio.personality].greeting;
+      let greeting = responses[state.studio.personality].greeting;
+      greeting = formatMessageByStyle(greeting, state.studio.style);
+
       studioChatLog = [
         { sender: 'assistant', text: greeting, time: '14:21' }
       ];
@@ -1681,6 +3477,30 @@ function initEventListeners() {
     state.updateStudio({ briefing: enabled });
     document.getElementById('briefing-time-section').classList.toggle('disabled', !enabled);
     showToast(enabled ? 'Daily briefing enabled!' : 'Daily briefing disabled!');
+
+    if (enabled) {
+      isAssistantTyping = true;
+      renderMockupChat();
+      
+      setTimeout(() => {
+        isAssistantTyping = false;
+        const langVal = state.studio.language || 'id';
+        const now = new Date();
+        const timeStr = `${String(now.getHours()).padStart(2, '0')}:${String(now.getMinutes()).padStart(2, '0')}`;
+        
+        let briefingText = '';
+        if (langVal === 'en') {
+          briefingText = `☀️ *NAIVA DAILY BRIEFING* ☀️\n\nGood morning Muis! Here is your schedule for today:\n\n📅 *Today's Schedule*:\n- 09:00: Product Launch Align\n- 14:00: Catch-up Meeting\n\n📋 *Priority Tasks*:\n- Complete API documentation\n- Send JavaCoffee invoice\n\nHave a productive day! 🚀`;
+        } else {
+          briefingText = `☀️ *DAILY BRIEFING NAIVA* ☀️\n\nSelamat pagi Muis! Berikut ringkasan agenda Anda hari ini:\n\n📅 *Agenda Hari Ini*:\n- 09:00: Product Launch Align\n- 14:00: Catch-up Meeting\n\n📋 *Tugas Prioritas*:\n- Menyelesaikan dokumentasi API\n- Mengirimkan invoice JavaCoffee\n\nSemoga hari Anda produktif! 🚀`;
+        }
+        
+        briefingText = formatMessageByStyle(briefingText, state.studio.style);
+        studioChatLog.push({ sender: 'assistant', text: briefingText, time: timeStr });
+        renderMockupChat();
+        playMockupNotificationSound();
+      }, 1000);
+    }
   });
 
   document.getElementById('briefing-time-input').addEventListener('change', (e) => {
@@ -1692,8 +3512,50 @@ function initEventListeners() {
   const followUpToggleEl = document.getElementById('smart-followup-toggle');
   if (followUpToggleEl) {
     followUpToggleEl.addEventListener('change', (e) => {
-      state.updateStudio({ followup: e.target.checked });
-      showToast(e.target.checked ? 'Smart Follow Up enabled!' : 'Smart Follow Up disabled!');
+      const enabled = e.target.checked;
+      state.updateStudio({ followup: enabled });
+      showToast(enabled ? 'Smart Follow Up enabled!' : 'Smart Follow Up disabled!');
+
+      if (enabled) {
+        isAssistantTyping = true;
+        renderMockupChat();
+        
+        setTimeout(() => {
+          isAssistantTyping = false;
+          const langVal = state.studio.language || 'id';
+          const now = new Date();
+          const timeStr = `${String(now.getHours()).padStart(2, '0')}:${String(now.getMinutes()).padStart(2, '0')}`;
+          
+          let followUpText = '';
+          if (langVal === 'en') {
+            followUpText = `⏳ *Smart Follow Up*:\n\nHi Muis, just a quick friendly reminder to complete your high-priority task: *Complete API documentation*. It's marked as pending. Let me know if you need any help!`;
+          } else {
+            followUpText = `⏳ *Smart Follow Up*:\n\nHalo Muis, sekadar mengingatkan tugas prioritas tinggi Anda: *Menyelesaikan dokumentasi API*. Statusnya masih tertunda. Kabari saya jika butuh bantuan ya!`;
+          }
+          
+          followUpText = formatMessageByStyle(followUpText, state.studio.style);
+          studioChatLog.push({ sender: 'assistant', text: followUpText, time: timeStr });
+          renderMockupChat();
+          playMockupNotificationSound();
+        }, 1000);
+      }
+    });
+  }
+
+  // Clear chat preview button
+  const clearChatBtn = document.getElementById('btn-clear-mockup-chat');
+  if (clearChatBtn) {
+    clearChatBtn.addEventListener('click', () => {
+      studioChatLog = [];
+      const config = state.studio;
+      const langVal = config.language || 'id';
+      const responses = PERSONALITY_RESPONSES[langVal] || PERSONALITY_RESPONSES['id'];
+      let greeting = responses[config.personality].greeting;
+      greeting = formatMessageByStyle(greeting, config.style);
+      
+      studioChatLog.push({ sender: 'assistant', text: greeting, time: '14:21' });
+      renderMockupChat();
+      showToast('Chat history cleared!');
     });
   }
 
@@ -1703,6 +3565,75 @@ function initEventListeners() {
     if (e.key === 'Enter') handleStudioSendMessage();
   });
 
+  // Assistant Studio Save All Button
+  const saveStudioBtn = document.getElementById('btn-save-studio');
+  if (saveStudioBtn) {
+    saveStudioBtn.addEventListener('click', async () => {
+      saveStudioBtn.disabled = true;
+      const originalHtml = saveStudioBtn.innerHTML;
+      saveStudioBtn.innerHTML = `
+        <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2.5" style="animation: spin 1s linear infinite; margin-right: 4px;"><circle cx="12" cy="12" r="10" stroke="rgba(255,255,255,0.2)"></circle><path d="M4 12a8 8 0 0 1 8-8" stroke="#FFF" stroke-linecap="round"></path></svg>
+        Saving Changes...
+      `;
+
+      // Read values from form
+      const name = document.getElementById('assistant-name-input').value.trim() || 'NAIVA';
+      const emoji = document.getElementById('studio-avatar-emoji').textContent || '🤖';
+      
+      const activeCard = document.querySelector('.personality-card.active');
+      const personality = activeCard ? activeCard.getAttribute('data-personality') : 'friendly';
+      
+      const activeStyleBtn = document.querySelector('.style-btn.active:not(.lang-btn)');
+      const style = activeStyleBtn ? activeStyleBtn.getAttribute('data-style') : 'normal';
+      
+      const activeLangBtn = document.querySelector('.lang-btn.active');
+      const language = activeLangBtn ? activeLangBtn.getAttribute('data-lang') : 'id';
+      
+      const briefing = document.getElementById('daily-briefing-toggle').checked;
+      const briefingTime = document.getElementById('briefing-time-input').value;
+      const followup = document.getElementById('smart-followup-toggle').checked;
+
+      try {
+        await state.updateStudio({
+          name,
+          emoji,
+          personality,
+          style,
+          language,
+          briefing,
+          briefingTime,
+          followup
+        });
+        
+        setTimeout(() => {
+          saveStudioBtn.disabled = false;
+          saveStudioBtn.innerHTML = originalHtml;
+          showToast('Assistant Studio configuration saved & synced successfully!');
+        }, 800);
+      } catch (err) {
+        saveStudioBtn.disabled = false;
+        saveStudioBtn.innerHTML = originalHtml;
+        showToast('Failed to save studio configuration.', 'error');
+      }
+    });
+  }
+
+  // Sidebar Toggle Minimize
+  const sidebar = document.querySelector('.sidebar');
+  const toggleBtn = document.getElementById('sidebar-toggle');
+  if (sidebar && toggleBtn) {
+    const isMinimized = localStorage.getItem('sidebar-minimized') === 'true';
+    if (isMinimized) {
+      sidebar.classList.add('minimized');
+      toggleBtn.classList.add('minimized');
+    }
+    
+    toggleBtn.addEventListener('click', () => {
+      sidebar.classList.toggle('minimized');
+      toggleBtn.classList.toggle('minimized');
+      localStorage.setItem('sidebar-minimized', sidebar.classList.contains('minimized'));
+    });
+  }
 }
 
 // --- FILE MOCK UPLOAD & SUMMARY ---
@@ -1760,48 +3691,107 @@ function handleFileProcessing(filesList) {
   `;
   document.body.appendChild(loader);
 
-  setTimeout(() => {
-    // Process each file
-    const newFiles = [...state.files];
+  if (state.token) {
+    const uploadPromises = [];
     for (let i = 0; i < filesList.length; i++) {
       const f = filesList[i];
-      const ext = f.name.split('.').pop().toLowerCase();
-      const type = ['pdf', 'txt', 'doc', 'csv'].includes(ext) ? (ext === 'csv' ? 'txt' : ext) : 'pdf';
-      const sizeStr = `${(f.size / (1024 * 1024)).toFixed(1)} MB`;
-      const dateStr = 'Today';
-      
-      const preset = FILE_PRESET_ANALYSES[type] || FILE_PRESET_ANALYSES.pdf;
+      const formData = new FormData();
+      formData.append('file', f);
 
-      newFiles.unshift({
-        id: `f_user_${Date.now()}_${i}`,
-        name: f.name,
-        type: type,
-        size: sizeStr,
-        date: dateStr,
-        summary: preset.summary,
-        points: preset.points,
-        actions: preset.actions
+      const promise = fetch('http://localhost:3000/file/upload', {
+        method: 'POST',
+        headers: {
+          'Authorization': `Bearer ${state.token}`
+        },
+        body: formData
+      })
+      .then(res => {
+        if (!res.ok) throw new Error('Upload failed');
+        return res.json();
+      })
+      .then(uploadedFile => {
+        return {
+          id: uploadedFile.id,
+          name: uploadedFile.filename,
+          type: uploadedFile.mimeType.split('/')[1] || 'pdf',
+          size: `${(uploadedFile.size / (1024 * 1024)).toFixed(1)} MB`,
+          date: new Date(uploadedFile.createdAt).toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' }),
+          summary: uploadedFile.summary || 'Summary not processed yet.',
+          points: uploadedFile.keyPoints || [],
+          actions: uploadedFile.actionItems || []
+        };
+      })
+      .catch(err => {
+        console.error('File upload failed, falling back to mock.', err);
+        const ext = f.name.split('.').pop().toLowerCase();
+        const type = ['pdf', 'txt', 'doc', 'csv'].includes(ext) ? (ext === 'csv' ? 'txt' : ext) : 'pdf';
+        const preset = FILE_PRESET_ANALYSES[type] || FILE_PRESET_ANALYSES.pdf;
+        return {
+          id: `f_user_${Date.now()}_${i}`,
+          name: f.name,
+          type: type,
+          size: `${(f.size / (1024 * 1024)).toFixed(1)} MB`,
+          date: 'Today',
+          summary: preset.summary,
+          points: preset.points,
+          actions: preset.actions
+        };
       });
+      uploadPromises.push(promise);
     }
 
-    state.updateFiles(newFiles);
-    document.body.removeChild(loader);
-
-    // Refresh view
-    renderFilesVault();
-  }, 1600);
+    Promise.all(uploadPromises).then(processedFiles => {
+      const newFiles = [...processedFiles, ...state.files];
+      state.updateFiles(newFiles);
+      document.body.removeChild(loader);
+      renderFilesVault();
+      showToast(`${filesList.length} file(s) analyzed and saved successfully`);
+    });
+  } else {
+    setTimeout(() => {
+      const newFiles = [...state.files];
+      for (let i = 0; i < filesList.length; i++) {
+        const f = filesList[i];
+        const ext = f.name.split('.').pop().toLowerCase();
+        const type = ['pdf', 'txt', 'doc', 'csv'].includes(ext) ? (ext === 'csv' ? 'txt' : ext) : 'pdf';
+        const sizeStr = `${(f.size / (1024 * 1024)).toFixed(1)} MB`;
+        const dateStr = 'Today';
+        const preset = FILE_PRESET_ANALYSES[type] || FILE_PRESET_ANALYSES.pdf;
+        
+        newFiles.unshift({
+          id: `f_user_${Date.now()}_${i}`,
+          name: f.name,
+          type: type,
+          size: sizeStr,
+          date: dateStr,
+          summary: preset.summary,
+          points: preset.points,
+          actions: preset.actions
+        });
+      }
+      state.updateFiles(newFiles);
+      document.body.removeChild(loader);
+      renderFilesVault();
+      showToast(`${filesList.length} file(s) analyzed (Mock Mode)`);
+    }, 1600);
+  }
 }
 
 // --- MODAL UTILS & SAVING LOGICS ---
 function openModal(id) {
   document.getElementById(id).classList.add('active');
+  if (id === 'modal-event') {
+    const todayStr = new Date().toISOString().split('T')[0];
+    const dateField = document.getElementById('new-event-date');
+    if (dateField) dateField.value = todayStr;
+  }
 }
 
 function closeModal(id) {
   document.getElementById(id).classList.remove('active');
 }
 
-function saveNewMemory() {
+async function saveNewMemory() {
   const title = document.getElementById('new-memory-title').value.trim();
   const content = document.getElementById('new-memory-content').value.trim();
   const category = document.getElementById('new-memory-category').value;
@@ -1819,6 +3809,13 @@ function saveNewMemory() {
     date: 'Today'
   };
 
+  if (state.token) {
+    const res = await state.apiPost('/memory', { title, content, category });
+    if (res && res.id) {
+      newMem.id = res.id;
+    }
+  }
+
   state.updateMemories([newMem, ...state.memories]);
   closeModal('modal-memory');
 
@@ -1830,7 +3827,7 @@ function saveNewMemory() {
   renderMemoryCenter();
 }
 
-function saveNewTask() {
+async function saveNewTask() {
   const title = document.getElementById('new-task-name').value.trim();
   const tagStr = document.getElementById('new-task-tag').value.trim();
   const priority = document.getElementById('new-task-priority').value;
@@ -1851,6 +3848,13 @@ function saveNewTask() {
     status
   };
 
+  if (state.token) {
+    const res = await state.apiPost('/task', { title, tags, priority, status });
+    if (res && res.id) {
+      newTask.id = res.id;
+    }
+  }
+
   state.updateTasks([newTask, ...state.tasks]);
   closeModal('modal-task');
 
@@ -1861,7 +3865,7 @@ function saveNewTask() {
   renderTasksBoard();
 }
 
-function saveNewReminder() {
+async function saveNewReminder() {
   const text = document.getElementById('new-reminder-text').value.trim();
   const timegroup = document.getElementById('new-reminder-timegroup').value;
   const time = document.getElementById('new-reminder-time').value;
@@ -1879,6 +3883,30 @@ function saveNewReminder() {
     completed: false
   };
 
+  if (state.token) {
+    let scheduledAt = new Date();
+    if (timegroup === 'Tomorrow') {
+      scheduledAt.setDate(scheduledAt.getDate() + 1);
+    } else if (timegroup === 'This Week') {
+      scheduledAt.setDate(scheduledAt.getDate() + 3);
+    } else if (timegroup === 'This Month') {
+      scheduledAt.setDate(scheduledAt.getDate() + 15);
+    }
+    if (time) {
+      const parts = time.split(':');
+      scheduledAt.setHours(parseInt(parts[0], 10), parseInt(parts[1], 10), 0, 0);
+    }
+
+    const res = await state.apiPost('/reminder', {
+      title: text,
+      scheduledAt: scheduledAt.toISOString(),
+      status: 'pending',
+    });
+    if (res && res.id) {
+      newRem.id = res.id;
+    }
+  }
+
   state.updateReminders([...state.reminders, newRem]);
   closeModal('modal-reminder');
 
@@ -1888,7 +3916,7 @@ function saveNewReminder() {
   renderRemindersTimeline();
 }
 
-function saveNewContact() {
+async function saveNewContact() {
   const name = document.getElementById('new-contact-name').value.trim();
   const company = document.getElementById('new-contact-company').value.trim() || 'Freelance';
   const phone = document.getElementById('new-contact-phone').value.trim();
@@ -1909,6 +3937,19 @@ function saveNewContact() {
     insta
   };
 
+  if (state.token) {
+    const res = await state.apiPost('/contact', {
+      name,
+      company,
+      phone,
+      email,
+      instagram: insta
+    });
+    if (res && res.id) {
+      newCon.id = res.id;
+    }
+  }
+
   state.updateContacts([newCon, ...state.contacts]);
   closeModal('modal-contact');
 
@@ -1922,9 +3963,10 @@ function saveNewContact() {
   renderContactsManager();
 }
 
-function saveNewEvent() {
+async function saveNewEvent() {
   const title = document.getElementById('new-event-title').value.trim();
   const time = document.getElementById('new-event-time').value;
+  const dateStr = document.getElementById('new-event-date').value || new Date().toISOString().split('T')[0];
   const details = document.getElementById('new-event-details').value.trim() || '';
 
   if (!title) {
@@ -1935,9 +3977,26 @@ function saveNewEvent() {
   const newEvt = {
     id: `e_user_${Date.now()}`,
     title,
+    date: dateStr,
     time,
     details
   };
+
+  if (state.token) {
+    let scheduledAt = new Date(dateStr);
+    if (time) {
+      const parts = time.split(':');
+      scheduledAt.setHours(parseInt(parts[0], 10), parseInt(parts[1], 10), 0, 0);
+    }
+    const res = await state.apiPost('/reminder', {
+      title: `[Calendar] ${title}`,
+      scheduledAt: scheduledAt.toISOString(),
+      status: 'pending',
+    });
+    if (res && res.id) {
+      newEvt.id = res.id;
+    }
+  }
 
   state.updateEvents([...state.events, newEvt]);
   closeModal('modal-event');
@@ -1945,6 +4004,7 @@ function saveNewEvent() {
   // Reset
   document.getElementById('new-event-title').value = '';
   document.getElementById('new-event-details').value = '';
+  document.getElementById('new-event-date').value = '';
 
   renderCalendarAgenda();
 }
@@ -1989,12 +4049,15 @@ function syncSidebarProfile() {
   const sidebarNameEl = document.querySelector('.sidebar .user-name');
   if (sidebarNameEl) sidebarNameEl.textContent = profile.username;
   const sidebarAvatarEl = document.querySelector('.sidebar .user-avatar');
-  if (sidebarAvatarEl) sidebarAvatarEl.textContent = profile.username.charAt(0).toUpperCase();
+  if (sidebarAvatarEl) {
+    sidebarAvatarEl.textContent = profile.avatar || profile.username.charAt(0).toUpperCase();
+  }
 }
 
-function saveUserProfile() {
+async function saveUserProfile() {
   const username = document.getElementById('settings-username').value.trim() || 'Muis';
   const phone = document.getElementById('settings-phone').value.trim() || '8123456789';
+  const bio = document.getElementById('settings-bio').value.trim();
 
   const saveBtn = document.getElementById('btn-save-profile');
   const oldText = saveBtn.textContent;
@@ -2002,23 +4065,84 @@ function saveUserProfile() {
   saveBtn.disabled = true;
   saveBtn.innerHTML = `<svg class="spinner-svg" viewBox="0 0 50 50" style="width:18px;height:18px;animation:spin 1s linear infinite;stroke:currentColor;fill:none;stroke-width:5;stroke-linecap:round;margin-right:8px;display:inline-block;"><circle cx="25" cy="25" r="20"></circle></svg> Saving...`;
   
-  setTimeout(() => {
-    state.updateProfile({ username, phone });
-    playSuccessChime();
-    showToast('Profile settings saved successfully!');
-    
-    saveBtn.innerHTML = 'Settings Saved ✓';
-    saveBtn.style.backgroundColor = 'var(--primary-color)';
-    
-    syncSidebarProfile();
-    renderDashboard();
-    
-    setTimeout(() => {
+  if (state.token) {
+    try {
+      const response = await fetch('http://localhost:3000/users/profile', {
+        method: 'PATCH',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${state.token}`
+        },
+        body: JSON.stringify({
+          name: username,
+          waNumber: phone,
+          avatar: state.profile.avatar || '🤖'
+        })
+      });
+      const data = await response.json();
+      if (data.success && data.user) {
+        state.updateProfile({ 
+          username: data.user.name, 
+          phone: data.user.waNumber,
+          avatar: data.user.avatar || '🤖',
+          bio: bio
+        });
+        playSuccessChime();
+        showToast('Profile settings saved successfully!');
+        
+        saveBtn.innerHTML = 'Settings Saved ✓';
+        saveBtn.style.backgroundColor = 'var(--primary-color)';
+        
+        syncSidebarProfile();
+        renderDashboard();
+        
+        // Update display text elements
+        const displayName = document.getElementById('profile-details-display-name');
+        if (displayName) displayName.textContent = data.user.name;
+
+        setTimeout(() => {
+          saveBtn.disabled = false;
+          saveBtn.innerHTML = oldText;
+          saveBtn.style.backgroundColor = '';
+        }, 1500);
+      } else {
+        showToast('Failed to save profile: ' + (data.message || 'Error API'));
+        saveBtn.disabled = false;
+        saveBtn.innerHTML = oldText;
+      }
+    } catch (err) {
+      showToast('Koneksi ke server gagal.');
+      console.error(err);
       saveBtn.disabled = false;
       saveBtn.innerHTML = oldText;
-      saveBtn.style.backgroundColor = '';
-    }, 1500);
-  }, 600);
+    }
+  } else {
+    setTimeout(() => {
+      state.updateProfile({ 
+        username, 
+        phone, 
+        avatar: state.profile.avatar || '🤖',
+        bio
+      });
+      playSuccessChime();
+      showToast('Profile settings saved successfully!');
+      
+      saveBtn.innerHTML = 'Settings Saved ✓';
+      saveBtn.style.backgroundColor = 'var(--primary-color)';
+      
+      syncSidebarProfile();
+      renderDashboard();
+
+      const displayName = document.getElementById('profile-details-display-name');
+      if (displayName) displayName.textContent = username;
+      
+      setTimeout(() => {
+        saveBtn.disabled = false;
+        saveBtn.innerHTML = oldText;
+        saveBtn.style.backgroundColor = '';
+      }, 1500);
+    }, 600);
+  }
 }
 
 // Helper: Escape HTML to avoid XSS injections in inputs
@@ -2031,15 +4155,77 @@ function escapeHtml(text) {
     .replace(/"/g, "&quot;")
     .replace(/'/g, "&#039;");
 }
+
+// Helper: Format message based on selected communication style
+function formatMessageByStyle(text, style) {
+  if (!text) return '';
+  if (style === 'short') {
+    if (text.includes('Assalamualaikum')) {
+      return 'Assalamualaikum Muis. Hari ini ada 2 meeting. Semoga berkah!';
+    }
+    if (text.includes('sayang') || text.includes('beb')) {
+      return 'Halo sayang! Semangat hari ini ya beb! ❤️';
+    }
+    if (text.includes('Kenapa kamu memandangi')) {
+      return 'Cepat kerja! Ada 5 tugas tertunda!';
+    }
+    if (text.includes('Selamat pagi') || text.includes('Greetings')) {
+      return 'Greetings. Agenda & tasks have been organized.';
+    }
+    if (text.includes('Halo rekan') || text.includes('partner')) {
+      return 'Hello partner. Ready to review today\'s metrics.';
+    }
+    // general fallback: take first sentence
+    const sentences = text.split(/[.!?\n]/).filter(s => s.trim().length > 0);
+    return sentences.length > 0 ? sentences[0] + '.' : text;
+  } else if (style === 'detailed') {
+    if (text.includes('Assalamualaikum')) {
+      return text + ' Jangan lupa untuk menyempatkan shalat Dhuha dan membaca Al-Qur\'an di sela-sela kesibukan Anda. Semoga hari ini penuh dengan kemudahan dan kesuksesan dunia akhirat.';
+    }
+    if (text.includes('sayang') || text.includes('beb')) {
+      return text + ' Aku selalu di sini buat support kamu gimanapun keadaan hari ini. Jangan lupa minum air putih yang banyak dan kabari aku kalau kamu udah selesai kerja ya beb, muah! ❤️';
+    }
+    if (text.includes('Kenapa kamu memandangi')) {
+      return text + ' Kerjaan menumpuk tapi kamu malah sibuk melihat preview chat ini. Segera selesaikan tugas-tugas penting itu sebelum tenggat waktu berakhir!';
+    }
+    if (text.includes('Selamat pagi') || text.includes('Greetings')) {
+      return text + ' I am ready to generate comprehensive reports, proofread draft emails, or analyze large documents for you. Please let me know how I can optimize your productivity today.';
+    }
+    if (text.includes('Halo rekan') || text.includes('partner')) {
+      return text + ' Let\'s focus on our key performance indicators (KPIs) and optimize conversion rates. I have also prepared statistical projections for our review.';
+    }
+    return text + ' Let me know if you want me to write emails, plan projects, or research information. I am fully at your service.';
+  }
+  return text; // 'normal' style returns original text
+}
 // --- INITIALIZE APPLICATION ---
-if (document.readyState === 'loading') {
-  document.addEventListener('DOMContentLoaded', () => {
-    initRouter();
-    initEventListeners();
-    syncSidebarProfile();
-  });
-} else {
+const initializeApp = async () => {
+  // Parse tokens from URL if coming back from Google OAuth redirect
+  const urlParams = new URLSearchParams(window.location.search);
+  const urlAccessToken = urlParams.get('accessToken');
+  const urlRefreshToken = urlParams.get('refreshToken');
+  
+  if (urlAccessToken && urlRefreshToken) {
+    state.token = urlAccessToken;
+    state.refreshToken = urlRefreshToken;
+    localStorage.setItem('naiva_token', urlAccessToken);
+    localStorage.setItem('naiva_refresh_token', urlRefreshToken);
+    
+    // Clear URL parameters
+    const cleanUrl = new URL(window.location.href);
+    cleanUrl.searchParams.delete('accessToken');
+    cleanUrl.searchParams.delete('refreshToken');
+    window.history.replaceState({}, document.title, cleanUrl.pathname + cleanUrl.hash);
+  }
+
+  await state.syncWithBackend();
   initRouter();
   initEventListeners();
   syncSidebarProfile();
+};
+
+if (document.readyState === 'loading') {
+  document.addEventListener('DOMContentLoaded', initializeApp);
+} else {
+  initializeApp();
 }

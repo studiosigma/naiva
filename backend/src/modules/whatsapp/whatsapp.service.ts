@@ -82,6 +82,11 @@ export class WhatsAppService {
     const isSearchQuery = searchPrefixes.some(p => cleanText.startsWith(p));
 
     if (urls && urls.length > 0 && !isSearchQuery) {
+      if (user.plan === 'free') {
+        const warning = `⚠️ *Fitur Ringkasan Web Terbatas* ⚠️\n\nFitur merangkum konten dari link/URL via WhatsApp hanya tersedia pada paket *Basic* atau *Pro*. Silakan upgrade paket Anda di dasbor NAIVA! 🔍`;
+        await this.whatsappApiService.sendMessage(from, warning);
+        return;
+      }
       const targetUrl = urls[0];
       this.logger.log(`URL detected: ${targetUrl}. Enqueueing scraping job.`);
 
@@ -148,6 +153,12 @@ export class WhatsAppService {
         plan: 'free',
         status: 'active',
       });
+    }
+
+    if (user.plan === 'free') {
+      const warning = `⚠️ *Fitur Voice Note Terbatas* ⚠️\n\nFitur transkripsi & rangkuman pesan suara (voice note) via WhatsApp hanya tersedia pada paket *Basic* atau *Pro*. Silakan upgrade paket Anda di dasbor NAIVA! 🎙️`;
+      await this.whatsappApiService.sendMessage(from, warning);
+      return;
     }
 
     // Add background processing job
@@ -244,5 +255,60 @@ export class WhatsAppService {
       );
       this.logger.log(`Reminder ${reminderId} snoozed for 10 minutes.`);
     }
+  }
+
+  async simulateMessage(from: string, text: string): Promise<string> {
+    let user = await this.usersService.findOneByWaNumber(from);
+    if (!user) {
+      user = await this.prisma.user.findFirst();
+      if (!user) {
+        user = await this.usersService.create({
+          email: 'muis@naiva.ai',
+          name: 'Muis',
+          waNumber: from,
+          plan: 'free',
+          status: 'active',
+        });
+      }
+    }
+
+    const replyText = await this.intentRouterService.routeMessage(user.id, text, user.persona);
+
+    // Save conversation log
+    let conversation = await this.prisma.conversation.findUnique({
+      where: {
+        userId_waRoomId: {
+          userId: user.id,
+          waRoomId: from,
+        },
+      },
+    });
+
+    if (!conversation) {
+      conversation = await this.prisma.conversation.create({
+        data: {
+          userId: user.id,
+          waRoomId: from,
+        },
+      });
+    }
+
+    await this.prisma.message.create({
+      data: {
+        conversationId: conversation.id,
+        senderType: 'user',
+        text,
+      },
+    });
+
+    await this.prisma.message.create({
+      data: {
+        conversationId: conversation.id,
+        senderType: 'assistant',
+        text: replyText,
+      },
+    });
+
+    return replyText;
   }
 }

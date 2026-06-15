@@ -60,4 +60,15 @@ export class WhatsAppController {
     }
     return { success: true };
   }
+
+  @Post('simulate')
+  @ApiOperation({ summary: 'Simulate a WhatsApp message and get the AI reply' })
+  async simulateMessage(@Body() body: { message: string; from?: string }) {
+    const from = body.from || '6281234567890';
+    const reply = await this.whatsappService.simulateMessage(from, body.message);
+    return {
+      success: true,
+      reply,
+    };
+  }
 }

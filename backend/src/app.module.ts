@@ -12,6 +12,7 @@ import { FileModule } from './modules/file/file.module';
 import { AIModule } from './modules/ai/ai.module';
 import { QueuesModule } from './queues/queues.module';
 import { ExpenseModule } from './modules/expense/expense.module';
+import { SubscriptionModule } from './modules/subscription/subscription.module';
 
 @Module({
   imports: [
@@ -37,6 +38,7 @@ import { ExpenseModule } from './modules/expense/expense.module';
     FileModule,
     AIModule,
     ExpenseModule,
+    SubscriptionModule,
   ],
 })
 export class AppModule {}

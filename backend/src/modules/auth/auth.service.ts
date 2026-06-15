@@ -55,6 +55,25 @@ export class AuthService {
     };
   }
 
+  async devLogin() {
+    let user = await this.usersService.findOneByEmail('muis@naiva.ai');
+    if (!user) {
+      user = await this.usersService.create({
+        email: 'muis@naiva.ai',
+        name: 'Muis',
+        waNumber: '6281234567890',
+        plan: 'free',
+        status: 'active',
+      });
+    }
+    const tokens = await this.generateTokens(user);
+    return {
+      success: true,
+      user: this.sanitizeUser(user),
+      ...tokens,
+    };
+  }
+
   async googleLogin(profile: any) {
     let user = await this.usersService.findOneByGoogleId(profile.id);
 

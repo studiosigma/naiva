@@ -5,11 +5,15 @@ import { LoginDto } from './dto/login.dto';
 import { RefreshDto } from './dto/refresh.dto';
 import { AuthGuard } from '@nestjs/passport';
 import { ApiTags, ApiOperation, ApiResponse } from '@nestjs/swagger';
+import { ConfigService } from '@nestjs/config';
 
 @ApiTags('Authentication')
 @Controller('auth')
 export class AuthController {
-  constructor(private readonly authService: AuthService) {}
+  constructor(
+    private readonly authService: AuthService,
+    private readonly configService: ConfigService,
+  ) {}
 
   @Post('signup')
   @ApiOperation({ summary: 'Register a new user account' })
@@ -26,6 +30,12 @@ export class AuthController {
   @ApiResponse({ status: 401, description: 'Invalid email or password.' })
   async login(@Body() dto: LoginDto) {
     return this.authService.login(dto);
+  }
+
+  @Post('dev-login')
+  @ApiOperation({ summary: 'Auto-login or register a default dev user' })
+  async devLogin() {
+    return this.authService.devLogin();
   }
 
   @Post('refresh')
@@ -46,7 +56,7 @@ export class AuthController {
   @ApiOperation({ summary: 'Google OAuth callback handler' })
   async googleAuthRedirect(@Req() req, @Res() res) {
     const data = await this.authService.googleLogin(req.user);
-    // Redirect or return token payload
-    return res.json(data);
+    const frontendUrl = this.configService.get<string>('FRONTEND_URL') || 'http://localhost:5173';
+    return res.redirect(`${frontendUrl}/?accessToken=${data.accessToken}&refreshToken=${data.refreshToken}`);
   }
 }
