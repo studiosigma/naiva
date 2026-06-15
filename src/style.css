@@ -3043,7 +3043,6 @@ input:checked + .slider:before {
   display: none;
   align-items: center;
   justify-content: center;
-  animation: fadeInOverlay 0.2s ease;
 }
 
 @keyframes fadeInOverlay {
@@ -3053,6 +3052,7 @@ input:checked + .slider:before {
 
 .modal-overlay.active {
   display: flex;
+  animation: fadeInOverlay 0.2s ease;
 }
 
 .modal-card {
@@ -3125,11 +3125,11 @@ input:checked + .slider:before {
   z-index: 999;
   display: none;
   justify-content: flex-end;
-  animation: fadeInOverlay 0.2s ease;
 }
 
 .drawer-overlay.active {
   display: flex;
+  animation: fadeInOverlay 0.2s ease;
 }
 
 .drawer-panel {
