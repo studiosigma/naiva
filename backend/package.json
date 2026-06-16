@@ -1,7 +1,7 @@
 {
-  "name": "naiva-backend",
+  "name": "myva-backend",
   "version": "1.0.0",
-  "description": "Production-ready backend for NAIVA (Personal AI Assistant on WhatsApp)",
+  "description": "Production-ready backend for MYVA (Personal AI Assistant on WhatsApp)",
   "author": "Muis",
   "private": true,
   "license": "UNLICENSED",

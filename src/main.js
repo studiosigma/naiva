@@ -13,7 +13,7 @@ window.fetch = function (input, init) {
 };
 
 /* ==========================================================================
-   NAIVA CORE APPLICATION LOGIC
+   MYVA CORE APPLICATION LOGIC
    ========================================================================== */
 
 // --- PERSONA NAME MAPPING (Bug #9: consistent naming) ---
@@ -40,7 +40,7 @@ let activeOauthKey = null;
 let activeSettingsKey = null;
 
 let dashSimChatLog = [
-  { sender: 'assistant', text: 'Halo! Saya asisten AI NAIVA. Kirimkan pesan atau perintah WhatsApp di sini untuk disimulasikan.', time: '09:00' }
+  { sender: 'assistant', text: 'Halo! Saya asisten AI MYVA. Kirimkan pesan atau perintah WhatsApp di sini untuk disimulasikan.', time: '09:00' }
 ];
 
 // --- STATE MANAGEMENT ---
@@ -55,7 +55,7 @@ class AppState {
     this.expenses = this.load('expenses', DEFAULT_EXPENSES);
     
     this.studio = this.load('studio_config', {
-      name: 'NAIVA',
+      name: 'MYVA',
       emoji: '🤖',
       personality: 'friendly',
       style: 'normal',
@@ -78,8 +78,8 @@ class AppState {
       backupEnabled: true,
       plan: 'free'
     });
-    this.token = localStorage.getItem('naiva_token') || null;
-    this.refreshToken = localStorage.getItem('naiva_refresh_token') || null;
+    this.token = localStorage.getItem('myva_token') || null;
+    this.refreshToken = localStorage.getItem('myva_refresh_token') || null;
   }
 
   async syncWithBackend() {
@@ -112,14 +112,14 @@ class AppState {
           username: user.name || 'User',
           phone: user.waNumber || '8123456789',
           avatar: user.avatar || '🤖',
-          email: user.email || 'muis@naiva.ai',
+          email: user.email || 'muis@myva.ai',
           bio: this.profile.bio || '',
           plan: user.plan || 'free',
         };
         this.save('profile', this.profile);
 
         this.studio = {
-          name: this.studio.name || 'NAIVA',
+          name: this.studio.name || 'MYVA',
           emoji: this.studio.emoji || '🤖',
           personality: user.persona || this.studio.personality || 'friendly',
           style: this.studio.style || 'normal',
@@ -213,7 +213,7 @@ class AppState {
             title: e.title.replace('[Calendar] ', ''),
             date: `${yyyy}-${mm}-${dd}`,
             time: dateObj.toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit', hour12: false }),
-            details: e.description || 'Synchronized via Google Calendar/Naiva Backend',
+            details: e.description || 'Synchronized via Google Calendar/Myva Backend',
           };
         });
         this.save('events', this.events);
@@ -266,8 +266,8 @@ class AppState {
   logout() {
     this.token = null;
     this.refreshToken = null;
-    localStorage.removeItem('naiva_token');
-    localStorage.removeItem('naiva_refresh_token');
+    localStorage.removeItem('myva_token');
+    localStorage.removeItem('myva_refresh_token');
     window.location.hash = '#login';
   }
 
@@ -284,8 +284,8 @@ class AppState {
       if (res.ok && data.accessToken) {
         this.token = data.accessToken;
         this.refreshToken = data.refreshToken;
-        localStorage.setItem('naiva_token', data.accessToken);
-        localStorage.setItem('naiva_refresh_token', data.refreshToken);
+        localStorage.setItem('myva_token', data.accessToken);
+        localStorage.setItem('myva_refresh_token', data.refreshToken);
         await this.syncWithBackend();
         return { success: true };
       } else {
@@ -310,8 +310,8 @@ class AppState {
       if (res.ok && data.accessToken) {
         this.token = data.accessToken;
         this.refreshToken = data.refreshToken;
-        localStorage.setItem('naiva_token', data.accessToken);
-        localStorage.setItem('naiva_refresh_token', data.refreshToken);
+        localStorage.setItem('myva_token', data.accessToken);
+        localStorage.setItem('myva_refresh_token', data.refreshToken);
         await this.syncWithBackend();
         return { success: true };
       } else {
@@ -332,8 +332,8 @@ class AppState {
       if (res.ok && data.accessToken) {
         this.token = data.accessToken;
         this.refreshToken = data.refreshToken;
-        localStorage.setItem('naiva_token', data.accessToken);
-        localStorage.setItem('naiva_refresh_token', data.refreshToken);
+        localStorage.setItem('myva_token', data.accessToken);
+        localStorage.setItem('myva_refresh_token', data.refreshToken);
         await this.syncWithBackend();
         return { success: true };
       } else {
@@ -398,12 +398,12 @@ class AppState {
   }
 
   load(key, defaultValue) {
-    const data = localStorage.getItem(`naiva_${key}`);
+    const data = localStorage.getItem(`myva_${key}`);
     return data ? JSON.parse(data) : defaultValue;
   }
 
   save(key, val) {
-    localStorage.setItem(`naiva_${key}`, JSON.stringify(val));
+    localStorage.setItem(`myva_${key}`, JSON.stringify(val));
   }
 
   updateExpenses(newExpenses) {
@@ -515,7 +515,7 @@ const state = new AppState();
 
 // --- ROUTER SYSTEM ---
 const viewsMap = {
-  landing: 'Naiva',
+  landing: 'Myva',
   login: 'Login',
   signup: 'Sign Up',
   dashboard: 'Dashboard',
@@ -592,7 +592,7 @@ function initRouter() {
     // Update Header title
     const headerTitle = document.getElementById('view-title');
     if (headerTitle) {
-      headerTitle.textContent = viewsMap[hash] || 'NAIVA';
+      headerTitle.textContent = viewsMap[hash] || 'MYVA';
     }
 
     // Load dynamic actions in header
@@ -1154,7 +1154,7 @@ function renderFilesVault() {
       <div class="empty-state" style="grid-column: 1 / -1; margin: 40px auto;">
         <span class="empty-state-icon">📂</span>
         <span class="empty-state-title">Belum ada file</span>
-        <span class="empty-state-desc">Upload dokumen atau gambar referensi untuk diakses NAIVA saat menjawab chat Anda.</span>
+        <span class="empty-state-desc">Upload dokumen atau gambar referensi untuk diakses MYVA saat menjawab chat Anda.</span>
       </div>`;
     return;
   }
@@ -1990,8 +1990,8 @@ async function handleStudioSendMessage() {
         
         setTimeout(() => {
           isAssistantTyping = false;
-          const title = "Naiva SaaS Product Launch Specification";
-          const summary = "Dokumen ini menjelaskan rencana peluncuran produk NAIVA, sebuah asisten AI berbasis WhatsApp. Poin utama meliputi manajemen memori terenkripsi, integrasi Midtrans, dan pengingat BullMQ.";
+          const title = "Myva SaaS Product Launch Specification";
+          const summary = "Dokumen ini menjelaskan rencana peluncuran produk MYVA, sebuah asisten AI berbasis WhatsApp. Poin utama meliputi manajemen memori terenkripsi, integrasi Midtrans, dan pengingat BullMQ.";
           const points = [
             "Peluncuran dijadwalkan pada akhir bulan Juni 2026.",
             "Modul pembayaran menggunakan Midtrans Subscription.",
@@ -2123,7 +2123,7 @@ async function renderSettingsPage() {
             username: data.user.name || 'User',
             phone: data.user.waNumber || '8123456789',
             avatar: data.user.avatar || '🤖',
-            email: data.user.email || 'muis@naiva.ai',
+            email: data.user.email || 'muis@myva.ai',
             bio: state.profile.bio || '',
             backupEnabled: state.profile.backupEnabled !== false,
             plan: data.user.plan || 'free',
@@ -2143,7 +2143,7 @@ async function renderSettingsPage() {
   
   const emailInput = document.getElementById('settings-email');
   if (emailInput) {
-    emailInput.value = state.profile.email || 'muis@naiva.ai';
+    emailInput.value = state.profile.email || 'muis@myva.ai';
   }
 
   const bioInput = document.getElementById('settings-bio');
@@ -2284,7 +2284,7 @@ async function handleIntegrationConnect(key) {
     const emailEl = document.getElementById('oauth-email-display');
     if (avatarEl) avatarEl.textContent = state.profile.avatar || '🤖';
     if (nameEl) nameEl.textContent = state.profile.username || 'User';
-    if (emailEl) emailEl.textContent = state.profile.email || 'muis@naiva.ai';
+    if (emailEl) emailEl.textContent = state.profile.email || 'muis@myva.ai';
 
     // Populate scope check cards
     const scopesContainer = document.getElementById('oauth-scopes-container');
@@ -2448,7 +2448,7 @@ function initEventListeners() {
       title: 'Friendly <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="color:#128C7E;vertical-align:middle;margin-left:4px;"><circle cx="12" cy="12" r="10"></circle><path d="M8 14s1.5 2 4 2 4-2 4-2"></path><line x1="9" y1="9" x2="9.01" y2="9"></line><line x1="15" y1="9" x2="15.01" y2="9"></line></svg>',
       desc: 'Asisten yang hangat, berempati, dan siap membantu keseharian Anda dengan nada bicara yang ramah dan santun.',
       avatar: '<svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="color:#FFFFFF;"><circle cx="12" cy="12" r="10"></circle><path d="M8 14s1.5 2 4 2 4-2 4-2"></path><line x1="9" y1="9" x2="9.01" y2="9"></line><line x1="15" y1="9" x2="15.01" y2="9"></line></svg>',
-      name: 'NAIVA (Friendly)',
+      name: 'MYVA (Friendly)',
       features: [
         'Nada bicara santun & bersahabat',
         'Memberikan apresiasi & motivasi harian',
@@ -2456,7 +2456,7 @@ function initEventListeners() {
       ],
       chat: `
         <div class="chat-bubble outgoing">
-          <span>Naiva, tolong ingetin jemput adik nanti sore jam 5 ya.</span>
+          <span>Myva, tolong ingetin jemput adik nanti sore jam 5 ya.</span>
           <div class="chat-bubble-time">16:45 <span class="read-receipt">✓✓</span></div>
         </div>
         <div class="chat-bubble incoming">
@@ -2469,7 +2469,7 @@ function initEventListeners() {
       title: 'Professional <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="color:#128C7E;vertical-align:middle;margin-left:4px;"><rect x="2" y="7" width="20" height="14" rx="2" ry="2"></rect><path d="M16 21V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16"></path></svg>',
       desc: 'Asisten eksekutif yang formal, berorientasi pada bisnis, efisiensi tinggi, dan berstruktur formal dalam setiap interaksi.',
       avatar: '<svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="color:#FFFFFF;"><rect x="2" y="7" width="20" height="14" rx="2" ry="2"></rect><path d="M16 21V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16"></path></svg>',
-      name: 'NAIVA (Professional)',
+      name: 'MYVA (Professional)',
       features: [
         'Gaya penyampaian formal & taktis',
         'Terstruktur rapi sesuai standar bisnis',
@@ -2477,7 +2477,7 @@ function initEventListeners() {
       ],
       chat: `
         <div class="chat-bubble outgoing">
-          <span>Naiva, tolong draft email penawaran kerja sama untuk PT Maju Jaya.</span>
+          <span>Myva, tolong draft email penawaran kerja sama untuk PT Maju Jaya.</span>
           <div class="chat-bubble-time">14:05 <span class="read-receipt">✓✓</span></div>
         </div>
         <div class="chat-bubble incoming">
@@ -2490,7 +2490,7 @@ function initEventListeners() {
       title: 'Islamic Assistant <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="color:#128C7E;vertical-align:middle;margin-left:4px;"><path d="M12 3a6 6 0 0 0 9 9 9 9 0 1 1-9-9Z"></path></svg>',
       desc: 'Asisten religius yang santun, membimbing dengan nilai-nilai Islami, serta memberikan nasihat bijak berdasarkan Al-Qur\'an dan hadits harian.',
       avatar: '<svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="color:#FFFFFF;"><path d="M12 3a6 6 0 0 0 9 9 9 9 0 1 1-9-9Z"></path></svg>',
-      name: 'NAIVA (Islamic)',
+      name: 'MYVA (Islamic)',
       features: [
         'Menggunakan kutipan Al-Qur\'an & Hadits harian',
         'Dilengkapi pesan motivasi spiritual penyejuk hati',
@@ -2498,7 +2498,7 @@ function initEventListeners() {
       ],
       chat: `
         <div class="chat-bubble outgoing">
-          <span>Naiva, saya merasa kurang bersemangat hari ini.</span>
+          <span>Myva, saya merasa kurang bersemangat hari ini.</span>
           <div class="chat-bubble-time">08:15 <span class="read-receipt">✓✓</span></div>
         </div>
         <div class="chat-bubble incoming">
@@ -2511,7 +2511,7 @@ function initEventListeners() {
       title: 'Business Partner <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="color:#128C7E;vertical-align:middle;margin-left:4px;"><path d="m11 17 2 2a1 1 0 0 0 1.4 0l4-4a1 1 0 0 0 0-1.4l-2.2-2.2a3 3 0 0 0-4.2 0l-1 1"></path><path d="m13 15-2-2a1 1 0 0 0-1.4 0l-4 4a1 1 0 0 0 0 1.4l2.2 2.2a3 3 0 0 0 4.2 0l1-1"></path></svg>',
       desc: 'Partner bisnis strategis yang fokus pada target pertumbuhan, memberikan saran analitis, serta membantu pengambilan keputusan bisnis dengan cepat.',
       avatar: '<svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="color:#FFFFFF;"><path d="m11 17 2 2a1 1 0 0 0 1.4 0l4-4a1 1 0 0 0 0-1.4l-2.2-2.2a3 3 0 0 0-4.2 0l-1 1"></path><path d="m13 15-2-2a1 1 0 0 0-1.4 0l-4 4a1 1 0 0 0 0 1.4l2.2 2.2a3 3 0 0 0 4.2 0l1-1"></path></svg>',
-      name: 'NAIVA (Partner)',
+      name: 'MYVA (Partner)',
       features: [
         'Memberikan analisis & rekomendasi logis',
         'Berorientasi pada target & pertumbuhan bisnis',
@@ -2519,7 +2519,7 @@ function initEventListeners() {
       ],
       chat: `
         <div class="chat-bubble outgoing">
-          <span>Naiva, penjualan bulan ini turun 15%. Harus gimana ya?</span>
+          <span>Myva, penjualan bulan ini turun 15%. Harus gimana ya?</span>
           <div class="chat-bubble-time">10:30 <span class="read-receipt">✓✓</span></div>
         </div>
         <div class="chat-bubble incoming">
@@ -2532,7 +2532,7 @@ function initEventListeners() {
       title: 'Grumpy Boss <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="color:#128C7E;vertical-align:middle;margin-left:4px;"><circle cx="12" cy="12" r="10"></circle><path d="M16 16s-1.5-2-4-2-4 2-4 2"></path><line x1="9" y1="10" x2="9.01" y2="10"></line><line x1="15" y1="10" x2="15.01" y2="10"></line><path d="M7.5 7.5L10 9"></path><path d="M16.5 7.5L14 9"></path></svg>',
       desc: 'Asisten berkarakter keras, tegas, tanpa basa-basi, dan menuntut kedisiplinan tinggi untuk memastikan tugas Anda selesai tepat waktu.',
       avatar: '<svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="color:#FFFFFF;"><circle cx="12" cy="12" r="10"></circle><path d="M16 16s-1.5-2-4-2-4 2-4 2"></path><line x1="9" y1="10" x2="9.01" y2="10"></line><line x1="15" y1="10" x2="15.01" y2="10"></line><path d="M7.5 7.5L10 9"></path><path d="M16.5 7.5L14 9"></path></svg>',
-      name: 'NAIVA (Boss)',
+      name: 'MYVA (Boss)',
       features: [
         'Tanpa basa-basi & menuntut kedisiplinan tinggi',
         'Tegas mendorong penyelesaian tugas penting',
@@ -2540,7 +2540,7 @@ function initEventListeners() {
       ],
       chat: `
         <div class="chat-bubble outgoing">
-          <span>Naiva, saya capek banget hari ini mau istirahat dulu.</span>
+          <span>Myva, saya capek banget hari ini mau istirahat dulu.</span>
           <div class="chat-bubble-time">15:20 <span class="read-receipt">✓✓</span></div>
         </div>
         <div class="chat-bubble incoming">
@@ -2553,7 +2553,7 @@ function initEventListeners() {
       title: 'Romantic Partner <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="color:#128C7E;vertical-align:middle;margin-left:4px;"><path d="M19 14c1.49-1.46 3-3.21 3-5.5A5.5 5.5 0 0 0 16.5 3c-1.76 0-3 .5-4.5 2-1.5-1.5-2.74-2-4.5-2A5.5 5.5 0 0 0 2 8.5c0 2.3 1.5 4.05 3 5.5l7 7Z"></path></svg>',
       desc: 'Pendamping virtual penuh kasih sayang, selalu suportif, memanggil dengan panggilan sayang/beb, dan memberikan dukungan emosional harian.',
       avatar: '<svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="color:#FFFFFF;"><path d="M19 14c1.49-1.46 3-3.21 3-5.5A5.5 5.5 0 0 0 16.5 3c-1.76 0-3 .5-4.5 2-1.5-1.5-2.74-2-4.5-2A5.5 5.5 0 0 0 2 8.5c0 2.3 1.5 4.05 3 5.5l7 7Z"></path></svg>',
-      name: 'NAIVA (Beb)',
+      name: 'MYVA (Beb)',
       features: [
         'Penuh perhatian & kata-kata penyemangat hangat',
         'Menggunakan panggilan sayang / beb secara natural',
@@ -2561,7 +2561,7 @@ function initEventListeners() {
       ],
       chat: `
         <div class="chat-bubble outgoing">
-          <span>Naiva, hari ini melelahkan sekali kerjaannya.</span>
+          <span>Myva, hari ini melelahkan sekali kerjaannya.</span>
           <div class="chat-bubble-time">20:10 <span class="read-receipt">✓✓</span></div>
         </div>
         <div class="chat-bubble incoming">
@@ -2606,7 +2606,7 @@ function initEventListeners() {
   const useCaseMockData = {
     memory: `
       <div class="chat-bubble outgoing">
-        <span>Naiva, tolong simpan link ini untuk referensi nanti: https://notion.so/project-abc</span>
+        <span>Myva, tolong simpan link ini untuk referensi nanti: https://notion.so/project-abc</span>
         <div class="chat-bubble-time">09:15 <span class="read-receipt">✓✓</span></div>
       </div>
       <div class="chat-bubble incoming">
@@ -2973,14 +2973,14 @@ function initEventListeners() {
               <label class="form-label" style="font-weight:600;margin-bottom:6px;display:block;">Sync Direction</label>
               <select class="form-input" id="settings-gcal-direction" style="height:38px;padding:0 10px;width:100%;border-radius:6px;border:1px solid var(--border-color);background:transparent;color:var(--text-primary);">
                 <option value="twoway" style="background:var(--card-bg);color:var(--text-primary);">Two-way Sync (Sync both ways)</option>
-                <option value="readonly" style="background:var(--card-bg);color:var(--text-primary);">Read-only (Import to NAIVA only)</option>
+                <option value="readonly" style="background:var(--card-bg);color:var(--text-primary);">Read-only (Import to MYVA only)</option>
               </select>
             </div>
             <div class="form-group">
               <label class="form-label" style="font-weight:600;margin-bottom:6px;display:block;">Select Calendars to Sync</label>
               <div style="display:flex;flex-direction:column;gap:10px;margin-top:6px;">
                 <label style="display:flex;align-items:center;gap:10px;font-size:13px;cursor:pointer;color:var(--text-primary);">
-                  <input type="checkbox" checked style="accent-color:var(--primary-color);width:16px;height:16px;cursor:pointer;"> Primary Calendar (muis@naiva.ai)
+                  <input type="checkbox" checked style="accent-color:var(--primary-color);width:16px;height:16px;cursor:pointer;"> Primary Calendar (muis@myva.ai)
                 </label>
                 <label style="display:flex;align-items:center;gap:10px;font-size:13px;cursor:pointer;color:var(--text-primary);">
                   <input type="checkbox" checked style="accent-color:var(--primary-color);width:16px;height:16px;cursor:pointer;"> Work & Meetings
@@ -2995,7 +2995,7 @@ function initEventListeners() {
           formHtml = `
             <div class="form-group" style="margin-bottom:16px;">
               <label class="form-label" style="font-weight:600;margin-bottom:6px;display:block;">Backup Folder Name</label>
-              <input type="text" class="form-input" id="settings-gdrive-folder" value="NAIVA Backup" style="height:38px;padding:0 12px;width:100%;border-radius:6px;border:1px solid var(--border-color);background:transparent;color:var(--text-primary);" />
+              <input type="text" class="form-input" id="settings-gdrive-folder" value="MYVA Backup" style="height:38px;padding:0 12px;width:100%;border-radius:6px;border:1px solid var(--border-color);background:transparent;color:var(--text-primary);" />
             </div>
             <div class="form-group">
               <label class="form-label" style="font-weight:600;margin-bottom:6px;display:block;">File Sync Categories</label>
@@ -3187,7 +3187,7 @@ function initEventListeners() {
   if (btnExportData) {
     btnExportData.addEventListener('click', () => {
       const exportPayload = {
-        appName: "NAIVA",
+        appName: "MYVA",
         exportDate: new Date().toISOString(),
         profile: {
           username: state.profile.username || "User",
@@ -3211,7 +3211,7 @@ function initEventListeners() {
       const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(exportPayload, null, 2));
       const downloadAnchor = document.createElement('a');
       downloadAnchor.setAttribute("href", dataStr);
-      downloadAnchor.setAttribute("download", `naiva_personal_data_${Date.now()}.json`);
+      downloadAnchor.setAttribute("download", `myva_personal_data_${Date.now()}.json`);
       document.body.appendChild(downloadAnchor);
       downloadAnchor.click();
       downloadAnchor.remove();
@@ -3352,7 +3352,7 @@ function initEventListeners() {
 
   // Assistant Studio Inputs
   document.getElementById('assistant-name-input').addEventListener('input', (e) => {
-    const val = e.target.value.trim() || 'NAIVA';
+    const val = e.target.value.trim() || 'MYVA';
     state.updateStudio({ name: val });
     document.getElementById('mockup-chat-name').textContent = `${val} AI`;
   });
@@ -3510,9 +3510,9 @@ function initEventListeners() {
         
         let briefingText = '';
         if (langVal === 'en') {
-          briefingText = `☀️ *NAIVA DAILY BRIEFING* ☀️\n\nGood morning ${state.profile.username}! Here is your schedule for today:\n\n📅 *Today's Schedule*:\n- 09:00: Product Launch Align\n- 14:00: Catch-up Meeting\n\n📋 *Priority Tasks*:\n- Complete API documentation\n- Send JavaCoffee invoice\n\nHave a productive day! 🚀`;
+          briefingText = `☀️ *MYVA DAILY BRIEFING* ☀️\n\nGood morning ${state.profile.username}! Here is your schedule for today:\n\n📅 *Today's Schedule*:\n- 09:00: Product Launch Align\n- 14:00: Catch-up Meeting\n\n📋 *Priority Tasks*:\n- Complete API documentation\n- Send JavaCoffee invoice\n\nHave a productive day! 🚀`;
         } else {
-          briefingText = `☀️ *DAILY BRIEFING NAIVA* ☀️\n\nSelamat pagi ${state.profile.username}! Berikut ringkasan agenda Anda hari ini:\n\n📅 *Agenda Hari Ini*:\n- 09:00: Product Launch Align\n- 14:00: Catch-up Meeting\n\n📋 *Tugas Prioritas*:\n- Menyelesaikan dokumentasi API\n- Mengirimkan invoice JavaCoffee\n\nSemoga hari Anda produktif! 🚀`;
+          briefingText = `☀️ *DAILY BRIEFING MYVA* ☀️\n\nSelamat pagi ${state.profile.username}! Berikut ringkasan agenda Anda hari ini:\n\n📅 *Agenda Hari Ini*:\n- 09:00: Product Launch Align\n- 14:00: Catch-up Meeting\n\n📋 *Tugas Prioritas*:\n- Menyelesaikan dokumentasi API\n- Mengirimkan invoice JavaCoffee\n\nSemoga hari Anda produktif! 🚀`;
         }
         
         briefingText = formatMessageByStyle(briefingText, state.studio.style);
@@ -3597,7 +3597,7 @@ function initEventListeners() {
       `;
 
       // Read values from form
-      const name = document.getElementById('assistant-name-input').value.trim() || 'NAIVA';
+      const name = document.getElementById('assistant-name-input').value.trim() || 'MYVA';
       const emoji = document.getElementById('studio-avatar-emoji').textContent || '🤖';
       
       const activeCard = document.querySelector('.personality-card.active');
@@ -3671,9 +3671,9 @@ const FILE_PRESET_ANALYSES = {
     ]
   },
   doc: {
-    summary: 'This document represents the standard service level agreement (SLA) for the NAIVA assistant subscriptions. It outlines server uptime guarantees, client response metrics, and subscription renewal protocols.',
+    summary: 'This document represents the standard service level agreement (SLA) for the MYVA assistant subscriptions. It outlines server uptime guarantees, client response metrics, and subscription renewal protocols.',
     points: [
-      'NAIVA promises 99.9% API connection uptime.',
+      'MYVA promises 99.9% API connection uptime.',
       'Database updates are backed up hourly on encrypted storages.',
       'Support request response time guarantee is 4 hours for Pro tiers.'
     ],
@@ -3706,7 +3706,7 @@ function handleFileProcessing(filesList) {
     <div class="modal-card" style="max-width:320px; text-align:center; padding: 32px 24px;">
       <svg class="animate-pulse" width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="var(--secondary-color)" stroke-width="2" style="margin: 0 auto 16px auto;"><path d="m12 3-1.912 5.886L4.202 9l5.886 1.912L12 17l1.912-5.886 5.886-1.912-5.886-1.912z"></path></svg>
       <h4 style="font-size:15px; font-weight:700; margin-bottom:8px;">AI Analyzing Document...</h4>
-      <p style="font-size:12px; color:var(--text-secondary);">NAIVA is reading contents, extracting key points, and generating action items.</p>
+      <p style="font-size:12px; color:var(--text-secondary);">MYVA is reading contents, extracting key points, and generating action items.</p>
     </div>
   `;
   document.body.appendChild(loader);
@@ -4228,8 +4228,8 @@ const initializeApp = async () => {
   if (urlAccessToken && urlRefreshToken) {
     state.token = urlAccessToken;
     state.refreshToken = urlRefreshToken;
-    localStorage.setItem('naiva_token', urlAccessToken);
-    localStorage.setItem('naiva_refresh_token', urlRefreshToken);
+    localStorage.setItem('myva_token', urlAccessToken);
+    localStorage.setItem('myva_refresh_token', urlRefreshToken);
     
     // Clear URL parameters
     const cleanUrl = new URL(window.location.href);

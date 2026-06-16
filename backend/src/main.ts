@@ -39,8 +39,8 @@ async function bootstrap() {
 
   // Swagger Documentation Setup
   const config = new DocumentBuilder()
-    .setTitle('NAIVA - WhatsApp Personal AI Assistant API')
-    .setDescription('The NAIVA backend service documentation.')
+    .setTitle('MYVA - WhatsApp Personal AI Assistant API')
+    .setDescription('The MYVA backend service documentation.')
     .setVersion('1.0.0')
     .addBearerAuth()
     .build();
@@ -50,7 +50,7 @@ async function bootstrap() {
 
   const port = process.env.PORT || 3000;
   await app.listen(port);
-  logger.log(`NAIVA Backend running on port ${port}`);
+  logger.log(`MYVA Backend running on port ${port}`);
   logger.log(`Swagger docs available at http://localhost:${port}/docs`);
 }
 bootstrap();

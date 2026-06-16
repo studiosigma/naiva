@@ -13,7 +13,7 @@ export class S3Service {
     const region = this.configService.get<string>('S3_REGION') || 'us-east-1';
     const accessKeyId = this.configService.get<string>('S3_ACCESS_KEY_ID');
     const secretAccessKey = this.configService.get<string>('S3_SECRET_ACCESS_KEY');
-    this.bucketName = this.configService.get<string>('S3_BUCKET_NAME') || 'naiva-vault';
+    this.bucketName = this.configService.get<string>('S3_BUCKET_NAME') || 'myva-vault';
 
     this.client = new S3Client({
       region,

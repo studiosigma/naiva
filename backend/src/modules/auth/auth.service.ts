@@ -56,10 +56,10 @@ export class AuthService {
   }
 
   async devLogin() {
-    let user = await this.usersService.findOneByEmail('muis@naiva.ai');
+    let user = await this.usersService.findOneByEmail('muis@myva.ai');
     if (!user) {
       user = await this.usersService.create({
-        email: 'muis@naiva.ai',
+        email: 'muis@myva.ai',
         name: 'Muis',
         waNumber: '6281234567890',
         plan: 'free',

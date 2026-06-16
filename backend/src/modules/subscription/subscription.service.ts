@@ -19,7 +19,7 @@ export class SubscriptionService {
       if (!user) {
         user = await this.prisma.user.create({
           data: {
-            email: 'muis@naiva.ai',
+            email: 'muis@myva.ai',
             name: 'Muis',
             waNumber: '6281234567890',
             plan: 'free',
@@ -43,7 +43,7 @@ export class SubscriptionService {
     const refId = `${user.id}:${plan}:${Date.now()}`;
 
     const body = {
-      name: user.name || 'NAIVA User',
+      name: user.name || 'MYVA User',
       email: user.email,
       phone: user.waNumber || '081234567890',
       amount: price.toString(),
@@ -51,7 +51,7 @@ export class SubscriptionService {
       returnUrl: `${appUrl}/#settings`,
       cancelUrl: `${appUrl}/#settings`,
       referenceId: refId,
-      comment: `Langganan NAIVA Paket ${plan.toUpperCase()}`,
+      comment: `Langganan MYVA Paket ${plan.toUpperCase()}`,
     };
 
     const timestamp = this.getTimestamp();

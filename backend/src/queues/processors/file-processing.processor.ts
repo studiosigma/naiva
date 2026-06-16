@@ -46,7 +46,7 @@ export class FileProcessingProcessor extends WorkerHost {
       this.logger.log(`Google Drive is connected. Uploading file "${fileRecord.filename}" to Google Drive.`);
       await this.prisma.file.update({
         where: { id: fileId },
-        data: { gdrivePath: `gdrive://naiva-vault/${fileRecord.filename}` },
+        data: { gdrivePath: `gdrive://myva-vault/${fileRecord.filename}` },
       });
     }
 
@@ -62,7 +62,7 @@ export class FileProcessingProcessor extends WorkerHost {
         userId,
         title: `Rangkuman File: ${fileRecord.filename}`,
         content: `Rangkuman:\n${result.summary}\n\nPoin Utama:\n${result.keyPoints.join('\n')}\n\nRekomendasi Tindakan:\n${result.actions.join('\n')}${
-          isGdriveConnected ? '\n\n📂 _File ini telah dicadangkan di Google Drive (naiva-vault)._' : ''
+          isGdriveConnected ? '\n\n📂 _File ini telah dicadangkan di Google Drive (myva-vault)._' : ''
         }`,
         category: 'Notes',
       },

@@ -45,7 +45,7 @@ export class ReminderProcessor extends WorkerHost {
     }
 
     // Send interactive button message
-    const messageText = `⏰ *NAIVA Reminder!*\n\n*${reminder.title}*\n${reminder.description || ''}`;
+    const messageText = `⏰ *MYVA Reminder!*\n\n*${reminder.title}*\n${reminder.description || ''}`;
     const buttons = [
       { id: `complete_reminder_${reminder.id}`, title: 'Selesai' },
       { id: `snooze_reminder_${reminder.id}`, title: 'Tunda 10 Menit' },

@@ -72,7 +72,7 @@ export class BriefingService implements OnApplicationBootstrap {
       .join('\n') || '- Tidak ada tugas mendesak.';
 
     // Generate personalized greeting using AI
-    const prompt = `Buatlah sapaan briefing pagi hari (Daily Briefing) yang ramah, hangat, dan informatif sebagai asisten virtual NAIVA.
+    const prompt = `Buatlah sapaan briefing pagi hari (Daily Briefing) yang ramah, hangat, dan informatif sebagai asisten virtual MYVA.
 Kepribadian asisten: ${user.persona || 'friendly'}
 Nama pengguna: ${user.name || 'User'}
 
@@ -155,7 +155,7 @@ Format dengan bahasa Indonesia yang alami, berikan motivasi singkat untuk memula
     const user = await this.prisma.user.findUnique({ where: { id: userId } });
     if (!user) throw new Error('User not found');
 
-    const prompt = `Buatlah pesan pengingat (follow-up) proaktif singkat, ramah, dan memotivasi untuk pengguna WhatsApp dari asisten virtual NAIVA.
+    const prompt = `Buatlah pesan pengingat (follow-up) proaktif singkat, ramah, dan memotivasi untuk pengguna WhatsApp dari asisten virtual MYVA.
 Kepribadian asisten: ${user.persona || 'friendly'}
 Nama pengguna: ${user.name || 'User'}
 Nama tugas penting: "${taskTitle}"

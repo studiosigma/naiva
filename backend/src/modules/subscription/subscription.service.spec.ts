@@ -52,7 +52,7 @@ describe('SubscriptionService', () => {
 
   describe('createCheckoutLink', () => {
     it('should create payment link successfully', async () => {
-      const mockUser = { id: 'user-123', email: 'test@naiva.ai', name: 'Test User', waNumber: '123' };
+      const mockUser = { id: 'user-123', email: 'test@myva.ai', name: 'Test User', waNumber: '123' };
       mockPrismaService.user.findUnique.mockResolvedValue(mockUser);
 
       // Mock global fetch
@@ -74,7 +74,7 @@ describe('SubscriptionService', () => {
 
     it('should fallback to first user if userId is not found', async () => {
       mockPrismaService.user.findUnique.mockResolvedValue(null);
-      const mockUser = { id: 'fallback-123', email: 'fallback@naiva.ai', name: 'Fallback User', waNumber: '456' };
+      const mockUser = { id: 'fallback-123', email: 'fallback@myva.ai', name: 'Fallback User', waNumber: '456' };
       mockPrismaService.user.findFirst.mockResolvedValue(mockUser);
 
       const mockFetchResponse = {

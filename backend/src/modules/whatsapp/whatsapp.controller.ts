@@ -20,7 +20,7 @@ export class WhatsAppController {
     @Query('hub.verify_token') token: string,
     @Query('hub.challenge') challenge: string,
   ) {
-    const expectedToken = this.configService.get<string>('WHATSAPP_VERIFY_TOKEN') || 'naiva-verify-token-123';
+    const expectedToken = this.configService.get<string>('WHATSAPP_VERIFY_TOKEN') || 'myva-verify-token-123';
     
     if (mode === 'subscribe' && token === expectedToken) {
       this.logger.log('Webhook verified successfully!');

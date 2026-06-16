@@ -29,7 +29,7 @@ export class WhatsAppService {
     if (!user) {
       this.logger.log(`User not found with WhatsApp number ${from}. Creating trial account.`);
       user = await this.usersService.create({
-        email: `${from}@trial.naiva.ai`,
+        email: `${from}@trial.myva.ai`,
         waNumber: from,
         name: `WhatsApp User (${from})`,
         plan: 'free',
@@ -83,7 +83,7 @@ export class WhatsAppService {
 
     if (urls && urls.length > 0 && !isSearchQuery) {
       if (user.plan === 'free') {
-        const warning = `⚠️ *Fitur Ringkasan Web Terbatas* ⚠️\n\nFitur merangkum konten dari link/URL via WhatsApp hanya tersedia pada paket *Basic* atau *Pro*. Silakan upgrade paket Anda di dasbor NAIVA! 🔍`;
+        const warning = `⚠️ *Fitur Ringkasan Web Terbatas* ⚠️\n\nFitur merangkum konten dari link/URL via WhatsApp hanya tersedia pada paket *Basic* atau *Pro*. Silakan upgrade paket Anda di dasbor MYVA! 🔍`;
         await this.whatsappApiService.sendMessage(from, warning);
         return;
       }
@@ -147,7 +147,7 @@ export class WhatsAppService {
     if (!user) {
       this.logger.log(`User not found with WhatsApp number ${from}. Creating trial account.`);
       user = await this.usersService.create({
-        email: `${from}@trial.naiva.ai`,
+        email: `${from}@trial.myva.ai`,
         waNumber: from,
         name: `WhatsApp User (${from})`,
         plan: 'free',
@@ -156,7 +156,7 @@ export class WhatsAppService {
     }
 
     if (user.plan === 'free') {
-      const warning = `⚠️ *Fitur Voice Note Terbatas* ⚠️\n\nFitur transkripsi & rangkuman pesan suara (voice note) via WhatsApp hanya tersedia pada paket *Basic* atau *Pro*. Silakan upgrade paket Anda di dasbor NAIVA! 🎙️`;
+      const warning = `⚠️ *Fitur Voice Note Terbatas* ⚠️\n\nFitur transkripsi & rangkuman pesan suara (voice note) via WhatsApp hanya tersedia pada paket *Basic* atau *Pro*. Silakan upgrade paket Anda di dasbor MYVA! 🎙️`;
       await this.whatsappApiService.sendMessage(from, warning);
       return;
     }
@@ -263,7 +263,7 @@ export class WhatsAppService {
       user = await this.prisma.user.findFirst();
       if (!user) {
         user = await this.usersService.create({
-          email: 'muis@naiva.ai',
+          email: 'muis@myva.ai',
           name: 'Muis',
           waNumber: from,
           plan: 'free',
