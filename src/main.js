@@ -2355,7 +2355,9 @@ function initEventListeners() {
         submitBtn.textContent = 'Masuk';
       }
 
-      if (!res.success && alertEl) {
+      if (res.success) {
+        window.location.hash = '#dashboard';
+      } else if (alertEl) {
         alertEl.textContent = res.message;
         alertEl.style.display = 'block';
       }
@@ -2404,6 +2406,9 @@ function initEventListeners() {
           successEl.textContent = 'Akun berhasil dibuat! Mengalihkan...';
           successEl.style.display = 'block';
         }
+        setTimeout(() => {
+          window.location.hash = '#dashboard';
+        }, 800);
       } else {
         if (errorEl) {
           errorEl.textContent = res.message;
