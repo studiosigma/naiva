@@ -27,6 +27,12 @@ export class UsersService {
     if (existing) {
       throw new ConflictException('Email address already in use.');
     }
+    if (data.waNumber) {
+      const existingWa = await this.findOneByWaNumber(data.waNumber);
+      if (existingWa) {
+        throw new ConflictException('WhatsApp number already in use.');
+      }
+    }
     return this.prisma.user.create({ data });
   }
 
