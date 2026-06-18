@@ -2513,7 +2513,7 @@ function initEventListeners() {
       title: 'Islamic Assistant <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="color:#128C7E;vertical-align:middle;margin-left:4px;"><path d="M12 3a6 6 0 0 0 9 9 9 9 0 1 1-9-9Z"></path></svg>',
       desc: 'Asisten religius yang santun, membimbing dengan nilai-nilai Islami, serta memberikan nasihat bijak berdasarkan Al-Qur\'an dan hadits harian.',
       avatar: '<svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="color:#FFFFFF;"><path d="M12 3a6 6 0 0 0 9 9 9 9 0 1 1-9-9Z"></path></svg>',
-      name: 'Ustadz Syamil (Islamic)',
+      name: 'Ahmad (Islamic)',
       features: [
         'Menggunakan kutipan Al-Qur\'an & Hadits harian',
         'Dilengkapi pesan motivasi spiritual penyejuk hati',
@@ -2521,7 +2521,7 @@ function initEventListeners() {
       ],
       chat: `
         <div class="chat-bubble outgoing">
-          <span>Ustadz Syamil, saya merasa kurang bersemangat hari ini.</span>
+          <span>Ahmad, saya merasa kurang bersemangat hari ini.</span>
           <div class="chat-bubble-time">08:15 <span class="read-receipt">✓✓</span></div>
         </div>
         <div class="chat-bubble incoming">
