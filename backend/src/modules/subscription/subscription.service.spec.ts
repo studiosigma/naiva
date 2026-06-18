@@ -22,10 +22,10 @@ describe('SubscriptionService', () => {
 
   const mockConfigService = {
     get: jest.fn((key: string) => {
-      if (key === 'IPAYMU_VA') return 'va-123';
-      if (key === 'IPAYMU_API_KEY') return 'key-123';
-      if (key === 'IPAYMU_SANDBOX') return 'true';
-      if (key === 'IPAYMU_BYPASS_SIGNATURE') return 'true';
+      if (key === 'DUITKU_MERCHANT_CODE') return 'D1234';
+      if (key === 'DUITKU_API_KEY') return 'key-123';
+      if (key === 'DUITKU_SANDBOX') return 'true';
+      if (key === 'DUITKU_BYPASS_SIGNATURE') return 'true';
       return null;
     }),
   };
@@ -59,8 +59,8 @@ describe('SubscriptionService', () => {
       const mockFetchResponse = {
         ok: true,
         json: jest.fn().mockResolvedValue({
-          Status: 200,
-          Data: { Url: 'https://checkout.ipaymu.com/pay' },
+          paymentUrl: 'https://checkout.duitku.com/pay',
+          statusCode: '00',
         }),
       };
       global.fetch = jest.fn().mockResolvedValue(mockFetchResponse);
@@ -69,7 +69,7 @@ describe('SubscriptionService', () => {
 
       expect(prisma.user.findUnique).toHaveBeenCalledWith({ where: { id: 'user-123' } });
       expect(global.fetch).toHaveBeenCalled();
-      expect(url).toBe('https://checkout.ipaymu.com/pay');
+      expect(url).toBe('https://checkout.duitku.com/pay');
     });
 
     it('should fallback to first user if userId is not found', async () => {
@@ -80,8 +80,8 @@ describe('SubscriptionService', () => {
       const mockFetchResponse = {
         ok: true,
         json: jest.fn().mockResolvedValue({
-          Status: 200,
-          Data: { Url: 'https://checkout.ipaymu.com/pay' },
+          paymentUrl: 'https://checkout.duitku.com/pay',
+          statusCode: '00',
         }),
       };
       global.fetch = jest.fn().mockResolvedValue(mockFetchResponse);
@@ -89,19 +89,21 @@ describe('SubscriptionService', () => {
       const url = await service.createCheckoutLink('non-existent', 'pro');
 
       expect(prisma.user.findFirst).toHaveBeenCalled();
-      expect(url).toBe('https://checkout.ipaymu.com/pay');
+      expect(url).toBe('https://checkout.duitku.com/pay');
     });
   });
 
   describe('handleWebhook', () => {
     it('should update user plan on success', async () => {
       const body = {
-        referenceId: 'user-123:pro:timestamp',
-        status_code: 1,
-        status: 'berhasil',
+        merchantCode: 'D1234',
+        amount: '49000',
+        merchantOrderId: 'user-123:pro:timestamp',
+        signature: 'sig-123',
+        resultCode: '00',
       };
 
-      const result = await service.handleWebhook(body, 'sig-123');
+      const result = await service.handleWebhook(body);
 
       expect(result).toBe(true);
       expect(prisma.user.update).toHaveBeenCalledWith({
@@ -112,3 +114,4 @@ describe('SubscriptionService', () => {
     });
   });
 });
+

@@ -1,9 +1,7 @@
-import { Controller, Post, Body, UseGuards, Headers, HttpCode, HttpStatus } from '@nestjs/common';
+import { Controller, Post, Body, UseGuards, Headers, HttpCode, HttpStatus, Header } from '@nestjs/common';
 import { SubscriptionService } from './subscription.service';
 import { CreateCheckoutDto } from './dto/create-checkout.dto';
-import { JwtAuthGuard } from '../../common/guards/jwt-auth.guard';
-import { GetUser } from '../../common/decorators/get-user.decorator';
-import { ApiTags, ApiOperation, ApiResponse, ApiBearerAuth } from '@nestjs/swagger';
+import { ApiTags, ApiOperation, ApiResponse } from '@nestjs/swagger';
 
 @ApiTags('Subscription')
 @Controller('subscription')
@@ -11,7 +9,7 @@ export class SubscriptionController {
   constructor(private readonly subscriptionService: SubscriptionService) {}
 
   @Post('checkout')
-  @ApiOperation({ summary: 'Create a new subscription checkout link via iPaymu' })
+  @ApiOperation({ summary: 'Create a new subscription checkout link via Duitku' })
   @ApiResponse({ status: 200, description: 'Checkout link successfully generated.' })
   async createCheckout(
     @Body() dto: CreateCheckoutDto,
@@ -43,15 +41,13 @@ export class SubscriptionController {
 
   @Post('webhook')
   @HttpCode(HttpStatus.OK)
-  @ApiOperation({ summary: 'iPaymu callback webhook listener' })
+  @Header('Content-Type', 'text/plain')
+  @ApiOperation({ summary: 'Duitku callback webhook listener' })
   async handleWebhook(
     @Body() body: any,
-    @Headers('signature') signature: string,
-  ) {
-    const processed = await this.subscriptionService.handleWebhook(body, signature);
-    return {
-      success: true,
-      processed,
-    };
+  ): Promise<string> {
+    const processed = await this.subscriptionService.handleWebhook(body);
+    return processed ? 'SUCCESS' : 'FAILED';
   }
 }
+

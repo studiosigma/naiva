@@ -29,94 +29,93 @@ export class SubscriptionService {
       }
     }
 
-    const va = this.configService.get<string>('IPAYMU_VA') || '0000002416172605';
-    const apiKey = this.configService.get<string>('IPAYMU_API_KEY') || 'sandbox_api_key_here';
-    const isSandbox = this.configService.get<string>('IPAYMU_SANDBOX') !== 'false';
+    const merchantCode = this.configService.get<string>('DUITKU_MERCHANT_CODE') || 'D1234';
+    const apiKey = this.configService.get<string>('DUITKU_API_KEY') || 'sandbox_api_key_here';
+    const isSandbox = this.configService.get<string>('DUITKU_SANDBOX') !== 'false';
     const appUrl = this.configService.get<string>('APP_URL') || 'http://localhost:5173';
     const backendUrl = this.configService.get<string>('BACKEND_URL') || 'http://localhost:3000';
 
     const baseUrl = isSandbox
-      ? 'https://sandbox.ipaymu.com/api/v2/payment'
-      : 'https://my.ipaymu.com/api/v2/payment';
+      ? 'https://sandbox.duitku.com/webapi/api/merchant/v2/inquiry'
+      : 'https://passport.duitku.com/webapi/api/merchant/v2/inquiry';
 
     const price = plan === 'basic' ? 25000 : 49000;
     const refId = `${user.id}:${plan}:${Date.now()}`;
 
+    // Signature MD5: merchantCode + merchantOrderId + paymentAmount + apiKey
+    const signature = crypto
+      .createHash('md5')
+      .update(merchantCode + refId + price.toString() + apiKey)
+      .digest('hex');
+
     const body = {
-      name: user.name || 'MYVA User',
+      merchantCode,
+      paymentAmount: price.toString(),
+      merchantOrderId: refId,
+      productDetails: `Langganan MYVA Paket ${plan.toUpperCase()}`,
       email: user.email,
-      phone: user.waNumber || '081234567890',
-      amount: price.toString(),
-      notifyUrl: `${backendUrl}/subscription/webhook`,
+      phoneNumber: user.waNumber || '081234567890',
+      callbackUrl: `${backendUrl}/subscription/webhook`,
       returnUrl: `${appUrl}/#settings`,
-      cancelUrl: `${appUrl}/#settings`,
-      referenceId: refId,
-      comment: `Langganan MYVA Paket ${plan.toUpperCase()}`,
+      signature,
     };
 
-    const timestamp = this.getTimestamp();
-    const signature = this.generateSignature('POST', va, body, apiKey);
-
-    this.logger.log(`Requesting iPaymu checkout link for plan ${plan}. Ref: ${refId}`);
+    this.logger.log(`Requesting Duitku checkout link for plan ${plan}. Ref: ${refId}`);
 
     try {
       const response = await fetch(baseUrl, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
-          va: va,
-          signature: signature,
-          timestamp: timestamp,
         },
         body: JSON.stringify(body),
       });
 
       const data = await response.json() as any;
 
-      if (!response.ok || data.Status !== 200) {
-        this.logger.error(`iPaymu checkout creation failed: ${JSON.stringify(data)}`);
+      if (!response.ok || !data.paymentUrl) {
+        this.logger.error(`Duitku checkout creation failed: ${JSON.stringify(data)}`);
         throw new BadRequestException(
-          data.Message || 'Failed to create payment link with iPaymu',
+          data.statusMessage || 'Failed to create payment link with Duitku',
         );
       }
 
-      this.logger.log(`Successfully created iPaymu link: ${data.Data?.Url}`);
-      return data.Data?.Url;
+      this.logger.log(`Successfully created Duitku link: ${data.paymentUrl}`);
+      return data.paymentUrl;
     } catch (error) {
-      this.logger.error(`Error connecting to iPaymu: ${error.message}`);
+      this.logger.error(`Error connecting to Duitku: ${error.message}`);
       throw new BadRequestException('Payment gateway connection error');
     }
   }
 
-  async handleWebhook(body: any, signature: string): Promise<boolean> {
-    const apiKey = this.configService.get<string>('IPAYMU_API_KEY') || 'sandbox_api_key_here';
-    const bypass = this.configService.get<string>('IPAYMU_BYPASS_SIGNATURE') !== 'false';
+  async handleWebhook(body: any): Promise<boolean> {
+    const apiKey = this.configService.get<string>('DUITKU_API_KEY') || 'sandbox_api_key_here';
+    const bypass = this.configService.get<string>('DUITKU_BYPASS_SIGNATURE') === 'true';
 
-    this.logger.log(`Received iPaymu webhook callback: ${JSON.stringify(body)}`);
+    this.logger.log(`Received Duitku webhook callback: ${JSON.stringify(body)}`);
 
-    // Verify signature
+    const { merchantCode, amount, merchantOrderId, signature, resultCode } = body;
+    if (!merchantOrderId) {
+      this.logger.warn('Webhook callback does not contain merchantOrderId');
+      return false;
+    }
+
+    // Verify Duitku signature MD5: merchantCode + amount + merchantOrderId + apiKey
     if (!bypass && signature) {
-      const bodyString = JSON.stringify(body);
       const generated = crypto
-        .createHmac('sha256', apiKey)
-        .update(bodyString)
+        .createHash('md5')
+        .update(merchantCode + amount + merchantOrderId + apiKey)
         .digest('hex');
 
       if (generated !== signature) {
-        this.logger.warn(`Invalid iPaymu signature. Header: ${signature}, Generated: ${generated}`);
+        this.logger.warn(`Invalid Duitku signature. Payload: ${signature}, Generated: ${generated}`);
         return false;
       }
     }
 
-    const { referenceId, status_code, status } = body;
-    if (!referenceId) {
-      this.logger.warn('Webhook callback does not contain referenceId');
-      return false;
-    }
-
-    // Only process successful payments (status_code = 1, status = 'berhasil' or similar)
-    if (status_code === '1' || status_code === 1 || status?.toLowerCase() === 'berhasil') {
-      const parts = referenceId.split(':');
+    // Duitku success resultCode is '00'
+    if (resultCode === '00') {
+      const parts = merchantOrderId.split(':');
       if (parts.length >= 2) {
         const userId = parts[0];
         const plan = parts[1] as 'basic' | 'pro';
@@ -141,34 +140,8 @@ export class SubscriptionService {
       }
     }
 
-    this.logger.log(`Transaction status is not successful: ${status} (code: ${status_code})`);
+    this.logger.log(`Transaction status is not successful: resultCode = ${resultCode}`);
     return false;
   }
-
-  private generateSignature(method: string, va: string, body: any, apiKey: string): string {
-    const bodyHash = crypto
-      .createHash('sha256')
-      .update(JSON.stringify(body))
-      .digest('hex')
-      .toLowerCase();
-
-    const stringToSign = `${method.toUpperCase()}:${va}:${bodyHash}:${apiKey}`;
-    return crypto
-      .createHmac('sha256', apiKey)
-      .update(stringToSign)
-      .digest('hex');
-  }
-
-  private getTimestamp(): string {
-    const date = new Date();
-    const pad = (n: number) => n.toString().padStart(2, '0');
-    return (
-      date.getFullYear() +
-      pad(date.getMonth() + 1) +
-      pad(date.getDate()) +
-      pad(date.getHours()) +
-      pad(date.getMinutes()) +
-      pad(date.getSeconds())
-    );
-  }
 }
+
