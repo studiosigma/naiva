@@ -5749,7 +5749,8 @@ input:checked + .slider:before {
 }
 .personality-chat-mockup {
   display: flex;
-  justify-content: center;
+  flex-direction: column;
+  align-items: center;
 }
 .small-mockup {
   max-width: 290px;
