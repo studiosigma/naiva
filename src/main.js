@@ -584,6 +584,12 @@ function initRouter() {
       el.classList.toggle('active', el.getAttribute('data-view') === hash);
     });
 
+    // Toggle header settings button active class
+    const headerSettingsBtn = document.querySelector('.header-settings-btn');
+    if (headerSettingsBtn) {
+      headerSettingsBtn.classList.toggle('active', hash === 'settings');
+    }
+
     // Toggle active view sections
     document.querySelectorAll('.view-section').forEach(el => {
       el.classList.toggle('active', el.id === `view-${hash}`);

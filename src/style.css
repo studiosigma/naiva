@@ -429,6 +429,39 @@ input, button, select, textarea {
   flex-shrink: 0;
 }
 
+.header-right-container {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+}
+
+.header-settings-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  color: var(--text-secondary);
+  background-color: transparent;
+  border: 1px solid var(--border-color);
+  transition: all 0.2s ease;
+  cursor: pointer;
+  text-decoration: none;
+}
+
+.header-settings-btn:hover {
+  color: var(--text-primary);
+  background-color: var(--bg-hover, #F1F5F9);
+  border-color: rgba(15, 23, 42, 0.15);
+}
+
+.header-settings-btn.active {
+  color: var(--secondary-color);
+  border-color: var(--secondary-color);
+  background-color: rgba(37, 211, 102, 0.05);
+}
+
 .view-title {
   font-size: 20px;
   font-weight: 700;
