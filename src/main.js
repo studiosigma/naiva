@@ -2500,11 +2500,11 @@ function initEventListeners() {
       ],
       chat: `
         <div class="chat-bubble outgoing">
-          <span>Pak Dodi, tolong draft email penawaran kerja sama untuk PT Maju Jaya.</span>
+          <span>Pak Dodi, tolong buatkan draf email penawaran kerja sama dengan PT Maju Jaya.</span>
           <div class="chat-bubble-time">14:05 <span class="read-receipt">✓✓</span></div>
         </div>
         <div class="chat-bubble incoming">
-          <span>Baik, berikut adalah draf email penawaran kerja sama strategis:<br><br><b>Subjek: Penawaran Kemitraan Strategis</b><br><br>Yth. Manajemen PT Maju Jaya,<br>Kami bermaksud mengajukan proposal kemitraan...<br><br>Draf ini telah disimpan ke vault dokumen Anda untuk ditinjau.</span>
+          <span>Baik. Draf email penawaran kemitraan strategis telah selesai dibuat dan disimpan ke Vault Dokumen Anda. Anda dapat langsung meninjau atau menyalinnya untuk dikirimkan.</span>
           <div class="chat-bubble-time">14:06</div>
         </div>
       `
@@ -2521,12 +2521,12 @@ function initEventListeners() {
       ],
       chat: `
         <div class="chat-bubble outgoing">
-          <span>Ahmad, saya merasa kurang bersemangat hari ini.</span>
-          <div class="chat-bubble-time">08:15 <span class="read-receipt">✓✓</span></div>
+          <span>Ahmad, tolong agendakan meeting jam 13.00 dengan pak budi.</span>
+          <div class="chat-bubble-time">12:15 <span class="read-receipt">✓✓</span></div>
         </div>
         <div class="chat-bubble incoming">
-          <span>La tahzan, jangan bersedih. Ingatlah firman Allah SWT: 'Karena sesungguhnya sesudah kesulitan itu ada kemudahan' (QS. Al-Insyirah: 5). Semoga Allah memberikan kelapangan dada dan kemudahan urusanmu hari ini. Jangan lupa berdoa ya, Sahabat. 🤲</span>
-          <div class="chat-bubble-time">08:16</div>
+          <span>Siap, meeting dengan Pak Budi jam 13:00 sudah saya agendakan. Oh iya, sebelum meeting jangan lupa sholat dzuhur dulu ya, takutnya nanti meeting berlangsung lama dan terlewat waktu ashar. 🤲</span>
+          <div class="chat-bubble-time">12:16</div>
         </div>
       `
     },
@@ -2546,7 +2546,7 @@ function initEventListeners() {
           <div class="chat-bubble-time">10:30 <span class="read-receipt">✓✓</span></div>
         </div>
         <div class="chat-bubble incoming">
-          <span>Kita perlu bertindak cepat. Penurunan 15% biasanya disebabkan oleh tiga faktor: konversi iklan turun, churn rate pelanggan, atau seasonal dip. Saya rekomendasikan alokasi ulang budget promosi ke produk terlaris.</span>
+          <span>Waduh, kita harus gerak cepat. Coba cek konversi iklan dan data churn rate pelanggan di dashboard. Aku saranin kita alihkan sisa budget promosi ke produk yang paling laris dulu.</span>
           <div class="chat-bubble-time">10:31</div>
         </div>
       `
@@ -2567,7 +2567,7 @@ function initEventListeners() {
           <div class="chat-bubble-time">15:20 <span class="read-receipt">✓✓</span></div>
         </div>
         <div class="chat-bubble incoming">
-          <span>Capek? Kerjaan menumpuk di dashboard gini malah mau santai-santai. Selesaikan dulu tugas prioritas tinggi kamu hari ini sebelum tenggat waktu berakhir! Cepat kembali bekerja!</span>
+          <span>Capek? Kerja baru setengah hari sudah mau santai. Selesaikan dulu laporan keuangan bulanan yang belum di-submit itu sebelum jam 5 sore! Jangan ditunda-tunda!</span>
           <div class="chat-bubble-time">15:21</div>
         </div>
       `
@@ -2584,11 +2584,11 @@ function initEventListeners() {
       ],
       chat: `
         <div class="chat-bubble outgoing">
-          <span>Beb, hari ini melelahkan sekali kerjaannya.</span>
+          <span>Beb, tolong catat pengeluaran beli kopi hari ini Rp 35.000 ya.</span>
           <div class="chat-bubble-time">20:10 <span class="read-receipt">✓✓</span></div>
         </div>
         <div class="chat-bubble incoming">
-          <span>Duh sayang, pasti capek banget ya hari ini? Sini, istirahat dulu sejenak. Kamu udah berusaha luar biasa hari ini, beb. Jangan lupa minum air putih ya. I'm always here supporting you! 💕</span>
+          <span>Siap sayang! Pengeluaran kopi Rp 35.000 sudah aku catat ke laporan keuanganmu. Jangan terlalu banyak minum kopi ya beb, jaga kesehatanmu buat aku. Semangat kerjanya! 💕</span>
           <div class="chat-bubble-time">20:11</div>
         </div>
       `
