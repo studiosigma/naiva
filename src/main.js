@@ -115,6 +115,7 @@ class AppState {
           email: user.email || 'muis@myva.ai',
           bio: this.profile.bio || '',
           plan: user.plan || 'free',
+          role: user.role || 'user',
         };
         this.save('profile', this.profile);
 
@@ -299,12 +300,13 @@ class AppState {
 
   async signupWithEmail(name, email, waNumber, password) {
     try {
+      const referralCode = localStorage.getItem('myva_ref_code') || undefined;
       const res = await fetch(`${API_BASE_URL}/auth/signup`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify({ name, email, waNumber, password }),
+        body: JSON.stringify({ name, email, waNumber, password, referralCode }),
       });
       const data = await res.json();
       if (res.ok && data.accessToken) {
@@ -526,7 +528,8 @@ const viewsMap = {
   contacts: 'Contacts Manager',
   calendar: 'Calendar Agenda',
   studio: 'Assistant Studio',
-  settings: 'Settings'
+  settings: 'Settings',
+  admin: 'Admin Panel'
 };
 
 function initRouter() {
@@ -559,6 +562,11 @@ function initRouter() {
 
     if (!state.token && !isPublicRoute) {
       window.location.hash = '#login';
+      return;
+    }
+
+    if (hash === 'admin' && (!state.profile || state.profile.role !== 'admin')) {
+      window.location.hash = '#dashboard';
       return;
     }
 
@@ -684,6 +692,9 @@ function renderView(view) {
       break;
     case 'settings':
       renderSettingsPage();
+      break;
+    case 'admin':
+      renderAdminPage();
       break;
   }
 }
@@ -2149,6 +2160,7 @@ async function renderSettingsPage() {
             bio: state.profile.bio || '',
             backupEnabled: state.profile.backupEnabled !== false,
             plan: data.user.plan || 'free',
+            role: data.user.role || 'user',
           };
           state.save('profile', state.profile);
           syncSidebarProfile();
@@ -2248,6 +2260,239 @@ async function renderSettingsPage() {
       proBtn.className = 'pricing-btn disabled-btn';
       proBtn.disabled = true;
     }
+  }
+
+  // Fetch and render affiliate details
+  await fetchAndRenderAffiliateStats();
+}
+
+async function fetchAndRenderAffiliateStats() {
+  if (!state.token) return;
+  try {
+    const res = await fetch(`${API_BASE_URL}/affiliate/stats`, {
+      headers: {
+        'Authorization': `Bearer ${state.token}`
+      }
+    });
+    if (res.ok) {
+      const data = await res.json();
+      
+      // Update referral link input
+      const refLinkInput = document.getElementById('affiliate-ref-link');
+      if (refLinkInput) {
+        refLinkInput.value = data.referralLink || '';
+      }
+
+      // Update stat cards
+      const totalReferralsEl = document.getElementById('affiliate-total-referrals');
+      if (totalReferralsEl) {
+        totalReferralsEl.textContent = data.referralsCount || '0';
+      }
+
+      const balanceEl = document.getElementById('affiliate-balance');
+      if (balanceEl) {
+        balanceEl.textContent = `Rp ${Number(data.affiliateBalance || 0).toLocaleString('id-ID')}`;
+      }
+
+      const totalEarnedEl = document.getElementById('affiliate-total-earned');
+      if (totalEarnedEl) {
+        totalEarnedEl.textContent = `Rp ${Number(data.affiliateTotalEarned || 0).toLocaleString('id-ID')}`;
+      }
+
+      // Render commissions table
+      const commissionsBody = document.getElementById('affiliate-commissions-table-body');
+      if (commissionsBody) {
+        if (data.commissions && data.commissions.length > 0) {
+          commissionsBody.innerHTML = data.commissions.map(c => {
+            const dateStr = new Date(c.createdAt).toLocaleDateString('id-ID', {
+              day: '2-digit',
+              month: 'short',
+              year: 'numeric',
+              hour: '2-digit',
+              minute: '2-digit'
+            });
+            return `
+              <tr>
+                <td style="padding: 10px; color: var(--text-secondary);">${dateStr}</td>
+                <td class="text-center" style="padding: 10px; color: var(--text-primary); font-weight: 500;">
+                  ${c.referredUser.name} <span style="font-size: 11px; color: var(--text-secondary); display: block;">(${c.referredUser.email})</span>
+                </td>
+                <td class="text-center" style="padding: 10px; color: var(--text-secondary);">${c.percentage}%</td>
+                <td class="text-center" style="padding: 10px; color: #10B981; font-weight: 600;">Rp ${Number(c.amount).toLocaleString('id-ID')}</td>
+              </tr>
+            `;
+          }).join('');
+        } else {
+          commissionsBody.innerHTML = `
+            <tr>
+              <td colspan="4" class="text-center" style="padding: 20px; color: var(--text-secondary);">Belum ada riwayat pendapatan komisi.</td>
+            </tr>
+          `;
+        }
+      }
+
+      // Render payouts table
+      const payoutsBody = document.getElementById('affiliate-payouts-table-body');
+      if (payoutsBody) {
+        if (data.payouts && data.payouts.length > 0) {
+          payoutsBody.innerHTML = data.payouts.map(p => {
+            const dateStr = new Date(p.createdAt).toLocaleDateString('id-ID', {
+              day: '2-digit',
+              month: 'short',
+              year: 'numeric'
+            });
+            let statusBadge = '';
+            if (p.status === 'pending') {
+              statusBadge = `<span class="badge" style="background: rgba(245, 158, 11, 0.1); color: #D97706; border: 1px solid rgba(245, 158, 11, 0.2); font-weight: 600; padding: 2px 8px; border-radius: 9999px;">Pending</span>`;
+            } else if (p.status === 'completed') {
+              statusBadge = `<span class="badge" style="background: rgba(16, 185, 129, 0.1); color: #059669; border: 1px solid rgba(16, 185, 129, 0.2); font-weight: 600; padding: 2px 8px; border-radius: 9999px;">Selesai</span>`;
+            } else {
+              statusBadge = `<span class="badge" style="background: rgba(239, 68, 68, 0.1); color: #DC2626; border: 1px solid rgba(239, 68, 68, 0.2); font-weight: 600; padding: 2px 8px; border-radius: 9999px;">Ditolak</span>`;
+            }
+            return `
+              <tr>
+                <td style="padding: 10px; color: var(--text-secondary);">${dateStr}</td>
+                <td class="text-center" style="padding: 10px; color: var(--text-primary); font-weight: 500;">
+                  ${p.paymentMethod} <span style="font-size: 11px; color: var(--text-secondary); display: block;">${p.accountNumber} (${p.accountName})</span>
+                </td>
+                <td class="text-center" style="padding: 10px; color: var(--text-primary); font-weight: 600;">Rp ${Number(p.amount).toLocaleString('id-ID')}</td>
+                <td class="text-center" style="padding: 10px;">${statusBadge}</td>
+              </tr>
+            `;
+          }).join('');
+        } else {
+          payoutsBody.innerHTML = `
+            <tr>
+              <td colspan="4" class="text-center" style="padding: 20px; color: var(--text-secondary);">Belum ada riwayat penarikan dana.</td>
+            </tr>
+          `;
+        }
+      }
+    }
+  } catch (err) {
+    console.error('Failed to load affiliate stats:', err);
+  }
+}
+
+async function renderAdminPage() {
+  if (!state.token || state.profile.role !== 'admin') return;
+  
+  const tbody = document.getElementById('admin-payouts-table-body');
+  if (!tbody) return;
+
+  try {
+    const res = await fetch(`${API_BASE_URL}/admin/payout-requests`, {
+      headers: {
+        'Authorization': `Bearer ${state.token}`
+      }
+    });
+
+    if (res.ok) {
+      const data = await res.json();
+      if (data.payoutRequests && data.payoutRequests.length > 0) {
+        tbody.innerHTML = data.payoutRequests.map(p => {
+          const dateStr = new Date(p.createdAt).toLocaleDateString('id-ID', {
+            day: '2-digit',
+            month: 'short',
+            year: 'numeric',
+            hour: '2-digit',
+            minute: '2-digit'
+          });
+          
+          let statusBadge = '';
+          if (p.status === 'pending') {
+            statusBadge = `<span class="badge" style="background: rgba(245, 158, 11, 0.1); color: #D97706; border: 1px solid rgba(245, 158, 11, 0.2); font-weight: 600; padding: 2px 8px; border-radius: 9999px;">Pending</span>`;
+          } else if (p.status === 'completed') {
+            statusBadge = `<span class="badge" style="background: rgba(16, 185, 129, 0.1); color: #059669; border: 1px solid rgba(16, 185, 129, 0.2); font-weight: 600; padding: 2px 8px; border-radius: 9999px;">Selesai</span>`;
+          } else {
+            statusBadge = `<span class="badge" style="background: rgba(239, 68, 68, 0.1); color: #DC2626; border: 1px solid rgba(239, 68, 68, 0.2); font-weight: 600; padding: 2px 8px; border-radius: 9999px;">Ditolak</span>`;
+          }
+
+          let actionButtons = '-';
+          if (p.status === 'pending') {
+            actionButtons = `
+              <div style="display: flex; gap: 8px; justify-content: center;">
+                <button class="btn btn-primary btn-sm btn-admin-payout-complete" data-id="${p.id}" style="background-color: #10B981; border-color: #10B981; padding: 4px 8px; font-size: 11px;">Selesai</button>
+                <button class="btn btn-outline btn-sm btn-admin-payout-reject" data-id="${p.id}" style="color: #EF4444; border-color: rgba(239, 68, 68, 0.3); padding: 4px 8px; font-size: 11px;">Tolak</button>
+              </div>
+            `;
+          }
+
+          return `
+            <tr>
+              <td style="padding: 12px; color: var(--text-primary); font-weight: 600; text-align: left;">
+                ${p.user.name || 'User Baru'} 
+                <span style="font-size: 11px; color: var(--text-secondary); display: block; font-weight: normal;">${p.user.email}</span>
+              </td>
+              <td class="text-center" style="padding: 12px; color: var(--text-secondary);">${dateStr}</td>
+              <td style="padding: 12px; color: var(--text-primary); text-align: left;">
+                <strong>${p.paymentMethod}</strong>
+                <span style="font-size: 12px; color: var(--text-secondary); display: block;">Rek: ${p.accountNumber}</span>
+                <span style="font-size: 12px; color: var(--text-secondary); display: block;">A/N: ${p.accountName}</span>
+              </td>
+              <td class="text-center" style="padding: 12px; color: var(--text-primary); font-weight: 600;">Rp ${Number(p.amount).toLocaleString('id-ID')}</td>
+              <td class="text-center" style="padding: 12px;">${statusBadge}</td>
+              <td class="text-center" style="padding: 12px;">${actionButtons}</td>
+            </tr>
+          `;
+        }).join('');
+
+        // Add event listeners to newly rendered action buttons
+        document.querySelectorAll('.btn-admin-payout-complete').forEach(btn => {
+          btn.addEventListener('click', async () => {
+            const id = btn.getAttribute('data-id');
+            if (confirm('Tandai permintaan penarikan ini sebagai selesai?')) {
+              await updatePayoutStatus(id, 'completed');
+            }
+          });
+        });
+
+        document.querySelectorAll('.btn-admin-payout-reject').forEach(btn => {
+          btn.addEventListener('click', async () => {
+            const id = btn.getAttribute('data-id');
+            if (confirm('Tolak permintaan penarikan ini? Saldo penarikan akan dikembalikan ke saldo user.')) {
+              await updatePayoutStatus(id, 'rejected');
+            }
+          });
+        });
+      } else {
+        tbody.innerHTML = `
+          <tr>
+            <td colspan="6" class="text-center" style="padding: 30px; color: var(--text-secondary);">Belum ada permintaan penarikan komisi.</td>
+          </tr>
+        `;
+      }
+    }
+  } catch (err) {
+    console.error('Failed to render admin payouts:', err);
+    tbody.innerHTML = `
+      <tr>
+        <td colspan="6" class="text-center" style="padding: 30px; color: #EF4444;">Gagal mengambil data dari server.</td>
+      </tr>
+    `;
+  }
+}
+
+async function updatePayoutStatus(id, status) {
+  try {
+    const res = await fetch(`${API_BASE_URL}/admin/payout-requests/${id}`, {
+      method: 'PATCH',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${state.token}`
+      },
+      body: JSON.stringify({ status })
+    });
+    if (res.ok) {
+      showToast(status === 'completed' ? 'Permintaan ditandai selesai!' : 'Permintaan ditolak!');
+      await renderAdminPage();
+    } else {
+      const data = await res.json();
+      showToast(data.message || 'Gagal memperbarui status.', 'error');
+    }
+  } catch (err) {
+    console.error(err);
+    showToast('Koneksi gagal.', 'error');
   }
 }
 
@@ -3312,6 +3557,100 @@ function initEventListeners() {
     });
   });
 
+  // Copy referral link listener
+  const btnCopyRef = document.getElementById('btn-copy-ref-link');
+  if (btnCopyRef) {
+    btnCopyRef.addEventListener('click', () => {
+      const refInput = document.getElementById('affiliate-ref-link');
+      if (refInput) {
+        refInput.select();
+        refInput.setSelectionRange(0, 99999); // For mobile devices
+        navigator.clipboard.writeText(refInput.value)
+          .then(() => {
+            btnCopyRef.textContent = 'Tersalin!';
+            setTimeout(() => {
+              btnCopyRef.textContent = 'Salin Link';
+            }, 2000);
+          })
+          .catch(err => {
+            console.error('Failed to copy text:', err);
+          });
+      }
+    });
+  }
+
+  // Payout request submission listener
+  const formPayout = document.getElementById('form-payout-request');
+  if (formPayout) {
+    formPayout.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      
+      const amount = parseFloat(document.getElementById('payout-amount').value);
+      const paymentMethod = document.getElementById('payout-method').value;
+      const accountNumber = document.getElementById('payout-account').value;
+      const accountName = document.getElementById('payout-name').value;
+      
+      const errorEl = document.getElementById('payout-error-alert');
+      const successEl = document.getElementById('payout-success-alert');
+      const submitBtn = document.getElementById('btn-submit-payout');
+
+      if (errorEl) errorEl.style.display = 'none';
+      if (successEl) successEl.style.display = 'none';
+
+      if (amount < 100000) {
+        if (errorEl) {
+          errorEl.textContent = 'Jumlah penarikan minimal adalah Rp 100.000.';
+          errorEl.style.display = 'block';
+        }
+        return;
+      }
+
+      if (submitBtn) {
+        submitBtn.disabled = true;
+        submitBtn.textContent = 'Memproses...';
+      }
+
+      try {
+        const res = await fetch(`${API_BASE_URL}/affiliate/payout-request`, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${state.token}`
+          },
+          body: JSON.stringify({ amount, paymentMethod, accountNumber, accountName })
+        });
+        
+        const data = await res.json();
+        
+        if (res.ok) {
+          if (successEl) {
+            successEl.textContent = 'Permintaan penarikan berhasil diajukan! Saldo Anda berkurang sementara menunggu proses persetujuan.';
+            successEl.style.display = 'block';
+          }
+          formPayout.reset();
+          // Reload stats
+          await fetchAndRenderAffiliateStats();
+        } else {
+          if (errorEl) {
+            errorEl.textContent = data.message || 'Gagal mengajukan penarikan. Silakan coba lagi.';
+            errorEl.style.display = 'block';
+          }
+        }
+      } catch (err) {
+        console.error(err);
+        if (errorEl) {
+          errorEl.textContent = 'Terjadi kesalahan koneksi. Silakan coba lagi.';
+          errorEl.style.display = 'block';
+        }
+      } finally {
+        if (submitBtn) {
+          submitBtn.disabled = false;
+          submitBtn.textContent = 'Ajukan Penarikan';
+        }
+      }
+    });
+  }
+
   // File Upload Drag and Drop
   const dropZone = document.getElementById('file-drop-zone');
   if (dropZone) {
@@ -3681,6 +4020,18 @@ function initEventListeners() {
       sidebar.classList.toggle('minimized');
       toggleBtn.classList.toggle('minimized');
       localStorage.setItem('sidebar-minimized', sidebar.classList.contains('minimized'));
+    });
+  }
+
+  // Refresh Admin Payouts Button
+  const btnRefreshAdmin = document.getElementById('btn-refresh-admin-payouts');
+  if (btnRefreshAdmin) {
+    btnRefreshAdmin.addEventListener('click', async () => {
+      btnRefreshAdmin.disabled = true;
+      btnRefreshAdmin.textContent = 'Menyegarkan...';
+      await renderAdminPage();
+      btnRefreshAdmin.disabled = false;
+      btnRefreshAdmin.textContent = 'Segarkan Data';
     });
   }
 }
@@ -4094,12 +4445,16 @@ function playSuccessChime() {
 }
 
 function syncSidebarProfile() {
-  const profile = state.profile || { username: 'User', phone: '' };
+  const profile = state.profile || { username: 'User', phone: '', role: 'user' };
   const sidebarNameEl = document.querySelector('.sidebar .user-name');
   if (sidebarNameEl) sidebarNameEl.textContent = profile.username;
   const sidebarAvatarEl = document.querySelector('.sidebar .user-avatar');
   if (sidebarAvatarEl) {
     sidebarAvatarEl.textContent = profile.avatar || profile.username.charAt(0).toUpperCase();
+  }
+  const adminTab = document.getElementById('nav-admin-panel');
+  if (adminTab) {
+    adminTab.style.display = (profile.role === 'admin') ? 'flex' : 'none';
   }
 }
 
@@ -4249,8 +4604,13 @@ function formatMessageByStyle(text, style) {
 }
 // --- INITIALIZE APPLICATION ---
 const initializeApp = async () => {
-  // Parse tokens from URL if coming back from Google OAuth redirect
+  // Parse tokens and referral code from URL
   const urlParams = new URLSearchParams(window.location.search);
+  const refCode = urlParams.get('ref');
+  if (refCode) {
+    localStorage.setItem('myva_ref_code', refCode);
+  }
+  
   const urlAccessToken = urlParams.get('accessToken');
   const urlRefreshToken = urlParams.get('refreshToken');
   

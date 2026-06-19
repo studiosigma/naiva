@@ -13,6 +13,8 @@ import { AIModule } from './modules/ai/ai.module';
 import { QueuesModule } from './queues/queues.module';
 import { ExpenseModule } from './modules/expense/expense.module';
 import { SubscriptionModule } from './modules/subscription/subscription.module';
+import { AffiliateModule } from './modules/affiliate/affiliate.module';
+import { AdminModule } from './modules/admin/admin.module';
 
 @Module({
   imports: [
@@ -39,6 +41,8 @@ import { SubscriptionModule } from './modules/subscription/subscription.module';
     AIModule,
     ExpenseModule,
     SubscriptionModule,
+    AffiliateModule,
+    AdminModule,
   ],
 })
 export class AppModule {}

@@ -17,6 +17,7 @@ model User {
   waNumber     String?  @unique @map("wa_number")
   plan         String   @default("free") // free, pro
   status       String   @default("active") // active, suspended
+  role         String   @default("user") // user, admin
   persona      String   @default("professional") // friendly, professional, islamic, business_partner, grumpy_boss, romantic_partner
   gcalConnected       Boolean  @default(false) @map("gcal_connected")
   gdriveConnected     Boolean  @default(false) @map("gdrive_connected")
@@ -36,6 +37,17 @@ model User {
   conversations Conversation[]
   usageLogs     UsageLog[]
   expenses      Expense[]
+
+  referralCode          String?             @unique @map("referral_code")
+  referredById          String?             @map("referred_by_id")
+  referredBy            User?               @relation("UserReferrals", fields: [referredById], references: [id])
+  referrals             User[]              @relation("UserReferrals")
+  affiliateBalance      Float               @default(0.0) @map("affiliate_balance")
+  affiliateTotalEarned  Float               @default(0.0) @map("affiliate_total_earned")
+
+  commissionsReceived   CommissionLog[]     @relation("ReferrerCommissions")
+  commissionsGenerated  CommissionLog[]     @relation("ReferredUserCommissions")
+  payoutRequests        PayoutRequest[]
 
   @@map("users")
 }
@@ -152,12 +164,15 @@ model File {
 }
 
 model UsageLog {
-  id          String   @id @default(uuid())
-  userId      String   @map("user_id")
-  actionType  String   @map("action_type") // WHATSAPP_MESSAGE, FILE_UPLOAD, SUMMARY, SEMANTIC_SEARCH
-  description String?
-  ipAddress   String?  @map("ip_address")
-  createdAt   DateTime @default(now()) @map("created_at")
+  id           String   @id @default(uuid())
+  userId       String   @map("user_id")
+  actionType   String   @map("action_type") // WHATSAPP_MESSAGE, FILE_UPLOAD, SUMMARY, SEMANTIC_SEARCH
+  description  String?
+  tokensInput  Int?     @map("tokens_input")
+  tokensOutput Int?     @map("tokens_output")
+  cost         Float?   @map("cost")
+  ipAddress    String?  @map("ip_address")
+  createdAt    DateTime @default(now()) @map("created_at")
 
   user User @relation(fields: [userId], references: [id], onDelete: Cascade)
 
@@ -177,4 +192,41 @@ model Expense {
 
   @@index([userId])
   @@map("expenses")
+}
+
+model CommissionLog {
+  id              String        @id @default(uuid())
+  referrerId      String        @map("referrer_id")
+  referrer        User          @relation("ReferrerCommissions", fields: [referrerId], references: [id])
+  referredUserId  String        @map("referred_user_id")
+  referredUser    User          @relation("ReferredUserCommissions", fields: [referredUserId], references: [id])
+  amount          Float
+  paymentAmount   Float         @map("payment_amount")
+  percentage      Int
+  createdAt       DateTime      @default(now()) @map("created_at")
+
+  @@map("commission_logs")
+}
+
+model PayoutRequest {
+  id            String          @id @default(uuid())
+  userId        String          @map("user_id")
+  user          User            @relation(fields: [userId], references: [id], onDelete: Cascade)
+  amount        Float
+  status        String          @default("pending") // pending, completed, rejected
+  paymentMethod String          @map("payment_method") // BCA, Mandiri, GOPAY, etc.
+  accountNumber String          @map("account_number")
+  accountName   String          @map("account_name")
+  createdAt     DateTime        @default(now()) @map("created_at")
+  updatedAt     DateTime        @updatedAt @map("updated_at")
+
+  @@map("payout_requests")
+}
+
+model SystemConfig {
+  key       String   @id
+  value     String
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  @@map("system_configs")
 }

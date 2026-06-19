@@ -60,6 +60,13 @@
             <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"></circle><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"></path></svg>
             <span>Settings</span>
           </a>
+          <a href="admin.html" class="nav-item" id="nav-admin-panel" style="display:none;">
+            <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect>
+              <path d="M7 11V7a5 5 0 0 1 10 0v4"></path>
+            </svg>
+            <span>Admin Panel</span>
+          </a>
         </nav>
 
         <div class="sidebar-footer">
@@ -1612,6 +1619,15 @@
                   <svg class="settings-tab-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="5" width="20" height="14" rx="2" ry="2"></rect><line x1="2" y1="10" x2="22" y2="10"></line></svg>
                   <span>Subscription</span>
                 </button>
+                <button class="settings-tab-btn" data-tab="affiliate">
+                  <svg class="settings-tab-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="stroke-linecap:round;stroke-linejoin:round;">
+                    <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path>
+                    <circle cx="9" cy="7" r="4"></circle>
+                    <path d="M23 21v-2a4 4 0 0 0-3-3.87"></path>
+                    <path d="M16 3.13a4 4 0 0 1 0 7.75"></path>
+                  </svg>
+                  <span>Afiliasi & Referral</span>
+                </button>
                 <button class="settings-tab-btn" id="btn-logout" style="margin-top: auto; color: #EF4444; border: 1px dashed rgba(239, 68, 68, 0.2); background: rgba(239, 68, 68, 0.02);">
                   <svg class="settings-tab-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="stroke: #EF4444;"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"></path><polyline points="16 17 21 12 16 7"></polyline><line x1="21" y1="12" x2="9" y2="12"></line></svg>
                   <span style="color: #EF4444; font-weight: 600;">Logout</span>
@@ -2060,6 +2076,146 @@
                       </table>
                     </div>
                   </div>
+                </div>
+
+                <!-- Affiliate Tab -->
+                <div class="settings-tab-pane" id="settings-pane-affiliate">
+                  <h3 class="panel-section-title">Program Afiliasi & Referral MyVA</h3>
+                  <p class="section-desc">Undang teman Anda untuk berlangganan MyVA dan dapatkan komisi tunai sebesar 30% untuk bulan pertama, serta 10% berkelanjutan (recurring) untuk setiap perpanjangan di bulan-bulan berikutnya.</p>
+
+                  <!-- Link Referral Box -->
+                  <div class="settings-form-card" style="margin-bottom: 24px;">
+                    <h4 style="margin-bottom: 12px; font-weight: 600; font-size: 15px; color: var(--text-primary);">Link Referral Anda</h4>
+                    <div class="input-icon-container" style="display: flex; gap: 8px;">
+                      <input type="text" class="form-input" id="affiliate-ref-link" value="https://myva.ai/?ref=" readonly style="flex: 1; background-color: var(--bg-hover);" />
+                      <button class="btn btn-outline btn-sm" id="btn-copy-ref-link" style="white-space: nowrap;">Salin Link</button>
+                    </div>
+                  </div>
+
+                  <!-- Stats Grid -->
+                  <div class="stats-grid" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 16px; margin-bottom: 24px;">
+                    <div class="stat-card" style="cursor: default;">
+                      <span class="stat-title">Total Undangan</span>
+                      <span class="stat-value" id="affiliate-total-referrals">0</span>
+                      <span class="stat-desc">Orang terdaftar</span>
+                    </div>
+                    <div class="stat-card" style="cursor: default;">
+                      <span class="stat-title">Saldo Aktif</span>
+                      <span class="stat-value" id="affiliate-balance">Rp 0</span>
+                      <span class="stat-desc">Dapat dicairkan (Min Rp 100.000)</span>
+                    </div>
+                    <div class="stat-card" style="cursor: default;">
+                      <span class="stat-title">Total Pendapatan</span>
+                      <span class="stat-value" id="affiliate-total-earned">Rp 0</span>
+                      <span class="stat-desc">Seumur hidup</span>
+                    </div>
+                  </div>
+
+                  <!-- Request Payout Card -->
+                  <div class="settings-form-card" style="margin-bottom: 24px;">
+                    <h4 style="margin-bottom: 16px; font-weight: 600; font-size: 15px; color: var(--text-primary);">Ajukan Penarikan Komisi</h4>
+                    
+                    <div id="payout-error-alert" class="login-alert error" style="display:none; margin-bottom:12px;"></div>
+                    <div id="payout-success-alert" class="login-alert success" style="display:none; margin-bottom:12px;"></div>
+
+                    <form id="form-payout-request">
+                      <div class="form-group" style="margin-bottom: 12px;">
+                        <label class="form-label">Nominal Penarikan (Rp)</label>
+                        <input type="number" class="form-input" id="payout-amount" placeholder="Contoh: 100000" min="100000" required />
+                      </div>
+                      <div class="form-group" style="margin-bottom: 12px;">
+                        <label class="form-label">Metode Pembayaran / Nama Bank</label>
+                        <input type="text" class="form-input" id="payout-method" placeholder="Contoh: Bank BCA, GoPay, OVO" required />
+                      </div>
+                      <div class="form-group" style="margin-bottom: 12px;">
+                        <label class="form-label">Nomor Rekening / No. E-Wallet</label>
+                        <input type="text" class="form-input" id="payout-account" placeholder="Contoh: 1234567890" required />
+                      </div>
+                      <div class="form-group" style="margin-bottom: 16px;">
+                        <label class="form-label">Nama Pemilik Rekening</label>
+                        <input type="text" class="form-input" id="payout-name" placeholder="Contoh: Nur Muis Masyuun" required />
+                      </div>
+                      <button type="submit" class="btn btn-primary btn-sm" id="btn-submit-payout">Ajukan Penarikan</button>
+                    </form>
+                  </div>
+
+                  <!-- Riwayat Komisi & Penarikan Tables -->
+                  <div class="settings-form-card">
+                    <h4 style="margin-bottom: 16px; font-weight: 600; font-size: 15px; color: var(--text-primary); border-bottom: 1px solid var(--border-color); padding-bottom: 8px;">Riwayat Pendapatan Afiliasi</h4>
+                    <div style="overflow-x: auto;">
+                      <table class="pricing-comparison-table" style="width: 100%;">
+                        <thead>
+                          <tr>
+                            <th class="feature-col-header" style="padding: 10px;">Tanggal</th>
+                            <th class="plan-col-header text-center" style="padding: 10px;">Teman</th>
+                            <th class="plan-col-header text-center" style="padding: 10px;">Persentase</th>
+                            <th class="plan-col-header text-center" style="padding: 10px;">Komisi</th>
+                          </tr>
+                        </thead>
+                        <tbody id="affiliate-commissions-table-body">
+                          <tr>
+                            <td colspan="4" class="text-center" style="padding: 20px; color: var(--text-secondary);">Belum ada riwayat pendapatan komisi.</td>
+                          </tr>
+                        </tbody>
+                      </table>
+                    </div>
+                  </div>
+
+                  <div class="settings-form-card" style="margin-top: 24px;">
+                    <h4 style="margin-bottom: 16px; font-weight: 600; font-size: 15px; color: var(--text-primary); border-bottom: 1px solid var(--border-color); padding-bottom: 8px;">Riwayat Penarikan</h4>
+                    <div style="overflow-x: auto;">
+                      <table class="pricing-comparison-table" style="width: 100%;">
+                        <thead>
+                          <tr>
+                            <th class="feature-col-header" style="padding: 10px;">Tanggal</th>
+                            <th class="plan-col-header text-center" style="padding: 10px;">Tujuan</th>
+                            <th class="plan-col-header text-center" style="padding: 10px;">Nominal</th>
+                            <th class="plan-col-header text-center" style="padding: 10px;">Status</th>
+                          </tr>
+                        </thead>
+                        <tbody id="affiliate-payouts-table-body">
+                          <tr>
+                            <td colspan="4" class="text-center" style="padding: 20px; color: var(--text-secondary);">Belum ada riwayat penarikan dana.</td>
+                          </tr>
+                        </tbody>
+                      </table>
+                    </div>
+                  </div>
+
+                </div>
+              </div>
+            </div>
+          </section>
+
+          <!-- 10. ADMIN VIEW -->
+          <section id="view-admin" class="view-section">
+            <div class="settings-layout" style="display: block; width: 100%;">
+              <div class="settings-form-card" style="margin-bottom: 24px;">
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px; border-bottom: 1px solid var(--border-color); padding-bottom: 12px;">
+                  <h3 class="panel-section-title" style="margin-bottom: 0;">Kelola Penarikan Komisi</h3>
+                  <button class="btn btn-outline btn-sm" id="btn-refresh-admin-payouts">Segarkan Data</button>
+                </div>
+                
+                <p class="section-desc">Berikut adalah daftar permintaan pencairan komisi oleh user. Silakan lakukan transfer secara manual ke rekening tujuan, kemudian klik "Selesai" untuk menandai transaksi telah diproses, atau "Tolak" jika data rekening tidak valid.</p>
+                
+                <div style="overflow-x: auto; margin-top: 16px;">
+                  <table class="pricing-comparison-table" style="width: 100%;">
+                    <thead>
+                      <tr>
+                        <th class="feature-col-header" style="padding: 12px;">User</th>
+                        <th class="plan-col-header text-center" style="padding: 12px;">Tanggal</th>
+                        <th class="plan-col-header text-center" style="padding: 12px;">Metode & Rekening</th>
+                        <th class="plan-col-header text-center" style="padding: 12px;">Nominal</th>
+                        <th class="plan-col-header text-center" style="padding: 12px;">Status</th>
+                        <th class="plan-col-header text-center" style="padding: 12px;">Aksi</th>
+                      </tr>
+                    </thead>
+                    <tbody id="admin-payouts-table-body">
+                      <tr>
+                        <td colspan="6" class="text-center" style="padding: 30px; color: var(--text-secondary);">Memuat data permintaan penarikan...</td>
+                      </tr>
+                    </tbody>
+                  </table>
                 </div>
               </div>
             </div>

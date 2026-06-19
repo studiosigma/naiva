@@ -20,4 +20,9 @@ export class SignupDto {
   @IsString()
   @IsOptional()
   waNumber?: string;
+
+  @ApiProperty({ example: 'muis123', description: 'Referral code of the user who invited them', required: false })
+  @IsString()
+  @IsOptional()
+  referralCode?: string;
 }
