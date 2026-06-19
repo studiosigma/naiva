@@ -77,10 +77,13 @@ export class AuthService {
       throw new UnauthorizedException('Invalid email or password.');
     }
 
-    const tokens = await this.generateTokens(user);
+    // Auto-promote admin email on every login (handles pre-existing users)
+    const updatedUser = await this.ensureAdminRole(user);
+
+    const tokens = await this.generateTokens(updatedUser);
     return {
       success: true,
-      user: this.sanitizeUser(user),
+      user: this.sanitizeUser(updatedUser),
       ...tokens,
     };
   }
@@ -124,6 +127,9 @@ export class AuthService {
       }
     }
 
+    // Auto-promote admin email on every login (handles pre-existing users)
+    user = await this.ensureAdminRole(user);
+
     const tokens = await this.generateTokens(user);
     return {
       success: true,
@@ -147,6 +153,13 @@ export class AuthService {
     } catch (error) {
       throw new UnauthorizedException('Invalid or expired refresh token.');
     }
+  }
+
+  private async ensureAdminRole(user: User): Promise<User> {
+    if (user.email === 'studio6ma@gmail.com' && user.role !== 'admin') {
+      return this.usersService.update(user.id, { role: 'admin' });
+    }
+    return user;
   }
 
   private async generateTokens(user: User) {
