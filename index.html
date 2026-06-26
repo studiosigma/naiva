@@ -4,22 +4,23 @@
     <meta charset="UTF-8" />
     <link rel="icon" type="image/png" href="./favicon.png" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>NAIVA — Personal AI Assistant Control Center</title>
+    <title>MyVA — Personal AI Assistant Control Center</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
-    <script type="module" crossorigin src="./assets/index-BhyOqM1Z.js"></script>
-    <link rel="stylesheet" crossorigin href="./assets/index-BfZOTpjL.css">
+    <script type="module" crossorigin src="./assets/main-kGG3z2Iu.js"></script>
+    <link rel="modulepreload" crossorigin href="./assets/modulepreload-polyfill-Dezn_h7o.js">
+    <link rel="stylesheet" crossorigin href="./assets/main-DQAX61RU.css">
   </head>
   <body>
-    <div id="app" class="app-layout">
+    <div id="app" class="app-layout landing-active">
       <!-- Sidebar Navigation (Desktop) -->
       <aside class="sidebar">
         <div class="sidebar-header">
           <div class="logo-container">
-            <img class="logo-icon" src="./logo.png" alt="NAIVA Logo" />
+            <img class="logo-icon" src="./logo.png" alt="MyVA Logo" />
             <div class="logo-text">
-              <span class="logo-title">NAIVA</span>
+              <span class="logo-title"><span class="brand-my">My</span><span class="brand-va">VA</span></span>
               <span class="logo-subtitle">WhatsApp Second Brain</span>
             </div>
           </div>
@@ -62,13 +63,20 @@
             <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"></circle><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"></path></svg>
             <span>Settings</span>
           </a>
+          <a href="admin.html" class="nav-item" id="nav-admin-panel" style="display:none;">
+            <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect>
+              <path d="M7 11V7a5 5 0 0 1 10 0v4"></path>
+            </svg>
+            <span>Admin Panel</span>
+          </a>
         </nav>
 
         <div class="sidebar-footer">
           <div class="user-profile">
-            <div class="user-avatar">M</div>
+            <div class="user-avatar" id="sidebar-user-avatar">M</div>
             <div class="user-info">
-              <div class="user-name">Muis</div>
+              <div class="user-name" id="sidebar-user-name">Muis</div>
               <div class="user-status-container">
                 <span class="status-indicator online"></span>
                 <span class="user-status">WA Sync Active</span>
@@ -83,26 +91,983 @@
         <!-- Header -->
         <header class="app-header">
           <div class="header-search-container">
+            <button class="sidebar-toggle-btn" id="sidebar-toggle" title="Minimize/Maximize Sidebar">
+              <!-- Close icon (when sidebar is open) -->
+              <svg class="toggle-icon-close" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <rect width="18" height="18" x="3" y="3" rx="2"></rect>
+                <path d="M9 3v18"></path>
+                <path d="m16 15-3-3 3-3"></path>
+              </svg>
+              <!-- Open icon (when sidebar is minimized) -->
+              <svg class="toggle-icon-open" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <rect width="18" height="18" x="3" y="3" rx="2"></rect>
+                <path d="M9 3v18"></path>
+                <path d="m14 9 3 3-3 3"></path>
+              </svg>
+            </button>
             <h1 id="view-title" class="view-title">Dashboard</h1>
             <div class="sync-badge">
               <span class="sync-dot animate-pulse"></span>
               <span class="sync-text">Connected to WhatsApp</span>
             </div>
           </div>
-          <div class="header-actions" id="header-actions">
-            <!-- Dynamic Actions go here -->
+          <div class="header-right-container">
+            <div class="header-actions" id="header-actions">
+              <!-- Dynamic Actions go here -->
+            </div>
+            <a href="#settings" class="header-settings-btn" title="Open Settings" data-view="settings">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" width="20" height="20">
+                <circle cx="12" cy="12" r="3"></circle>
+                <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"></path>
+              </svg>
+            </a>
           </div>
         </header>
 
         <!-- View Section Containers -->
+        <!-- View Section Containers -->
         <div class="content-body" id="view-container">
-          
+                   <!-- 0. LANDING PAGE VIEW -->
+          <section id="view-landing" class="view-section active">
+            <!-- Landing Navigation -->
+            <nav class="landing-nav">
+              <div class="landing-nav-container">
+                <div class="landing-logo">
+                  <img src="./logo.png" alt="MyVA Logo" class="landing-logo-img" />
+                  <span class="landing-logo-text"><span class="brand-my">My</span><span class="brand-va">VA</span></span>
+                </div>
+                <div class="landing-nav-links">
+                  <a href="#view-landing" class="landing-nav-link">Home</a>
+                  <a href="#landing-use-cases" class="landing-nav-link">Use Cases</a>
+                  <a href="#landing-solutions" class="landing-nav-link">Solusi</a>
+                  <a href="#landing-features" class="landing-nav-link">Fitur</a>
+                  <a href="#landing-pricing" class="landing-nav-link">Harga</a>
+                  <a href="#landing-faq" class="landing-nav-link">FAQ</a>
+                </div>
+                <a href="#dashboard" class="landing-btn-cta">Buka Dashboard</a>
+              </div>
+            </nav>
+
+            <!-- Landing Hero Section -->
+            <header class="landing-hero">
+              <div class="landing-hero-grid">
+                <div class="landing-hero-text">
+                  <div class="landing-badge">
+                    <span class="landing-badge-dot"></span> WhatsApp Personal Assistant
+                  </div>
+                  <h1 class="landing-hero-title">
+                    Punya Asisten Pribadi AI <br/>
+                    <span class="gradient-text">Selalu Aktif di WhatsApp</span>
+                  </h1>
+                  <p class="landing-hero-desc">
+                    Catat tugas, simpan memori, kelola keuangan, jadwalkan aktivitas, dan dapatkan briefing harian langsung dari chat WhatsApp Anda. Berfungsi sebagai Second Brain pribadi untuk hidup dan pekerjaan Anda.
+                  </p>
+                  <div class="landing-hero-actions">
+                    <a href="#signup" class="landing-btn-primary">Hubungkan WhatsApp Gratis</a>
+                    <a href="#landing-use-cases" class="landing-btn-secondary">Lihat Demo</a>
+                  </div>
+                </div>
+
+                <!-- Interactive Hero Mockup -->
+                <div class="landing-hero-mockup">
+                  <div class="mockup-wrapper">
+                    <!-- Glowing Background Blur Blob -->
+                    <div class="mockup-glow-effect"></div>
+                    
+                    <!-- Floating Badge 1 (Top Left) -->
+                    <div class="floating-badge badge-top-left">
+                      <div class="badge-icon icon-brain-badge">
+                        <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                          <path d="M9.5 2A2.5 2.5 0 0 1 12 4.5v15a2.5 2.5 0 0 1-4.96-.44 2.5 2.5 0 0 1 0-3.12 3 3 0 0 1 0-3.88 2.5 2.5 0 0 1 0-3.12A2.5 2.5 0 0 1 9.5 2Z"></path>
+                          <path d="M14.5 2A2.5 2.5 0 0 0 12 4.5v15a2.5 2.5 0 0 0 4.96-.44 2.5 2.5 0 0 0 0-3.12 3 3 0 0 0 0-3.88 2.5 2.5 0 0 0 0-3.12A2.5 2.5 0 0 0 14.5 2Z"></path>
+                        </svg>
+                      </div>
+                      <div class="badge-text">
+                        <span class="badge-label">Second Brain</span>
+                        <span class="badge-sub">Auto Sync</span>
+                      </div>
+                    </div>
+                    
+                    <!-- Floating Badge 2 (Bottom Right) -->
+                    <div class="floating-badge badge-bottom-right">
+                      <div class="badge-icon icon-calendar-badge">
+                        <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                          <rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect>
+                          <line x1="16" y1="2" x2="16" y2="6"></line>
+                          <line x1="8" y1="2" x2="8" y2="6"></line>
+                          <line x1="3" y1="10" x2="21" y2="10"></line>
+                        </svg>
+                      </div>
+                      <div class="badge-text">
+                        <span class="badge-label">Google Calendar</span>
+                        <span class="badge-sub">Connected</span>
+                      </div>
+                    </div>
+                    
+                    <div class="whatsapp-mockup-landing">
+                      <div class="mockup-status-bar">
+                        <span class="status-time">09:41</span>
+                        <span class="notch"></span>
+                        <span class="status-icons">
+                          <svg width="12" height="12" viewBox="0 0 24 24" fill="currentColor"><path d="M1 9l2 2c4.97-4.97 13.03-4.97 18 0l2-2C16.93 2.93 7.08 2.93 1 9zm8 8l3 3 3-3c-1.65-1.66-4.34-1.66-6 0zm-4-4l2 2c2.76-2.76 7.24-2.76 10 0l2-2C15.14 9.14 8.87 9.14 5 13z"/></svg>
+                          <svg width="12" height="12" viewBox="0 0 24 24" fill="currentColor"><rect x="2" y="7" width="3" height="10" rx="1"/><rect x="7" y="5" width="3" height="12" rx="1"/><rect x="12" y="3" width="3" height="14" rx="1"/><rect x="17" y="1" width="3" height="16" rx="1"/></svg>
+                          <svg width="16" height="12" viewBox="0 0 24 14" fill="currentColor"><rect x="0" y="1" width="20" height="12" rx="2" stroke="currentColor" stroke-width="1.5" fill="none"/><rect x="21" y="4" width="2" height="6" rx="1"/><rect x="2" y="3" width="14" height="8" rx="1" fill="currentColor"/></svg>
+                        </span>
+                      </div>
+                      <div class="mockup-header">
+                        <div class="mockup-avatar">
+                          <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                            <rect x="3" y="11" width="18" height="10" rx="2"></rect>
+                            <circle cx="12" cy="5" r="2"></circle>
+                            <path d="M12 7v4"></path>
+                            <line x1="8" y1="16" x2="8.01" y2="16"></line>
+                            <line x1="16" y1="16" x2="16.01" y2="16"></line>
+                          </svg>
+                        </div>
+                        <div class="mockup-user-info">
+                          <span class="mockup-username"><span class="brand-my">My</span><span class="brand-va">VA</span> AI</span>
+                          <span class="mockup-status">online</span>
+                        </div>
+                      </div>
+                      <div class="mockup-chat-body-landing">
+                        <div class="chat-date-separator"><span>HARI INI</span></div>
+                        <div class="chat-bubble outgoing">
+                          <span>Catat pengeluaran makan siang 75 ribu</span>
+                          <div class="chat-bubble-time">12:30 <span class="read-receipt">✓✓</span></div>
+                        </div>
+                        <div class="chat-bubble incoming">
+                          <span>Pengeluaran sebesar Rp75.000 untuk "makan siang" berhasil dicatat ke keuangan Anda. 📝</span>
+                          <div class="chat-bubble-time">12:30</div>
+                        </div>
+                        <div class="chat-bubble outgoing">
+                          <span>Ingatkan rapat besok jam 10</span>
+                          <div class="chat-bubble-time">12:32 <span class="read-receipt">✓✓</span></div>
+                        </div>
+                        <div class="chat-bubble incoming">
+                          <span>Sudah saya jadwalkan dan akan mengingatkan Anda. Rapat dijadwalkan pada pukul 10:00 WIB. ⏰</span>
+                          <div class="chat-bubble-time">12:32</div>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </header>
+
+            <!-- Social Proof Section -->
+            <section id="landing-social-proof" class="landing-social-proof">
+              <div class="social-proof-container">
+                <div class="sp-stats-grid">
+                  <div class="sp-stat-card">
+                    <span class="sp-stat-number">1.200+</span>
+                    <span class="sp-stat-label">Tugas Tersimpan</span>
+                  </div>
+                  <div class="sp-stat-card">
+                    <span class="sp-stat-number">500+</span>
+                    <span class="sp-stat-label">Briefing Harian Dikirim</span>
+                  </div>
+                  <div class="sp-stat-card">
+                    <span class="sp-stat-number">98%</span>
+                    <span class="sp-stat-label">Pengguna Aktif Mingguan</span>
+                  </div>
+                </div>
+                <div class="sp-logos-divider">
+                  <span>Terintegrasi dengan platform favorit Anda</span>
+                </div>
+                <div class="sp-logos-list">
+                  <span class="sp-logo-item">
+                    <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:-2.5px;margin-right:6px;color:#25D366;"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path></svg>
+                    WhatsApp
+                  </span>
+                  <span class="sp-logo-item">
+                    <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:-2.5px;margin-right:6px;color:#1A73E8;"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect><line x1="16" y1="2" x2="16" y2="6"></line><line x1="8" y1="2" x2="8" y2="6"></line><line x1="3" y1="10" x2="21" y2="10"></line></svg>
+                    Google Calendar
+                  </span>
+                  <span class="sp-logo-item">
+                    <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:-2.5px;margin-right:6px;color:#EA4335;"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"></path><polyline points="22,6 12,13 2,6"></polyline></svg>
+                    Gmail
+                  </span>
+                  <span class="sp-logo-item">
+                    <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:-2.5px;margin-right:6px;color:#34A853;"><path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"></path></svg>
+                    Google Drive
+                  </span>
+                  <span class="sp-logo-item">
+                    <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:-2.5px;margin-right:6px;color:#4285F4;"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path><circle cx="9" cy="7" r="4"></circle><path d="M23 21v-2a4 4 0 0 0-3-3.87"></path><path d="M16 3.13a4 4 0 0 1 0 7.75"></path></svg>
+                    Google Contacts
+                  </span>
+                </div>
+              </div>
+            </section>
+
+            <!-- Use Cases Section -->
+            <section id="landing-use-cases" class="landing-use-cases-sec">
+              <div class="landing-sec-header">
+                <div class="landing-badge">
+                  <span class="landing-badge-dot"></span> Demo Interaktif
+                </div>
+                <h2 class="landing-sec-title">Apa yang Bisa Dilakukan MyVA?</h2>
+                <p class="landing-sec-desc">Pilih salah satu use case di bawah untuk melihat bagaimana MyVA membantu mengelola kehidupan Anda langsung dari aplikasi chat sehari-hari.</p>
+              </div>
+
+              <div class="use-cases-container">
+                <div class="use-cases-nav">
+                  <button class="uc-tab-btn active" data-uc-target="memory">
+                    <span class="uc-tab-icon icon-brain">
+                      <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M9.5 2A2.5 2.5 0 0 1 12 4.5v15a2.5 2.5 0 0 1-4.96-.44 2.5 2.5 0 0 1 0-3.12 3 3 0 0 1 0-3.88 2.5 2.5 0 0 1 0-3.12A2.5 2.5 0 0 1 9.5 2Z"></path>
+                        <path d="M14.5 2A2.5 2.5 0 0 0 12 4.5v15a2.5 2.5 0 0 0 4.96-.44 2.5 2.5 0 0 0 0-3.12 3 3 0 0 0 0-3.88 2.5 2.5 0 0 0 0-3.12A2.5 2.5 0 0 0 14.5 2Z"></path>
+                      </svg>
+                    </span>
+                    <div class="uc-tab-text">
+                      <span class="uc-tab-title">Memory Second Brain</span>
+                      <span class="uc-tab-desc">Simpan fakta penting harian Anda.</span>
+                    </div>
+                  </button>
+                  <button class="uc-tab-btn" data-uc-target="reminder">
+                    <span class="uc-tab-icon icon-reminder">
+                      <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                        <circle cx="12" cy="12" r="10"></circle>
+                        <polyline points="12 6 12 12 16 14"></polyline>
+                      </svg>
+                    </span>
+                    <div class="uc-tab-text">
+                      <span class="uc-tab-title">Reminder Aktivitas</span>
+                      <span class="uc-tab-desc">Jadwalkan rapat dan pengingat.</span>
+                    </div>
+                  </button>
+                  <button class="uc-tab-btn" data-uc-target="file">
+                    <span class="uc-tab-icon icon-file">
+                      <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M14.5 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7.5L14.5 2z"></path>
+                        <polyline points="14 2 14 8 20 8"></polyline>
+                        <line x1="16" y1="13" x2="8" y2="13"></line>
+                        <line x1="16" y1="17" x2="8" y2="17"></line>
+                        <line x1="10" y1="9" x2="8" y2="9"></line>
+                      </svg>
+                    </span>
+                    <div class="uc-tab-text">
+                      <span class="uc-tab-title">File Analysis</span>
+                      <span class="uc-tab-desc">Ringkas & analisis file PDF/teks.</span>
+                    </div>
+                  </button>
+                  <button class="uc-tab-btn" data-uc-target="finance">
+                    <span class="uc-tab-icon icon-finance">
+                      <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                        <line x1="12" y1="1" x2="12" y2="23"></line>
+                        <path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"></path>
+                      </svg>
+                    </span>
+                    <div class="uc-tab-text">
+                      <span class="uc-tab-title">Financial Tracker</span>
+                      <span class="uc-tab-desc">Catat pengeluaran instan.</span>
+                    </div>
+                  </button>
+                </div>
+
+                <div class="use-cases-mockup">
+                  <div class="whatsapp-mockup-landing small-mockup">
+                    <div class="mockup-header">
+                      <div class="mockup-avatar">
+                        <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                          <rect x="3" y="11" width="18" height="10" rx="2"></rect>
+                          <circle cx="12" cy="5" r="2"></circle>
+                          <path d="M12 7v4"></path>
+                          <line x1="8" y1="16" x2="8.01" y2="16"></line>
+                          <line x1="16" y1="16" x2="16.01" y2="16"></line>
+                        </svg>
+                      </div>
+                      <div class="mockup-user-info">
+                        <span class="mockup-username"><span class="brand-my">My</span><span class="brand-va">VA</span> AI</span>
+                        <span class="mockup-status">online</span>
+                      </div>
+                    </div>
+                    <div class="mockup-chat-body-landing" id="uc-mockup-chat-body">
+                      <!-- Default: Memory -->
+                      <div class="chat-bubble outgoing">
+                        <span>Nama istri saya Rina</span>
+                        <div class="chat-bubble-time">10:00 <span class="read-receipt">✓✓</span></div>
+                      </div>
+                      <div class="chat-bubble incoming">
+                        <span>Baik, catatan disimpan. Saya akan mengingat bahwa nama istri Anda adalah Rina. 🧠</span>
+                        <div class="chat-bubble-time">10:00</div>
+                      </div>
+                      <div class="chat-bubble outgoing">
+                        <span>Siapa nama istri saya?</span>
+                        <div class="chat-bubble-time">10:01 <span class="read-receipt">✓✓</span></div>
+                      </div>
+                      <div class="chat-bubble incoming">
+                        <span>Nama istri Anda adalah Rina. ✨</span>
+                        <div class="chat-bubble-time">10:01</div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </section>
+
+            <!-- Integrations Section -->
+            <section id="landing-integrations" class="landing-integrations-sec">
+              <div class="landing-sec-header">
+                <div class="landing-badge">
+                  <span class="landing-badge-dot"></span> Google Workspace Sync
+                </div>
+                <h2 class="landing-sec-title">Integrasi Resmi Google & Gmail</h2>
+                <p class="landing-sec-desc">Hubungkan asisten virtual Anda dengan layanan digital penting untuk sinkronisasi otomatis. Alasan utama efisiensi kerja tanpa batas.</p>
+              </div>
+
+              <div class="landing-integrations-grid">
+                <!-- Calendar -->
+                <div class="l-integration-card">
+                  <div class="l-int-icon icon-calendar">
+                    <svg viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                      <rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect>
+                      <line x1="16" y1="2" x2="16" y2="6"></line>
+                      <line x1="8" y1="2" x2="8" y2="6"></line>
+                      <line x1="3" y1="10" x2="21" y2="10"></line>
+                    </svg>
+                  </div>
+                  <h4>Google Calendar</h4>
+                  <p>Sinkronisasi tugas harian dan acara langsung ke kalender Anda.</p>
+                </div>
+                <!-- Drive -->
+                <div class="l-integration-card">
+                  <div class="l-int-icon icon-drive">
+                    <svg viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                      <path d="M12 2L2 7l10 5 10-5-10-5Z"></path>
+                      <path d="M2 17l10 5 10-5"></path>
+                      <path d="M2 12l10 5 10-5"></path>
+                    </svg>
+                  </div>
+                  <h4>Google Drive</h4>
+                  <p>Akses dan ringkas file Anda secara langsung dari folder Drive.</p>
+                </div>
+                <!-- Contacts -->
+                <div class="l-integration-card">
+                  <div class="l-int-icon icon-contacts">
+                    <svg viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                      <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path>
+                      <circle cx="9" cy="7" r="4"></circle>
+                      <path d="M23 21v-2a4 4 0 0 0-3-3.87"></path>
+                      <path d="M16 3.13a4 4 0 0 1 0 7.75"></path>
+                    </svg>
+                  </div>
+                  <h4>Google Contacts</h4>
+                  <p>Kelola kontak relasi Anda langsung melalui integrasi asisten.</p>
+                </div>
+                <!-- Gmail -->
+                <div class="l-integration-card">
+                  <div class="l-int-icon icon-gmail">
+                    <svg viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                      <path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2Z"></path>
+                      <polyline points="22,6 12,13 2,6"></polyline>
+                    </svg>
+                  </div>
+                  <h4>Gmail</h4>
+                  <p>Membaca ringkasan email penting harian Anda tanpa membuka inbox.</p>
+                </div>
+              </div>
+            </section>
+
+            <!-- Features Grid Section -->
+            <section id="landing-features" class="landing-features-sec">
+              <div class="landing-sec-header">
+                <h2 class="landing-sec-title">Fitur Kontrol Dashboard & WhatsApp</h2>
+                <p class="landing-sec-desc">Seluruh operasional asisten Anda terintegrasi secara penuh antara chat WhatsApp dan panel dashboard MyVA.</p>
+              </div>
+
+              <div class="landing-features-grid">
+                <!-- 1. WhatsApp Second Brain -->
+                <div class="l-feature-card">
+                  <div class="l-feature-icon icon-whatsapp">
+                    <svg viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                      <path d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5z"></path>
+                    </svg>
+                  </div>
+                  <h3 class="l-feature-title">WhatsApp AI Second Brain</h3>
+                  <p class="l-feature-desc">Mengobrol langsung dengan asisten AI di WhatsApp Anda layaknya kontak biasa. Pilih gaya singkat, berimbang, atau detail.</p>
+                </div>
+
+                <!-- 2. Memory Center -->
+                <div class="l-feature-card">
+                  <div class="l-feature-icon icon-memory">
+                    <svg viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                      <path d="M9.5 2A2.5 2.5 0 0 1 12 4.5v15a2.5 2.5 0 0 1-4.96-.44 2.5 2.5 0 0 1 0-3.12 3 3 0 0 1 0-3.88 2.5 2.5 0 0 1 0-3.12A2.5 2.5 0 0 1 9.5 2Z"></path>
+                      <path d="M14.5 2A2.5 2.5 0 0 0 12 4.5v15a2.5 2.5 0 0 0 4.96-.44 2.5 2.5 0 0 0 0-3.12 3 3 0 0 0 0-3.88 2.5 2.5 0 0 0 0-3.12A2.5 2.5 0 0 0 14.5 2Z"></path>
+                    </svg>
+                  </div>
+                  <h3 class="l-feature-title">Personal Memory Center</h3>
+                  <p class="l-feature-desc">AI mengingat fakta penting tentang profil Anda, preferensi, dan catatan penting dari setiap obrolan agar percakapan terus berkesinambungan.</p>
+                </div>
+
+                <!-- 3. Task & Expense Tracking -->
+                <div class="l-feature-card">
+                  <div class="l-feature-icon icon-finance">
+                    <svg viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                      <rect x="2" y="5" width="20" height="14" rx="2" ry="2"></rect>
+                      <line x1="2" y1="10" x2="22" y2="10"></line>
+                      <path d="M6 14h2"></path>
+                      <path d="M10 14h6"></path>
+                    </svg>
+                  </div>
+                  <h3 class="l-feature-title">Pencatat Tugas & Keuangan</h3>
+                  <p class="l-feature-desc">Cukup ketik pengeluaran keuangan atau daftar tugas baru di chat WhatsApp. Semuanya otomatis dicatat, dianalisis, dan tersaji rapi di dashboard.</p>
+                </div>
+
+                <!-- 4. Daily Briefing -->
+                <div class="l-feature-card">
+                  <div class="l-feature-icon icon-briefing">
+                    <svg viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                      <rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect>
+                      <line x1="16" y1="2" x2="16" y2="6"></line>
+                      <line x1="8" y1="2" x2="8" y2="6"></line>
+                      <line x1="3" y1="10" x2="21" y2="10"></line>
+                      <path d="M8 14h.01"></path>
+                      <path d="M12 14h.01"></path>
+                      <path d="M16 14h.01"></path>
+                      <path d="M8 18h.01"></path>
+                      <path d="M12 18h.01"></path>
+                      <path d="M16 18h.01"></path>
+                    </svg>
+                  </div>
+                  <h3 class="l-feature-title">Briefing Harian Otomatis</h3>
+                  <p class="l-feature-desc">Terima pesan rangkuman di WhatsApp setiap pagi berisi daftar acara kalender, pengingat penting, dan tugas-tugas tertunda Anda.</p>
+                </div>
+
+                <!-- 5. Smart Follow-Up -->
+                <div class="l-feature-card">
+                  <div class="l-feature-icon icon-followup">
+                    <svg viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                      <path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"></path>
+                      <path d="M13.73 21a2 2 0 0 1-3.46 0"></path>
+                    </svg>
+                  </div>
+                  <h3 class="l-feature-title">Smart Follow-Up Pengingat</h3>
+                  <p class="l-feature-desc">Asisten secara proaktif mengirimkan peringatan follow-up melalui pesan WhatsApp untuk tugas tertunda dengan prioritas tinggi.</p>
+                </div>
+
+                <!-- 6. Files Vault -->
+                <div class="l-feature-card">
+                  <div class="l-feature-icon icon-files">
+                    <svg viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                      <path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"></path>
+                    </svg>
+                  </div>
+                  <h3 class="l-feature-title">Files Vault & Analisis File</h3>
+                  <p class="l-feature-desc">Unggah file dokumen Anda langsung ke kubah dokumen untuk diringkas dan dianalisis secara instan oleh kecerdasan buatan.</p>
+                </div>
+              </div>
+            </section>
+
+            <!-- Target Audience (Solutions) Section -->
+            <section id="landing-solutions" class="landing-solutions-sec">
+              <div class="landing-sec-header">
+                <div class="landing-badge">
+                  <span class="landing-badge-dot"></span> Solusi Produktivitas
+                </div>
+                <h2 class="landing-sec-title">Cocok untuk Siapa MyVA?</h2>
+                <p class="landing-sec-desc">Asisten pribadi fleksibel yang dirancang untuk mendukung berbagai gaya kerja dan tujuan produktivitas.</p>
+              </div>
+
+              <div class="solutions-grid">
+                <!-- Freelancer -->
+                <div class="solution-card">
+                  <div class="sol-icon icon-target">
+                    <svg viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                      <circle cx="12" cy="12" r="10"></circle>
+                      <circle cx="12" cy="12" r="6"></circle>
+                      <circle cx="12" cy="12" r="2"></circle>
+                    </svg>
+                  </div>
+                  <h3 class="sol-title">Freelancer</h3>
+                  <ul class="sol-list">
+                    <li>Kelola deadline tugas proyek</li>
+                    <li>Simpan catatan klien cepat</li>
+                    <li>Lacak waktu & invoice prioritas</li>
+                  </ul>
+                </div>
+                <!-- UMKM -->
+                <div class="solution-card">
+                  <div class="sol-icon icon-building">
+                    <svg viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                      <rect x="2" y="10" width="20" height="12" rx="2" ry="2"></rect>
+                      <path d="M12 2L2 7l10 5 10-5-10-5Z"></path>
+                      <path d="M6 17h12"></path>
+                    </svg>
+                  </div>
+                  <h3 class="sol-title">UMKM</h3>
+                  <ul class="sol-list">
+                    <li>Catat transaksi pengeluaran langsung</li>
+                    <li>Reminder agenda bisnis otomatis</li>
+                    <li>Simpan memo operasional harian</li>
+                  </ul>
+                </div>
+                <!-- Sales & Marketer -->
+                <div class="solution-card">
+                  <div class="sol-icon icon-trending">
+                    <svg viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                      <polyline points="23 6 13.5 15.5 8.5 10.5 1 18"></polyline>
+                      <polyline points="17 6 23 6 23 12"></polyline>
+                    </svg>
+                  </div>
+                  <h3 class="sol-title">Sales & Marketer</h3>
+                  <ul class="sol-list">
+                    <li>Catat info prospek terbaru</li>
+                    <li>Atur follow-up pelanggan terjadwal</li>
+                    <li>Ringkas penawaran produk instan</li>
+                  </ul>
+                </div>
+                <!-- Profesional -->
+                <div class="solution-card">
+                  <div class="sol-icon icon-briefcase">
+                    <svg viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                      <rect x="2" y="7" width="20" height="14" rx="2" ry="2"></rect>
+                      <path d="M16 21V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16"></path>
+                    </svg>
+                  </div>
+                  <h3 class="sol-title">Profesional</h3>
+                  <ul class="sol-list">
+                    <li>Briefing harian agenda pagi</li>
+                    <li>Catat meeting log via pesan suara</li>
+                    <li>Kelola task list prioritas tinggi</li>
+                  </ul>
+                </div>
+              </div>
+            </section>
+
+            <!-- Interactive Personality Showcase Section -->
+            <section id="landing-personalities" class="landing-personalities-sec">
+              <div class="landing-sec-header">
+                <div class="landing-badge">
+                  <span class="landing-badge-dot"></span> Unique Selling Point (USP)
+                </div>
+                <h2 class="landing-sec-title">Asisten dengan 6 Kepribadian Unik</h2>
+                <p class="landing-sec-desc">Sesuaikan asisten virtual dengan gaya komunikasi Anda sendiri. Kustomisasi avatar emoji, nama kontak, dan bahasa komunikasi.</p>
+              </div>
+
+              <div class="personality-showcase-container">
+                <!-- Selector Tab Buttons -->
+                <div class="personality-tab-nav">
+                  <button class="p-tab-btn active" data-p-target="friendly">
+                    <span class="p-tab-emoji">
+                      <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"></circle><path d="M8 14s1.5 2 4 2 4-2 4-2"></path><line x1="9" y1="9" x2="9.01" y2="9"></line><line x1="15" y1="9" x2="15.01" y2="9"></line></svg>
+                    </span>
+                    <span class="p-tab-name">Friendly</span>
+                  </button>
+                  <button class="p-tab-btn" data-p-target="professional">
+                    <span class="p-tab-emoji">
+                      <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="7" width="20" height="14" rx="2" ry="2"></rect><path d="M16 21V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16"></path></svg>
+                    </span>
+                    <span class="p-tab-name">Professional</span>
+                  </button>
+                  <button class="p-tab-btn" data-p-target="islamic">
+                    <span class="p-tab-emoji">
+                      <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3a6 6 0 0 0 9 9 9 9 0 1 1-9-9Z"></path></svg>
+                    </span>
+                    <span class="p-tab-name">Islamic Assistant</span>
+                  </button>
+                  <button class="p-tab-btn" data-p-target="business">
+                    <span class="p-tab-emoji">
+                      <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="m11 17 2 2a1 1 0 0 0 1.4 0l4-4a1 1 0 0 0 0-1.4l-2.2-2.2a3 3 0 0 0-4.2 0l-1 1"></path><path d="m13 15-2-2a1 1 0 0 0-1.4 0l-4 4a1 1 0 0 0 0 1.4l2.2 2.2a3 3 0 0 0 4.2 0l1-1"></path></svg>
+                    </span>
+                    <span class="p-tab-name">Business Partner</span>
+                  </button>
+                  <button class="p-tab-btn" data-p-target="grumpy">
+                    <span class="p-tab-emoji">
+                      <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"></circle><path d="M16 16s-1.5-2-4-2-4 2-4 2"></path><line x1="9" y1="10" x2="9.01" y2="10"></line><line x1="15" y1="10" x2="15.01" y2="10"></line><path d="M7.5 7.5L10 9"></path><path d="M16.5 7.5L14 9"></path></svg>
+                    </span>
+                    <span class="p-tab-name">Grumpy Boss</span>
+                  </button>
+                  <button class="p-tab-btn" data-p-target="romantic">
+                    <span class="p-tab-emoji">
+                      <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M19 14c1.49-1.46 3-3.21 3-5.5A5.5 5.5 0 0 0 16.5 3c-1.76 0-3 .5-4.5 2-1.5-1.5-2.74-2-4.5-2A5.5 5.5 0 0 0 2 8.5c0 2.3 1.5 4.05 3 5.5l7 7Z"></path></svg>
+                    </span>
+                    <span class="p-tab-name">Romantic Partner</span>
+                  </button>
+                </div>
+
+                <!-- Showcase Frame -->
+                <div class="personality-showcase-frame">
+                  <div class="personality-info-panel">
+                    <h3 id="p-info-title" class="p-info-title" style="display:flex;align-items:center;gap:8px;">Friendly <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="color:#128C7E;"><circle cx="12" cy="12" r="10"></circle><path d="M8 14s1.5 2 4 2 4-2 4-2"></path><line x1="9" y1="9" x2="9.01" y2="9"></line><line x1="15" y1="9" x2="15.01" y2="9"></line></svg></h3>
+                    <p id="p-info-desc" class="p-info-desc">Asisten yang hangat, berempati, dan siap membantu keseharian Anda dengan nada bicara yang ramah dan santun.</p>
+                    <div class="p-features-list">
+                      <div class="p-feature-item"><span class="check-icon">✓</span> Nada bicara santun & bersahabat</div>
+                      <div class="p-feature-item"><span class="check-icon">✓</span> Memberikan apresiasi & motivasi harian</div>
+                      <div class="p-feature-item"><span class="check-icon">✓</span> Cocok untuk rekan obrolan sehari-hari</div>
+                    </div>
+                  </div>
+
+                  <div class="personality-chat-mockup">
+                    <div class="whatsapp-mockup-landing small-mockup">
+                      <div class="mockup-header">
+                        <div class="mockup-avatar" id="p-mockup-avatar">
+                          <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="color:#FFFFFF;"><circle cx="12" cy="12" r="10"></circle><path d="M8 14s1.5 2 4 2 4-2 4-2"></path><line x1="9" y1="9" x2="9.01" y2="9"></line><line x1="15" y1="9" x2="15.01" y2="9"></line></svg>
+                        </div>
+                        <div class="mockup-user-info">
+                          <span class="mockup-username" id="p-mockup-name">Desi (Friendly)</span>
+                          <span class="mockup-status">online</span>
+                        </div>
+                      </div>
+                      <div class="mockup-chat-body-landing" id="p-mockup-chat-body">
+                        <!-- Default Chat for Friendly -->
+                        <div class="chat-bubble outgoing">
+                          <span>Desi, tolong ingetin jemput adik nanti sore jam 5 ya.</span>
+                          <div class="chat-bubble-time">16:45 <span class="read-receipt">✓✓</span></div>
+                        </div>
+                        <div class="chat-bubble incoming">
+                          <span>Siap! Rencana jemput adik jam 17:00 sore nanti sudah aku catat ke agenda harianmu ya. Nanti jam 16:45 aku ingetin lagi biar nggak telat. Semangat ya harinya! ✨</span>
+                          <div class="chat-bubble-time">16:45</div>
+                        </div>
+                      </div>
+                    </div>
+                    <div class="mockup-note" style="margin-top: 14px; font-size: 0.85rem; color: #64748B; text-align: center; display: flex; align-items: center; justify-content: center; gap: 6px; font-style: italic; line-height: 1.4;">
+                      <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="color: #128C7E; flex-shrink: 0;"><circle cx="12" cy="12" r="10"></circle><line x1="12" y1="16" x2="12" y2="12"></line><line x1="12" y1="8" x2="12.01" y2="8"></line></svg>
+                      Nama, avatar, kepribadian, dan bahasa asisten di atas dapat disesuaikan sepenuhnya melalui Dashboard Anda.
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </section>
+
+            <!-- How It Works Section -->
+            <section id="landing-steps" class="landing-steps-sec">
+              <div class="landing-sec-header">
+                <h2 class="landing-sec-title">3 Langkah Mudah Memulai</h2>
+                <p class="landing-sec-desc">Hanya butuh beberapa menit untuk menyetel asisten pribadi Anda.</p>
+              </div>
+
+              <div class="landing-steps-grid">
+                <div class="l-step-card">
+                  <div class="l-step-num">1</div>
+                  <h3>Hubungkan WhatsApp</h3>
+                  <p>Buka kontrol panel dashboard dan otentikasi nomor WhatsApp Anda agar asisten mulai aktif mendengarkan chat.</p>
+                </div>
+                <div class="l-step-card">
+                  <div class="l-step-num">2</div>
+                  <h3>Sesuaikan di Studio</h3>
+                  <p>Pilih kepribadian asisten Anda (Friendly, Professional, Islamic, dll.) dan atur waktu briefing harian Anda.</p>
+                </div>
+                <div class="l-step-card">
+                  <div class="l-step-num">3</div>
+                  <h3>Chatting & Simpan</h3>
+                  <p>Mulailah mengirimkan memo suara atau teks untuk menyimpan keuangan, tugas, atau memori pribadi secara otomatis.</p>
+                </div>
+              </div>
+            </section>
+
+            <!-- Pricing Section -->
+            <section id="landing-pricing" class="landing-pricing-sec">
+              <div class="landing-sec-header">
+                <div class="landing-badge">
+                  <span class="landing-badge-dot"></span> Paket Harga Transparan
+                </div>
+                <h2 class="landing-sec-title">Plan Berlangganan</h2>
+                <p class="landing-sec-desc">Pilih paket asisten pribadi yang paling sesuai dengan kebutuhan produktivitas harian Anda.</p>
+              </div>
+
+              <div class="pricing-plans-cols">
+                <!-- Paket Free -->
+                <div class="pricing-card-landing">
+                  <div class="p-card-header">
+                    <h3>Paket Free</h3>
+                    <div class="p-card-price-row">
+                      <span class="price-old-landing" style="visibility: hidden;">Rp 0</span>
+                      <span class="p-card-price">Rp 0<span class="price-period">/ 7 hari</span></span>
+                    </div>
+                    <p>Coba fitur dasar asisten pribadi secara gratis selama 7 hari.</p>
+                  </div>
+                  <ul class="p-card-features">
+                    <li><span>✓</span> Pengingat kegiatan via WhatsApp</li>
+                    <li><span>✓</span> Simpan data (teks, link, gambar)</li>
+                    <li><span>✓</span> Simpan kontak & Pusat Memori</li>
+                    <li><span>✓</span> Todolist sederhana & Dashboard</li>
+                    <li><span class="cross">✗</span> Kuota chat tidak terbatas</li>
+                    <li><span class="cross">✗</span> Ringkas & analisa berkas</li>
+                    <li><span class="cross">✗</span> Kirim email notifikasi otomatis</li>
+                    <li><span class="cross">✗</span> Integrasi Google Meet & Drive</li>
+                    <li><span class="cross">✗</span> Task management via WhatsApp</li>
+                  </ul>
+                  <a href="#signup" class="pricing-card-btn">Coba Gratis</a>
+                </div>
+
+                <!-- Paket Basic -->
+                <div class="pricing-card-landing">
+                  <div class="p-card-header">
+                    <h3>Paket Basic</h3>
+                    <div class="p-card-price-row">
+                      <span class="price-old-landing">Rp 30.000</span>
+                      <span class="p-card-price">Rp 25.000<span class="price-period">/ bln</span></span>
+                    </div>
+                    <p>Fitur lengkap untuk produktivitas harian yang dinamis.</p>
+                  </div>
+                  <ul class="p-card-features">
+                    <li><span>✓</span> Kuota chat tidak terbatas</li>
+                    <li><span>✓</span> Ringkas & analisa berkas via WhatsApp</li>
+                    <li><span>✓</span> Kirim email notifikasi otomatis</li>
+                    <li><span>✓</span> Buat event / meeting & Google Meet</li>
+                    <li><span>✓</span> Terintegrasi Google Drive</li>
+                    <li><span>✓</span> Simpan data & Dashboard kelola</li>
+                    <li><span class="cross">✗</span> Task management via WhatsApp</li>
+                    <li><span class="cross">✗</span> Dashboard task management</li>
+                  </ul>
+                  <a href="#signup" class="pricing-card-btn">Mulai Berlangganan</a>
+                </div>
+
+                <!-- Paket Pro -->
+                <div class="pricing-card-landing featured">
+                  <div class="p-card-badge">Populer</div>
+                  <div class="p-card-header">
+                    <h3>Paket Pro</h3>
+                    <div class="p-card-price-row">
+                      <span class="price-old-landing">Rp 70.000</span>
+                      <span class="p-card-price">Rp 49.000<span class="price-period">/ bln</span></span>
+                    </div>
+                    <p>Produktivitas tanpa batas dengan manajemen tugas penuh.</p>
+                  </div>
+                  <ul class="p-card-features">
+                    <li><span>✓</span> Semua fitur Paket Basic</li>
+                    <li><span>✓</span> Task management via WhatsApp</li>
+                    <li><span>✓</span> Dashboard task management lengkap</li>
+                    <li><span>✓</span> Terintegrasi Google Workspace</li>
+                    <li><span>✓</span> Prioritas kecepatan respons AI</li>
+                    <li><span>✓</span> Dukungan penuh & Update prioritas</li>
+                  </ul>
+                  <a href="#signup" class="pricing-card-btn featured-btn">Mulai Berlangganan</a>
+                </div>
+              </div>
+            </section>
+
+            <!-- FAQ Section -->
+            <section id="landing-faq" class="landing-faq-sec">
+              <div class="landing-sec-header">
+                <div class="landing-badge">
+                  <span class="landing-badge-dot"></span> FAQ
+                </div>
+                <h2 class="landing-sec-title">Pertanyaan Sering Diajukan</h2>
+                <p class="landing-sec-desc">Temukan jawaban atas pertanyaan umum seputar asisten virtual MyVA.</p>
+              </div>
+
+              <div class="faq-accordion-container">
+                <div class="faq-item">
+                  <button class="faq-question">
+                    <span>Apakah data chat saya aman dan terjamin kerahasiaannya?</span>
+                    <span class="faq-icon">+</span>
+                  </button>
+                  <div class="faq-answer">
+                    <p>Tentu saja. Semua pesan yang dikirimkan ke MyVA diproses menggunakan enkripsi standar industri. Kami tidak menjual data chat atau informasi pribadi Anda ke pihak ketiga manapun.</p>
+                  </div>
+                </div>
+                <div class="faq-item">
+                  <button class="faq-question">
+                    <span>Bagaimana cara menyambungkan MyVA ke nomor WhatsApp saya?</span>
+                    <span class="faq-icon">+</span>
+                  </button>
+                  <div class="faq-answer">
+                    <p>Setelah mendaftar dan masuk ke dashboard kontrol panel, Anda akan melihat panduan koneksi cepat. Anda cukup memindai kode QR atau memasukkan kode otentikasi unik di WhatsApp untuk langsung mengaktifkan asisten AI Anda.</p>
+                  </div>
+                </div>
+                <div class="faq-item">
+                  <button class="faq-question">
+                    <span>Apakah saya bisa menggunakan nomor WhatsApp pribadi yang sudah ada?</span>
+                    <span class="faq-icon">+</span>
+                  </button>
+                  <div class="faq-answer">
+                    <p>Ya, Anda bisa menggunakan nomor WhatsApp pribadi Anda saat ini. MyVA akan berfungsi layaknya kontak chatbot biasa, sehingga Anda tetap bisa menggunakannya tanpa mengganggu percakapan chat dengan kontak lainnya.</p>
+                  </div>
+                </div>
+                <div class="faq-item">
+                  <button class="faq-question">
+                    <span>Apakah asisten MyVA mendukung pesan suara (Voice Note)?</span>
+                    <span class="faq-icon">+</span>
+                  </button>
+                  <div class="faq-answer">
+                    <p>Ya, asisten MyVA dilengkapi dengan fitur transkripsi otomatis suara-ke-teks. Anda cukup mengirimkan memo suara (Voice Note) di chat WhatsApp Anda, dan MyVA akan otomatis memahami serta membalas pesan Anda.</p>
+                  </div>
+                </div>
+              </div>
+            </section>
+
+            <!-- Trust Building Section -->
+            <section id="landing-trust" class="landing-trust-sec">
+              <div class="trust-container">
+                <div class="trust-header">
+                  <h3>Keamanan & Privasi Terjamin</h3>
+                  <p>Kepercayaan Anda adalah prioritas utama kami. Kami merancang sistem proteksi terbaik untuk data Second Brain Anda.</p>
+                </div>
+                <div class="trust-badge-row">
+                  <div class="trust-badge-card">
+                    <span class="t-badge-icon icon-lock">
+                      <svg viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                        <rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect>
+                        <path d="M7 11V7a5 5 0 0 1 10 0v4"></path>
+                      </svg>
+                    </span>
+                    <h4>Data Terenkripsi</h4>
+                    <p>Semua transmisi data obrolan dan dokumen dilindungi enkripsi SSL end-to-end yang ketat.</p>
+                  </div>
+                  <div class="trust-badge-card">
+                    <span class="t-badge-icon icon-link">
+                      <svg viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"></path>
+                        <path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"></path>
+                      </svg>
+                    </span>
+                    <h4>Integrasi Google Resmi</h4>
+                    <p>Sinkronisasi data ke Google Calendar, Drive, dan Contacts menggunakan otentikasi OAuth2 resmi yang aman.</p>
+                  </div>
+                  <div class="trust-badge-card">
+                    <span class="t-badge-icon icon-shield">
+                      <svg viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path>
+                      </svg>
+                    </span>
+                    <h4>Privasi Mutlak</h4>
+                    <p>Data memori AI Anda diisolasi secara terpisah dan hanya diakses saat memproses permintaan Anda.</p>
+                  </div>
+                </div>
+              </div>
+            </section>
+
+            <!-- CTA Footer Section -->
+            <section class="landing-footer-cta">
+              <div class="landing-cta-box">
+                <h2>Miliki Virtual Assistant Anda Sekarang</h2>
+                <p>Hanya dalam beberapa menit, MyVA siap menjadi asisten pribadi yang selalu aktif di WhatsApp.</p>
+                <a href="#signup" class="landing-btn-cta-large">Hubungkan WhatsApp Gratis</a>
+              </div>
+            </section>
+
+            <!-- Landing Footer -->
+            <footer class="landing-footer">
+              <div class="landing-footer-container">
+                <div>
+                  <span class="footer-brand"><span class="brand-my">My</span><span class="brand-va">VA</span> © 2026. Hak Cipta Dilindungi Undang-Undang.</span>
+                  <span class="footer-sub" style="display: block; margin-top: 4px;">WhatsApp Second Brain Personal Assistant</span>
+                </div>
+                <div class="landing-footer-links" style="display: flex; gap: 16px; font-size: 13px; font-weight: 500; flex-wrap: wrap;">
+                  <a href="#" id="link-compliance-tos" style="color: var(--text-secondary); text-decoration: none; transition: color 0.2s;">Syarat & Ketentuan</a>
+                  <a href="#" id="link-compliance-privacy" style="color: var(--text-secondary); text-decoration: none; transition: color 0.2s;">Kebijakan Privasi</a>
+                  <a href="#" id="link-compliance-refund" style="color: var(--text-secondary); text-decoration: none; transition: color 0.2s;">Kebijakan Refund</a>
+                  <a href="#" id="link-compliance-contact" style="color: var(--text-secondary); text-decoration: none; transition: color 0.2s;">Hubungi Kami</a>
+                </div>
+              </div>
+            </footer>
+          </section>
+
+          <!-- ==========================================
+               LOGIN VIEW
+               ========================================== -->
+          <section id="view-login" class="view-section">
+            <div class="login-wrapper">
+              <div class="login-card">
+                <div class="login-logo-container">
+                  <img src="./logo.png" alt="MyVA Logo" class="login-logo-img" />
+                  <h2><span class="brand-my">My</span><span class="brand-va">VA</span></h2>
+                  <p>Asisten AI Pribadi & WhatsApp Second Brain</p>
+                </div>
+
+                <div class="login-alert error" id="login-error-alert" style="display:none"></div>
+
+                <!-- Google OAuth Login (PRIMARY OPTION) -->
+                <div class="google-auth-wrapper">
+                  <a href="#" class="btn-google-login" id="btn-google-login">
+                    <svg class="google-icon" viewBox="0 0 24 24" width="20" height="20">
+                      <path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/>
+                      <path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.56-2.77c-.98.66-2.23 1.06-3.72 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/>
+                      <path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.06H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.94l2.85-2.22.81-.63z"/>
+                      <path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.06l3.66 2.84c.87-2.6 3.3-4.52 6.16-4.52z"/>
+                    </svg>
+                    <span>Lanjutkan dengan Gmail</span>
+                  </a>
+                  <p class="google-notice">Direkomendasikan untuk sinkronisasi Google Calendar & Gmail</p>
+                </div>
+
+                <div class="login-divider">
+                  <span>atau masuk dengan email</span>
+                </div>
+
+                <!-- Email & Password Form -->
+                <form id="form-login-email" class="login-form">
+                  <div class="form-group-login">
+                    <label for="login-email">Alamat Email</label>
+                    <input type="email" id="login-email" required placeholder="nama@email.com" />
+                  </div>
+                  <div class="form-group-login">
+                    <label for="login-password">Kata Sandi</label>
+                    <input type="password" id="login-password" required placeholder="••••••••" />
+                  </div>
+                  <button type="submit" class="btn btn-primary w-full" id="btn-login-submit">Masuk</button>
+                </form>
+
+                <div class="login-footer-links">
+                  Belum punya akun? <a href="#signup" class="link-switch-auth">Daftar Sekarang</a>
+                  <div class="compliance-footer-links" style="margin-top: 16px; display: flex; gap: 10px; justify-content: center; font-size: 11px; opacity: 0.8; flex-wrap: wrap;">
+                    <a href="#" class="link-compliance-tos" style="color: var(--text-muted); text-decoration: none;">Syarat & Ketentuan</a> •
+                    <a href="#" class="link-compliance-privacy" style="color: var(--text-muted); text-decoration: none;">Kebijakan Privasi</a> •
+                    <a href="#" class="link-compliance-refund" style="color: var(--text-muted); text-decoration: none;">Kebijakan Refund</a> •
+                    <a href="#" class="link-compliance-contact" style="color: var(--text-muted); text-decoration: none;">Hubungi Kami</a>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </section>
+
+          <!-- ==========================================
+               SIGN UP VIEW
+               ========================================== -->
+          <section id="view-signup" class="view-section">
+            <div class="login-wrapper">
+              <div class="login-card">
+                <div class="login-logo-container">
+                  <img src="./logo.png" alt="MyVA Logo" class="login-logo-img" />
+                  <h2>Daftar <span class="brand-my">My</span><span class="brand-va">VA</span></h2>
+                  <p>Buat akun asisten WhatsApp Second Brain Anda</p>
+                </div>
+
+                <div class="login-alert error" id="signup-error-alert" style="display:none"></div>
+                <div class="login-alert success" id="signup-success-alert" style="display:none"></div>
+
+                <!-- Signup Form -->
+                <form id="form-signup" class="login-form">
+                  <div class="form-group-login">
+                    <label for="signup-name">Nama Lengkap</label>
+                    <input type="text" id="signup-name" required placeholder="Nama Anda" />
+                  </div>
+                  <div class="form-group-login">
+                    <label for="signup-email">Alamat Email</label>
+                    <input type="email" id="signup-email" required placeholder="nama@email.com" />
+                  </div>
+                  <div class="form-group-login">
+                    <label for="signup-wa">Nomor WhatsApp (dengan kode negara)</label>
+                    <input type="tel" id="signup-wa" required placeholder="628123456789" pattern="[0-9]{10,15}" minlength="10" maxlength="15" title="Masukkan 10-15 digit nomor (contoh: 628123456789)" />
+                    <p class="input-hint">Digunakan untuk menerima notifikasi & sinkronisasi chat</p>
+                  </div>
+                  <div class="form-group-login">
+                    <label for="signup-password">Kata Sandi</label>
+                    <input type="password" id="signup-password" required placeholder="••••••••" />
+                  </div>
+                  <button type="submit" class="btn btn-primary w-full" id="btn-signup-submit">Buat Akun</button>
+                </form>
+
+                <div class="login-footer-links">
+                  Sudah memiliki akun? <a href="#login" class="link-switch-auth">Masuk di sini</a>
+                  <div class="compliance-footer-links" style="margin-top: 16px; display: flex; gap: 10px; justify-content: center; font-size: 11px; opacity: 0.8; flex-wrap: wrap;">
+                    <a href="#" class="link-compliance-tos" style="color: var(--text-muted); text-decoration: none;">Syarat & Ketentuan</a> •
+                    <a href="#" class="link-compliance-privacy" style="color: var(--text-muted); text-decoration: none;">Kebijakan Privasi</a> •
+                    <a href="#" class="link-compliance-refund" style="color: var(--text-muted); text-decoration: none;">Kebijakan Refund</a> •
+                    <a href="#" class="link-compliance-contact" style="color: var(--text-muted); text-decoration: none;">Hubungi Kami</a>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </section>
+
           <!-- 1. DASHBOARD HOME VIEW -->
-          <section id="view-dashboard" class="view-section active">
+          <section id="view-dashboard" class="view-section">
             <!-- Hero banner card -->
             <div class="hero-card">
               <div class="hero-content">
-                <h2 class="hero-greeting font-inter">Good Morning, Muis 👋</h2>
+                <h2 class="hero-greeting font-inter">Good Morning, User 👋</h2>
                 <p class="hero-tagline">Here is your personal assistant summary for today:</p>
                 <div class="hero-stats">
                   <div class="hero-stat-pill">
@@ -378,6 +1343,21 @@
               <p class="vault-tagline">Upload and summarize any documents instantly with AI.</p>
             </div>
 
+            <!-- Vault Search & Filter Toolbar -->
+            <div class="vault-toolbar" style="margin-bottom: 24px; display: flex; gap: 16px; align-items: center; justify-content: space-between; flex-wrap: wrap;">
+              <div class="search-input-wrapper" style="flex: 1; min-width: 280px; position: relative;">
+                <svg class="search-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="20" height="20" style="position: absolute; left: 14px; top: 50%; transform: translateY(-50%); color: #94A3B8;"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg>
+                <input type="text" id="files-search-input" placeholder="Search files by name, type, or date..." style="width: 100%; padding: 12px 16px 12px 48px; border-radius: var(--radius-md); border: 1px solid var(--border-color); background-color: var(--card-bg); font-size: 14px; transition: all 0.2s;" />
+              </div>
+              <div class="tab-pills-row" id="files-filter-tabs" style="display: flex; gap: 8px;">
+                <button class="tab-pill active" data-filter="all">All Files</button>
+                <button class="tab-pill" data-filter="pdf">PDFs</button>
+                <button class="tab-pill" data-filter="txt">Texts</button>
+                <button class="tab-pill" data-filter="docx,doc">Word Docs</button>
+                <button class="tab-pill" data-filter="png,jpg,jpeg">Images</button>
+              </div>
+            </div>
+
             <!-- Upload drop zone -->
             <div class="drop-zone" id="file-drop-zone">
               <input type="file" id="file-input-raw" style="display:none" multiple />
@@ -403,15 +1383,18 @@
 
           <!-- 6. CONTACTS VIEW -->
           <section id="view-contacts" class="view-section">
-            <div class="contacts-toolbar">
-              <div class="search-input-wrapper">
-                <svg class="search-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="20" height="20"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg>
-                <input type="text" id="contacts-search-input" placeholder="Search contacts by name, company, or note details..." />
+            <div class="contacts-toolbar" style="margin-bottom: 24px; display: flex; gap: 16px; align-items: center; justify-content: space-between; flex-wrap: wrap;">
+              <div class="search-input-wrapper" style="flex: 1; min-width: 280px; position: relative;">
+                <svg class="search-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="20" height="20" style="position: absolute; left: 14px; top: 50%; transform: translateY(-50%); color: #94A3B8;"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg>
+                <input type="text" id="contacts-search-input" placeholder="Search contacts by name, company, or phone..." style="width: 100%; padding: 12px 16px 12px 48px; border-radius: var(--radius-md); border: 1px solid var(--border-color); background-color: var(--card-bg); font-size: 14px; transition: all 0.2s;" />
               </div>
-              <button class="btn btn-primary" id="btn-open-contact-modal">
-                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="16" height="16"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg>
-                <span>Add Contact</span>
-              </button>
+              <div class="tab-pills-row" id="contacts-filter-tabs" style="display: flex; gap: 8px;">
+                <button class="tab-pill active" data-filter="all">All Contacts</button>
+                <button class="tab-pill" data-filter="javacoffee">Javacoffee</button>
+                <button class="tab-pill" data-filter="cyberdyne">Cyberdyne</button>
+                <button class="tab-pill" data-filter="techvibe">TechVibe</button>
+                <button class="tab-pill" data-filter="others">Others</button>
+              </div>
             </div>
 
             <div class="contacts-grid" id="contacts-cards-grid">
@@ -436,19 +1419,13 @@
               <!-- Right side: Mini agenda summary -->
               <div class="calendar-sidebar-panel">
                 <div class="month-card">
-                  <div class="month-header">
-                    <span class="month-name">June 2026</span>
+                  <div class="month-header" style="display: flex; align-items: center; justify-content: space-between;">
+                    <button id="btn-prev-month" class="btn btn-outline btn-sm" style="padding: 2px 8px; font-size: 14px; line-height: 1;">&larr;</button>
+                    <span class="month-name" id="calendar-month-name" style="font-weight: 700; font-size: 15px;">June 2026</span>
+                    <button id="btn-next-month" class="btn btn-outline btn-sm" style="padding: 2px 8px; font-size: 14px; line-height: 1;">&rarr;</button>
                   </div>
-                  <div class="calendar-mini-grid">
-                    <div class="day-label">S</div><div class="day-label">M</div><div class="day-label">T</div><div class="day-label">W</div><div class="day-label">T</div><div class="day-label">F</div><div class="day-label">S</div>
-                    <!-- Calendar days (highlighting today) -->
-                    <div class="mini-day prev-month">31</div>
-                    <div class="mini-day">1</div><div class="mini-day">2</div><div class="mini-day">3</div><div class="mini-day">4</div><div class="mini-day">5</div><div class="mini-day">6</div><div class="mini-day">7</div>
-                    <div class="mini-day">8</div><div class="mini-day">9</div><div class="mini-day">10</div><div class="mini-day active-today">11</div><div class="mini-day">12</div><div class="mini-day">13</div><div class="mini-day">14</div>
-                    <div class="mini-day">15</div><div class="mini-day">16</div><div class="mini-day">17</div><div class="mini-day">18</div><div class="mini-day">19</div><div class="mini-day">20</div><div class="mini-day">21</div>
-                    <div class="mini-day">22</div><div class="mini-day">23</div><div class="mini-day">24</div><div class="mini-day">25</div><div class="mini-day">26</div><div class="mini-day">27</div><div class="mini-day">28</div>
-                    <div class="mini-day">29</div><div class="mini-day">30</div>
-                    <div class="mini-day next-month">1</div><div class="mini-day next-month">2</div><div class="mini-day next-month">3</div><div class="mini-day next-month">4</div>
+                  <div class="calendar-mini-grid" id="calendar-mini-grid">
+                    <!-- Dynamic mini grid days will render here -->
                   </div>
                 </div>
 
@@ -456,7 +1433,7 @@
                   <h4 class="summary-title">System Agendas</h4>
                   <div class="info-bubble">
                     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="16" height="16"><path d="M12 22c5.523 0 10-4.477 10-10S17.523 2 12 2 2 6.477 2 12s4.477 10 10 10z"></path><path d="M12 16v-4"></path><path d="M12 8h.01"></path></svg>
-                    <p>NAIVA syncs events directly from your chat message intents. You can say: <em>"Set a meeting with Client at 2pm tomorrow"</em> on WhatsApp to auto-create events here.</p>
+                    <p>MyVA syncs events directly from your chat message intents. You can say: <em>"Set a meeting with Client at 2pm tomorrow"</em> on WhatsApp to auto-create events here.</p>
                   </div>
                 </div>
               </div>
@@ -468,8 +1445,12 @@
             <div class="studio-layout">
               <!-- Settings Form Panel -->
               <div class="studio-form-panel">
-                <h3 class="panel-section-title">Assistant Settings</h3>
-                
+                <div class="studio-page-header">
+                  <h3><span class="header-icon">✨</span> Assistant Studio</h3>
+                  <p class="header-subtitle">Customize your AI assistant's personality, style, and behavior.</p>
+                </div>
+
+                <div class="studio-form-body">
                 <!-- Identity Section -->
                 <div class="form-group">
                   <label class="form-label">Assistant Identity</label>
@@ -478,15 +1459,17 @@
                       <span id="studio-avatar-emoji">🤖</span>
                     </div>
                     <div class="identity-inputs">
-                      <input type="text" id="assistant-name-input" class="form-input" value="NAIVA" placeholder="Assistant Name..." />
+                      <input type="text" id="assistant-name-input" class="form-input" value="MyVA" placeholder="Assistant Name..." />
                       <span class="input-helper">The name your assistant will introduce itself with.</span>
                     </div>
                   </div>
                 </div>
 
+                <div class="studio-section-divider"><span>Personality</span></div>
+
                 <!-- Personality Section -->
                 <div class="form-group">
-                  <label class="form-label">Assistant Personality</label>
+                  <label class="form-label">Choose Personality</label>
                   <div class="personality-grid" id="personality-cards-grid">
                     <div class="personality-card active" data-personality="friendly">
                       <span class="personality-emoji">😊</span>
@@ -521,13 +1504,15 @@
                   </div>
                 </div>
 
+                <div class="studio-section-divider"><span>Communication</span></div>
+
                 <!-- Communication Style Section -->
                 <div class="form-group">
                   <label class="form-label">Communication Style</label>
                   <div class="style-selector">
-                    <button class="style-btn" data-style="short">Short & Punchy</button>
-                    <button class="style-btn active" data-style="normal">Balanced</button>
-                    <button class="style-btn" data-style="detailed">Detailed & Verbose</button>
+                    <button class="style-btn" data-style="short"><span class="style-icon">⚡</span> Short & Punchy</button>
+                    <button class="style-btn active" data-style="normal"><span class="style-icon">⚖️</span> Balanced</button>
+                    <button class="style-btn" data-style="detailed"><span class="style-icon">📝</span> Detailed</button>
                   </div>
                 </div>
 
@@ -535,13 +1520,15 @@
                 <div class="form-group">
                   <label class="form-label">Assistant Language</label>
                   <div class="style-selector" id="studio-language-selector">
-                    <button class="style-btn lang-btn" data-lang="en">English</button>
-                    <button class="style-btn lang-btn" data-lang="id">Indonesia</button>
+                    <button class="style-btn lang-btn" data-lang="en"><span class="style-icon">🇬🇧</span> English</button>
+                    <button class="style-btn lang-btn" data-lang="id"><span class="style-icon">🇮🇩</span> Indonesia</button>
                   </div>
                 </div>
 
+                <div class="studio-section-divider"><span>Automation</span></div>
+
                 <!-- Daily Briefing Section -->
-                <div class="form-group border-top pt-4">
+                <div class="form-group">
                   <div class="briefing-toggle-row">
                     <div class="briefing-label-col">
                       <span class="briefing-title">Enable Daily Briefing</span>
@@ -559,7 +1546,7 @@
                 </div>
 
                 <!-- Smart Follow Up Section -->
-                <div class="form-group border-top pt-4">
+                <div class="form-group">
                   <div class="briefing-toggle-row">
                     <div class="briefing-label-col">
                       <span class="briefing-title">Enable Smart Follow Up</span>
@@ -571,21 +1558,47 @@
                     </label>
                   </div>
                 </div>
+                </div>
+
+                <!-- Save Bar -->
+                <div class="studio-save-bar">
+                  <button class="btn-save-studio" id="btn-save-studio">
+                    <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"></path><polyline points="17 21 17 13 7 13 7 21"></polyline><polyline points="7 3 7 8 15 8"></polyline></svg>
+                    Save All Changes
+                  </button>
+                </div>
               </div>
 
               <!-- Preview Mockup Panel -->
               <div class="studio-preview-panel">
+                <div class="preview-label-badge">
+                  <span class="live-dot"></span> Live Preview
+                </div>
                 <div class="whatsapp-mockup">
+                  <div class="mockup-status-bar">
+                    <span class="status-time">20:30</span>
+                    <span class="notch"></span>
+                    <span class="status-icons">
+                      <svg width="12" height="12" viewBox="0 0 24 24" fill="currentColor"><path d="M1 9l2 2c4.97-4.97 13.03-4.97 18 0l2-2C16.93 2.93 7.08 2.93 1 9zm8 8l3 3 3-3c-1.65-1.66-4.34-1.66-6 0zm-4-4l2 2c2.76-2.76 7.24-2.76 10 0l2-2C15.14 9.14 8.87 9.14 5 13z"/></svg>
+                      <svg width="12" height="12" viewBox="0 0 24 24" fill="currentColor"><rect x="2" y="7" width="3" height="10" rx="1"/><rect x="7" y="5" width="3" height="12" rx="1"/><rect x="12" y="3" width="3" height="14" rx="1"/><rect x="17" y="1" width="3" height="16" rx="1"/></svg>
+                      <svg width="16" height="12" viewBox="0 0 24 14" fill="currentColor"><rect x="0" y="1" width="20" height="12" rx="2" stroke="currentColor" stroke-width="1.5" fill="none"/><rect x="21" y="4" width="2" height="6" rx="1"/><rect x="2" y="3" width="14" height="8" rx="1" fill="currentColor"/></svg>
+                    </span>
+                  </div>
                   <div class="mockup-header">
                     <div class="mockup-back-btn">
                       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="20" height="20"><polyline points="15 18 9 12 15 6"></polyline></svg>
                     </div>
                     <div class="mockup-avatar" id="mockup-chat-avatar">🤖</div>
                     <div class="mockup-user-info">
-                      <span class="mockup-username" id="mockup-chat-name">NAIVA AI</span>
+                      <span class="mockup-username" id="mockup-chat-name"><span class="brand-my">My</span><span class="brand-va">VA</span> AI</span>
                       <span class="mockup-status">online</span>
                     </div>
-                    <div class="mockup-actions">
+                    <div class="mockup-actions" style="display: flex; gap: 12px; align-items: center;">
+                      <!-- Clear chat (trash icon) -->
+                      <button id="btn-clear-mockup-chat" style="background: none; border: none; color: #FFFFFF; opacity: 0.8; cursor: pointer; padding: 0; display: flex; align-items: center; justify-content: center;" title="Clear Chat">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="18" height="18"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path></svg>
+                      </button>
+                      <!-- Call icon -->
                       <svg viewBox="0 0 24 24" stroke="currentColor" fill="none" stroke-width="2" width="18" height="18"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 9.72v3z"></path></svg>
                     </div>
                   </div>
@@ -629,6 +1642,19 @@
                   <svg class="settings-tab-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="5" width="20" height="14" rx="2" ry="2"></rect><line x1="2" y1="10" x2="22" y2="10"></line></svg>
                   <span>Subscription</span>
                 </button>
+                <button class="settings-tab-btn" data-tab="affiliate">
+                  <svg class="settings-tab-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="stroke-linecap:round;stroke-linejoin:round;">
+                    <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path>
+                    <circle cx="9" cy="7" r="4"></circle>
+                    <path d="M23 21v-2a4 4 0 0 0-3-3.87"></path>
+                    <path d="M16 3.13a4 4 0 0 1 0 7.75"></path>
+                  </svg>
+                  <span>Afiliasi & Referral</span>
+                </button>
+                <button class="settings-tab-btn" id="btn-logout" style="margin-top: auto; color: #EF4444; border: 1px dashed rgba(239, 68, 68, 0.2); background: rgba(239, 68, 68, 0.02);">
+                  <svg class="settings-tab-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="stroke: #EF4444;"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"></path><polyline points="16 17 21 12 16 7"></polyline><line x1="21" y1="12" x2="9" y2="12"></line></svg>
+                  <span style="color: #EF4444; font-weight: 600;">Logout</span>
+                </button>
               </div>
 
               <!-- Right side content panel -->
@@ -636,12 +1662,34 @@
                 <!-- Profile Tab -->
                 <div class="settings-tab-pane active" id="settings-pane-profile">
                   <h3 class="panel-section-title">Profile Settings</h3>
+                  
+                  <div class="profile-avatar-container">
+                    <div class="profile-avatar-wrapper" id="profile-avatar-trigger">
+                      <span class="profile-avatar-emoji" id="profile-avatar-emoji-display">🤖</span>
+                      <div class="profile-avatar-overlay">
+                        <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="margin-bottom:2px;"><path d="M12 20h9"></path><path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"></path></svg>
+                        <span>Edit</span>
+                      </div>
+                    </div>
+                    <div class="profile-details-summary">
+                      <div class="profile-details-name" id="profile-details-display-name">User</div>
+                      <div class="profile-details-role" id="profile-details-display-plan">Free Plan</div>
+                    </div>
+                  </div>
+
                   <div class="settings-form-card">
                     <div class="form-group">
                       <label class="form-label">Name</label>
                       <div class="input-icon-container">
                         <svg class="input-field-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path><circle cx="12" cy="7" r="4"></circle></svg>
-                        <input type="text" class="form-input icon-padded" value="Muis" id="settings-username" />
+                        <input type="text" class="form-input icon-padded" value="User" id="settings-username" />
+                      </div>
+                    </div>
+                    <div class="form-group">
+                      <label class="form-label">Email Address <span class="verified-badge">✓ Verified</span></label>
+                      <div class="input-icon-container">
+                        <svg class="input-field-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect><path d="M7 11V7a5 5 0 0 1 10 0v4"></path></svg>
+                        <input type="email" class="form-input icon-padded disabled-locked" id="settings-email" disabled />
                       </div>
                     </div>
                     <div class="form-group">
@@ -650,7 +1698,12 @@
                         <span class="phone-prefix">+62</span>
                         <input type="tel" class="form-input" value="8123456789" id="settings-phone" />
                       </div>
-                      <span class="input-helper">The phone number registered with NAIVA assistant.</span>
+                      <span class="input-helper">The phone number registered with MyVA assistant.</span>
+                    </div>
+                    <div class="form-group">
+                      <label class="form-label">Personal Bio / AI Personalization Context</label>
+                      <textarea class="form-input" id="settings-bio" rows="3" placeholder="Tell MyVA about yourself (your role, preferences, hobbies) so it can personalize its responses..." style="padding:10px 12px;height:auto;resize:vertical;font-family:inherit;font-size:13px;"></textarea>
+                      <span class="input-helper">This description is injected into the AI's system instructions to help it customize summaries and reminders.</span>
                     </div>
                     <button class="btn btn-primary" id="btn-save-profile">Save Settings</button>
                   </div>
@@ -670,11 +1723,100 @@
                     </div>
                     <div class="shield-details">
                       <h4>End-to-End Encryption</h4>
-                      <p>All data and messages saved by NAIVA are encrypted using AES-256 before storing. Your privacy is fully secured.</p>
+                      <p>All data and messages saved by MyVA are encrypted using AES-256 before storing. Your privacy is fully secured.</p>
                     </div>
                   </div>
 
-                  <div class="form-group mt-6">
+                  <!-- Two-Factor Authentication -->
+                  <div class="two-factor-card">
+                    <div class="two-factor-details">
+                      <h4>Two-Factor Authentication (2FA)</h4>
+                      <p>Secure login attempts with a one-time OTP code sent directly to your registered WhatsApp number.</p>
+                    </div>
+                    <label class="switch">
+                      <input type="checkbox" id="security-2fa-toggle">
+                      <span class="slider round"></span>
+                    </label>
+                  </div>
+
+                  <!-- Change Password Section -->
+                  <div class="security-section-divider"></div>
+                  <h3 class="panel-section-title">Update Password</h3>
+                  <div class="settings-form-card">
+                    <div class="form-group">
+                      <label class="form-label">Current Password</label>
+                      <div class="password-input-wrapper">
+                        <input type="password" class="form-input password-padded" id="security-current-password" placeholder="Enter current password">
+                        <button type="button" class="password-toggle-btn" data-toggle="security-current-password">
+                          <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path><circle cx="12" cy="12" r="3"></circle></svg>
+                        </button>
+                      </div>
+                    </div>
+                    <div class="form-group">
+                      <label class="form-label">New Password</label>
+                      <div class="password-input-wrapper">
+                        <input type="password" class="form-input password-padded" id="security-new-password" placeholder="Enter new password">
+                        <button type="button" class="password-toggle-btn" data-toggle="security-new-password">
+                          <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path><circle cx="12" cy="12" r="3"></circle></svg>
+                        </button>
+                      </div>
+                    </div>
+                    <div class="form-group">
+                      <label class="form-label">Confirm New Password</label>
+                      <div class="password-input-wrapper">
+                        <input type="password" class="form-input password-padded" id="security-confirm-password" placeholder="Confirm new password">
+                        <button type="button" class="password-toggle-btn" data-toggle="security-confirm-password">
+                          <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path><circle cx="12" cy="12" r="3"></circle></svg>
+                        </button>
+                      </div>
+                    </div>
+                    <button class="btn btn-primary" id="btn-update-password">Update Password</button>
+                  </div>
+
+                  <!-- Active Sessions -->
+                  <div class="security-section-divider"></div>
+                  <div class="flex-row-between">
+                    <h3 class="panel-section-title" style="margin-bottom:0;">Active Devices & Sessions</h3>
+                    <button class="btn btn-link btn-sm" id="btn-revoke-all-sessions" style="color:#dc2626;font-size:12px;font-weight:600;padding:0;border:none;background:none;cursor:pointer;">Log Out All Other Devices</button>
+                  </div>
+                  <div class="sessions-container" id="sessions-list-container" style="margin-top:16px;">
+                    <!-- Session 1: Current Session -->
+                    <div class="session-item">
+                      <div class="session-left">
+                        <div class="session-icon">
+                          <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="3" width="20" height="14" rx="2" ry="2"></rect><line x1="8" y1="21" x2="16" y2="21"></line><line x1="12" y1="17" x2="12" y2="21"></line></svg>
+                        </div>
+                        <div class="session-info">
+                          <div class="session-device">
+                            Chrome on Linux
+                            <span class="session-badge active">Current</span>
+                          </div>
+                          <div class="session-location">Jakarta, Indonesia • IP: 182.253.14.88</div>
+                        </div>
+                      </div>
+                    </div>
+                    <!-- Session 2: Mobile Session -->
+                    <div class="session-item" id="session-device-mobile">
+                      <div class="session-left">
+                        <div class="session-icon">
+                          <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="5" y="2" width="14" height="20" rx="2" ry="2"></rect><line x1="12" y1="18" x2="12.01" y2="18"></line></svg>
+                        </div>
+                        <div class="session-info">
+                          <div class="session-device">
+                            Safari on iPhone 15 Pro
+                            <span class="session-badge inactive">Active</span>
+                          </div>
+                          <div class="session-location">Surabaya, Indonesia • IP: 110.138.8.214 • Active 2 hours ago</div>
+                        </div>
+                      </div>
+                      <button class="btn btn-outline btn-sm" id="btn-revoke-mobile" style="padding:4px 8px;font-size:11px;">Revoke</button>
+                    </div>
+                  </div>
+
+                  <!-- Privacy & Data Control (Danger Zone) -->
+                  <div class="security-section-divider"></div>
+                  <h3 class="panel-section-title">Privacy & Data Control</h3>
+                  <div class="form-group mt-4">
                     <div class="briefing-toggle-row">
                       <div>
                         <span class="briefing-title">Store Chat Backups</span>
@@ -686,12 +1828,36 @@
                       </label>
                     </div>
                   </div>
+
+                  <div class="danger-zone-card">
+                    <div class="danger-zone-row">
+                      <div class="danger-action-details">
+                        <h4>Export Personal Data</h4>
+                        <p>Download a JSON backup containing all your processed AI memories, preferences, and assistant settings.</p>
+                      </div>
+                      <button class="btn btn-outline btn-sm" id="btn-export-data" style="border-color:var(--border-color);color:var(--text-primary);">Export Data</button>
+                    </div>
+                    <div class="danger-zone-row">
+                      <div class="danger-action-details">
+                        <h4>Reset AI Memory</h4>
+                        <p>Flush all raw chat histories, vector store embeddings, and learned agent preferences. This action is irreversible.</p>
+                      </div>
+                      <button class="btn btn-outline btn-sm" id="btn-reset-memory" style="border-color:#fca5a5;color:#dc2626;">Reset Memory</button>
+                    </div>
+                    <div class="danger-zone-row">
+                      <div class="danger-action-details">
+                        <h4>Delete Account</h4>
+                        <p>Permanently remove your profile, subscription details, and all integration keys from the MyVA database.</p>
+                      </div>
+                      <button class="btn btn-primary btn-sm" id="btn-delete-account" style="background-color:#dc2626;border-color:#dc2626;">Delete Account</button>
+                    </div>
+                  </div>
                 </div>
 
                 <!-- Integrations Tab -->
                 <div class="settings-tab-pane" id="settings-pane-integrations">
                   <h3 class="panel-section-title">Connected Integrations</h3>
-                  <p class="section-desc">Connect external services to allow NAIVA to manage calendars, sync files, and summarize emails.</p>
+                  <p class="section-desc">Connect external services to allow MyVA to manage calendars, sync files, and summarize emails.</p>
                   
                   <div class="integrations-list">
                     <!-- Google Calendar -->
@@ -707,29 +1873,40 @@
                         <div class="brand-details">
                           <span class="brand-name">Google Calendar</span>
                           <span class="brand-status" id="status-gcal">Disconnected</span>
+                          <span class="brand-sync-info" id="sync-info-gcal">Last synced: Never</span>
                         </div>
                       </div>
-                      <button class="btn btn-outline btn-sm btn-connect-int" data-int="gcal">Connect</button>
+                      <div class="integration-actions" style="display:flex;align-items:center;">
+                        <button class="btn-settings-int" data-int="gcal" style="display:none;" title="Settings">
+                          <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2.5"><circle cx="12" cy="12" r="3"></circle><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"></path></svg>
+                        </button>
+                        <button class="btn btn-primary btn-sm btn-connect-int" data-int="gcal">Connect</button>
+                      </div>
                     </div>
 
                     <!-- Google Drive -->
                     <div class="integration-card">
                       <div class="integration-brand">
                         <div class="brand-logo-container">
-                          <svg class="brand-logo-svg" viewBox="0 0 24 24" width="40" height="40">
-                            <path d="M19 13H5L2.5 8.5 7.5 0h9l5 8.5L19 13z" fill="none"/>
-                            <path d="m2.5 8.5 5-8.5h9l-5 8.5h-9z" fill="#000000" opacity="0.05"/>
-                            <path d="M8.5 15.5 5 9.5 12.5.5h7L16 6.5l-7.5 9z" fill="#0F9D58"/>
-                            <path d="M12.5.5 16 6.5h7.5l-3.5-6h-7.5z" fill="#FFC107"/>
-                            <path d="M2 9.5h15l3.5 6H5.5L2 9.5z" fill="#4285F4"/>
+                          <svg class="brand-logo-svg" viewBox="0 0 32 32" width="40" height="40">
+                            <path d="M16.0019 12.4507L12.541 6.34297C12.6559 6.22598 12.7881 6.14924 12.9203 6.09766C11.8998 6.43355 11.4315 7.57961 11.4315 7.57961L5.10895 18.7345C5.01999 19.0843 4.99528 19.4 5.0064 19.6781H11.9072L16.0019 12.4507Z" fill="#34A853"/>
+                            <path d="M16.002 12.4507L20.0967 19.6781H26.9975C27.0086 19.4 26.9839 19.0843 26.8949 18.7345L20.5724 7.57961C20.5724 7.57961 20.1029 6.43355 19.0835 6.09766C19.2145 6.14924 19.3479 6.22598 19.4628 6.34297L16.002 12.4507Z" fill="#FBBC05"/>
+                            <path d="M11.9082 19.6782L8.48687 25.7168C8.48687 25.7168 8.3732 25.6614 8.21875 25.5469C8.70434 25.9206 9.17633 25.9998 9.17633 25.9998H22.6134C23.3547 25.9998 23.5092 25.7168 23.5092 25.7168C23.5116 25.7155 23.5129 25.7142 23.5153 25.713L20.0965 19.6782H11.9082Z" fill="#4285F4"/>
+                            <path d="M16.0019 12.4514L19.4628 6.34371C19.3479 6.22671 19.2144 6.14997 19.0835 6.09839C18.9327 6.04933 18.7709 6.01662 18.5954 6.00781H18.4125H13.5913H13.4084C13.2342 6.01536 13.0711 6.04807 12.9203 6.09839C12.7894 6.14997 12.6559 6.22671 12.541 6.34371L16.0019 12.4514Z" fill="#188038"/>
                           </svg>
                         </div>
                         <div class="brand-details">
                           <span class="brand-name">Google Drive</span>
                           <span class="brand-status" id="status-gdrive">Disconnected</span>
+                          <span class="brand-sync-info" id="sync-info-gdrive">Last synced: Never</span>
                         </div>
                       </div>
-                      <button class="btn btn-outline btn-sm btn-connect-int" data-int="gdrive">Connect</button>
+                      <div class="integration-actions" style="display:flex;align-items:center;">
+                        <button class="btn-settings-int" data-int="gdrive" style="display:none;" title="Settings">
+                          <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2.5"><circle cx="12" cy="12" r="3"></circle><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"></path></svg>
+                        </button>
+                        <button class="btn btn-primary btn-sm btn-connect-int" data-int="gdrive">Connect</button>
+                      </div>
                     </div>
 
                     <!-- Google Contacts -->
@@ -748,9 +1925,15 @@
                         <div class="brand-details">
                           <span class="brand-name">Google Contacts</span>
                           <span class="brand-status" id="status-gcontacts">Disconnected</span>
+                          <span class="brand-sync-info" id="sync-info-gcontacts">Last synced: Never</span>
                         </div>
                       </div>
-                      <button class="btn btn-outline btn-sm btn-connect-int" data-int="gcontacts">Connect</button>
+                      <div class="integration-actions" style="display:flex;align-items:center;">
+                        <button class="btn-settings-int" data-int="gcontacts" style="display:none;" title="Settings">
+                          <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2.5"><circle cx="12" cy="12" r="3"></circle><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"></path></svg>
+                        </button>
+                        <button class="btn btn-primary btn-sm btn-connect-int" data-int="gcontacts">Connect</button>
+                      </div>
                     </div>
 
                     <!-- Gmail -->
@@ -769,50 +1952,293 @@
                         <div class="brand-details">
                           <span class="brand-name">Gmail</span>
                           <span class="brand-status" id="status-gmail">Disconnected</span>
+                          <span class="brand-sync-info" id="sync-info-gmail">Last synced: Never</span>
                         </div>
                       </div>
-                      <button class="btn btn-outline btn-sm btn-connect-int" data-int="gmail">Connect</button>
+                      <div class="integration-actions" style="display:flex;align-items:center;">
+                        <button class="btn-settings-int" data-int="gmail" style="display:none;" title="Settings">
+                          <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2.5"><circle cx="12" cy="12" r="3"></circle><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"></path></svg>
+                        </button>
+                        <button class="btn btn-primary btn-sm btn-connect-int" data-int="gmail">Connect</button>
+                      </div>
                     </div>
                   </div>
                 </div>
 
                 <!-- Subscription Tab -->
                 <div class="settings-tab-pane" id="settings-pane-subscription">
-                  <h3 class="panel-section-title">Subscription Plan</h3>
-                  <div class="subscription-obsidian-card">
-                    <div class="obsidian-card-glow"></div>
-                    <div class="sub-header">
-                      <div class="plan-info">
-                        <span class="plan-badge-obsidian">PRO ACCESS</span>
-                        <h4 class="plan-name-title">Obsidian Premium</h4>
+                  <div class="pricing-container">
+                    <div class="pricing-header-row">
+                      <h2 class="pricing-title">Plan Berlangganan</h2>
+                      <p class="pricing-subtitle">Pilih plan langganan sesuai kebutuhanmu.</p>
+                    </div>
+                    
+                    <div class="pricing-plans-cols">
+                      <!-- Free Card -->
+                      <div class="pricing-plan-header-card free">
+                        <h3 class="plan-header-title">Paket Free</h3>
+                        <div class="plan-price-row">
+                          <span class="price-old" style="visibility: hidden;">Rp 0</span>
+                          <span class="price-current">Rp 0 <span class="price-period">/ 7 hari</span></span>
+                        </div>
+                        <button class="pricing-btn active-btn" id="btn-subscribe-free">Coba Gratis</button>
                       </div>
-                      <span class="sub-cost">$15<span class="cost-period">/month</span></span>
+                      
+                      <!-- Basic Card -->
+                      <div class="pricing-plan-header-card basic">
+                        <h3 class="plan-header-title">Paket Basic</h3>
+                        <div class="plan-price-row">
+                          <span class="price-old">Rp 30.000</span>
+                          <span class="price-current">Rp 25.000 <span class="price-period">/ 1 bulan</span></span>
+                        </div>
+                        <button class="pricing-btn active-btn" id="btn-subscribe-basic">Mulai Berlangganan</button>
+                      </div>
+                      
+                      <!-- Pro Card -->
+                      <div class="pricing-plan-header-card pro">
+                        <h3 class="plan-header-title">Paket Pro</h3>
+                        <div class="plan-price-row">
+                          <span class="price-old">Rp 70.000</span>
+                          <span class="price-current">Rp 49.000 <span class="price-period">/ 1 bulan</span></span>
+                        </div>
+                        <button class="pricing-btn active-btn" id="btn-subscribe-pro">Mulai Berlangganan</button>
+                      </div>
                     </div>
-                    <div class="sub-details">
-                      <p class="sub-renewal-text">Your subscription is active and will renew on <strong>July 11, 2026</strong>.</p>
-                      <ul class="sub-features-list">
-                        <li>
-                          <svg class="bullet-check-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"></polyline></svg>
-                          <span>Unlimited memories saved (encrypted)</span>
-                        </li>
-                        <li>
-                          <svg class="bullet-check-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"></polyline></svg>
-                          <span>Advanced AI summarization (RAG enabled)</span>
-                        </li>
-                        <li>
-                          <svg class="bullet-check-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"></polyline></svg>
-                          <span>Daily smart briefings via WhatsApp</span>
-                        </li>
-                        <li>
-                          <svg class="bullet-check-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"></polyline></svg>
-                          <span>Bi-directional Google Workspace integration</span>
-                        </li>
-                      </ul>
-                    </div>
-                    <div class="sub-actions">
-                      <button class="btn btn-obsidian-billing">Manage Billing & Invoices</button>
+                    
+                    <!-- Comparison Table -->
+                    <div class="pricing-table-wrapper">
+                      <table class="pricing-comparison-table">
+                        <thead>
+                          <tr>
+                            <th class="feature-col-header">Fasilitas</th>
+                            <th class="plan-col-header text-center">Paket Free</th>
+                            <th class="plan-col-header text-center">Paket Basic</th>
+                            <th class="plan-col-header text-center">Paket Pro</th>
+                          </tr>
+                        </thead>
+                        <tbody>
+                          <tr>
+                            <td class="feature-cell">Reminder/pengingat kegiatan penting harian, mingguan atau bulanan via WhatsApp</td>
+                            <td class="status-cell text-center"><div class="circle-check">✓</div></td>
+                            <td class="status-cell text-center"><div class="circle-check">✓</div></td>
+                            <td class="status-cell text-center"><div class="circle-check">✓</div></td>
+                          </tr>
+                          <tr>
+                            <td class="feature-cell">Kuota chat tidak terbatas</td>
+                            <td class="status-cell text-center"><div class="circle-cross">×</div></td>
+                            <td class="status-cell text-center"><div class="circle-check">✓</div></td>
+                            <td class="status-cell text-center"><div class="circle-check">✓</div></td>
+                          </tr>
+                          <tr>
+                            <td class="feature-cell">Simpan data penting berupa text, link, image hingga file via WhatsApp</td>
+                            <td class="status-cell text-center"><div class="circle-check">✓</div></td>
+                            <td class="status-cell text-center"><div class="circle-check">✓</div></td>
+                            <td class="status-cell text-center"><div class="circle-check">✓</div></td>
+                          </tr>
+                          <tr>
+                            <td class="feature-cell">Simpan data kontak penting (Email, WhatsApp, Instagram dll)</td>
+                            <td class="status-cell text-center"><div class="circle-check">✓</div></td>
+                            <td class="status-cell text-center"><div class="circle-check">✓</div></td>
+                            <td class="status-cell text-center"><div class="circle-check">✓</div></td>
+                          </tr>
+                          <tr>
+                            <td class="feature-cell">Ringkas dan analisa file atau berkas apapun via whatsapp</td>
+                            <td class="status-cell text-center"><div class="circle-cross">×</div></td>
+                            <td class="status-cell text-center"><div class="circle-check">✓</div></td>
+                            <td class="status-cell text-center"><div class="circle-check">✓</div></td>
+                          </tr>
+                          <tr>
+                            <td class="feature-cell">Kirim email notifikasi meeting/event atau reminder ke teman secara otomatis</td>
+                            <td class="status-cell text-center"><div class="circle-cross">×</div></td>
+                            <td class="status-cell text-center"><div class="circle-check">✓</div></td>
+                            <td class="status-cell text-center"><div class="circle-check">✓</div></td>
+                          </tr>
+                          <tr>
+                            <td class="feature-cell">Buat event / acara, meeting atau pertemuan</td>
+                            <td class="status-cell text-center"><div class="circle-cross">×</div></td>
+                            <td class="status-cell text-center"><div class="circle-check">✓</div></td>
+                            <td class="status-cell text-center"><div class="circle-check">✓</div></td>
+                          </tr>
+                          <tr>
+                            <td class="feature-cell">Terintegrasi dengan Google Meet dan Google Drive</td>
+                            <td class="status-cell text-center"><div class="circle-cross">×</div></td>
+                            <td class="status-cell text-center"><div class="circle-check">✓</div></td>
+                            <td class="status-cell text-center"><div class="circle-check">✓</div></td>
+                          </tr>
+                          <tr>
+                            <td class="feature-cell">Dashboard kelola reminder, event, kontak, todolist, data dan file penting</td>
+                            <td class="status-cell text-center"><div class="circle-check">✓</div></td>
+                            <td class="status-cell text-center"><div class="circle-check">✓</div></td>
+                            <td class="status-cell text-center"><div class="circle-check">✓</div></td>
+                          </tr>
+                          <tr>
+                            <td class="feature-cell">Dashboard Pusat Memori</td>
+                            <td class="status-cell text-center"><div class="circle-check">✓</div></td>
+                            <td class="status-cell text-center"><div class="circle-check">✓</div></td>
+                            <td class="status-cell text-center"><div class="circle-check">✓</div></td>
+                          </tr>
+                          <tr>
+                            <td class="feature-cell">Todolist sederhana</td>
+                            <td class="status-cell text-center"><div class="circle-check">✓</div></td>
+                            <td class="status-cell text-center"><div class="circle-check">✓</div></td>
+                            <td class="status-cell text-center"><div class="circle-check">✓</div></td>
+                          </tr>
+                          <tr>
+                            <td class="feature-cell">Task management via WhatsApp</td>
+                            <td class="status-cell text-center"><div class="circle-cross">×</div></td>
+                            <td class="status-cell text-center"><div class="circle-cross">×</div></td>
+                            <td class="status-cell text-center"><div class="circle-check">✓</div></td>
+                          </tr>
+                          <tr>
+                            <td class="feature-cell">Dashboard task management</td>
+                            <td class="status-cell text-center"><div class="circle-cross">×</div></td>
+                            <td class="status-cell text-center"><div class="circle-cross">×</div></td>
+                            <td class="status-cell text-center"><div class="circle-check">✓</div></td>
+                          </tr>
+                        </tbody>
+                      </table>
                     </div>
                   </div>
+                </div>
+
+                <!-- Affiliate Tab -->
+                <div class="settings-tab-pane" id="settings-pane-affiliate">
+                  <h3 class="panel-section-title">Program Afiliasi & Referral MyVA</h3>
+                  <p class="section-desc">Undang teman Anda untuk berlangganan MyVA dan dapatkan komisi tunai sebesar 30% untuk bulan pertama, serta 10% berkelanjutan (recurring) untuk setiap perpanjangan di bulan-bulan berikutnya.</p>
+
+                  <!-- Link Referral Box -->
+                  <div class="settings-form-card" style="margin-bottom: 24px;">
+                    <h4 style="margin-bottom: 12px; font-weight: 600; font-size: 15px; color: var(--text-primary);">Link Referral Anda</h4>
+                    <div class="input-icon-container" style="display: flex; gap: 8px;">
+                      <input type="text" class="form-input" id="affiliate-ref-link" value="https://myva.ai/?ref=" readonly style="flex: 1; background-color: var(--bg-hover);" />
+                      <button class="btn btn-outline btn-sm" id="btn-copy-ref-link" style="white-space: nowrap;">Salin Link</button>
+                    </div>
+                  </div>
+
+                  <!-- Stats Grid -->
+                  <div class="stats-grid" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 16px; margin-bottom: 24px;">
+                    <div class="stat-card" style="cursor: default;">
+                      <span class="stat-title">Total Undangan</span>
+                      <span class="stat-value" id="affiliate-total-referrals">0</span>
+                      <span class="stat-desc">Orang terdaftar</span>
+                    </div>
+                    <div class="stat-card" style="cursor: default;">
+                      <span class="stat-title">Saldo Aktif</span>
+                      <span class="stat-value" id="affiliate-balance">Rp 0</span>
+                      <span class="stat-desc">Dapat dicairkan (Min Rp 100.000)</span>
+                    </div>
+                    <div class="stat-card" style="cursor: default;">
+                      <span class="stat-title">Total Pendapatan</span>
+                      <span class="stat-value" id="affiliate-total-earned">Rp 0</span>
+                      <span class="stat-desc">Seumur hidup</span>
+                    </div>
+                  </div>
+
+                  <!-- Request Payout Card -->
+                  <div class="settings-form-card" style="margin-bottom: 24px;">
+                    <h4 style="margin-bottom: 16px; font-weight: 600; font-size: 15px; color: var(--text-primary);">Ajukan Penarikan Komisi</h4>
+                    
+                    <div id="payout-error-alert" class="login-alert error" style="display:none; margin-bottom:12px;"></div>
+                    <div id="payout-success-alert" class="login-alert success" style="display:none; margin-bottom:12px;"></div>
+
+                    <form id="form-payout-request">
+                      <div class="form-group" style="margin-bottom: 12px;">
+                        <label class="form-label">Nominal Penarikan (Rp)</label>
+                        <input type="number" class="form-input" id="payout-amount" placeholder="Contoh: 100000" min="100000" required />
+                      </div>
+                      <div class="form-group" style="margin-bottom: 12px;">
+                        <label class="form-label">Metode Pembayaran / Nama Bank</label>
+                        <input type="text" class="form-input" id="payout-method" placeholder="Contoh: Bank BCA, GoPay, OVO" required />
+                      </div>
+                      <div class="form-group" style="margin-bottom: 12px;">
+                        <label class="form-label">Nomor Rekening / No. E-Wallet</label>
+                        <input type="text" class="form-input" id="payout-account" placeholder="Contoh: 1234567890" required />
+                      </div>
+                      <div class="form-group" style="margin-bottom: 16px;">
+                        <label class="form-label">Nama Pemilik Rekening</label>
+                        <input type="text" class="form-input" id="payout-name" placeholder="Contoh: Nur Muis Masyuun" required />
+                      </div>
+                      <button type="submit" class="btn btn-primary btn-sm" id="btn-submit-payout">Ajukan Penarikan</button>
+                    </form>
+                  </div>
+
+                  <!-- Riwayat Komisi & Penarikan Tables -->
+                  <div class="settings-form-card">
+                    <h4 style="margin-bottom: 16px; font-weight: 600; font-size: 15px; color: var(--text-primary); border-bottom: 1px solid var(--border-color); padding-bottom: 8px;">Riwayat Pendapatan Afiliasi</h4>
+                    <div style="overflow-x: auto;">
+                      <table class="pricing-comparison-table" style="width: 100%;">
+                        <thead>
+                          <tr>
+                            <th class="feature-col-header" style="padding: 10px;">Tanggal</th>
+                            <th class="plan-col-header text-center" style="padding: 10px;">Teman</th>
+                            <th class="plan-col-header text-center" style="padding: 10px;">Persentase</th>
+                            <th class="plan-col-header text-center" style="padding: 10px;">Komisi</th>
+                          </tr>
+                        </thead>
+                        <tbody id="affiliate-commissions-table-body">
+                          <tr>
+                            <td colspan="4" class="text-center" style="padding: 20px; color: var(--text-secondary);">Belum ada riwayat pendapatan komisi.</td>
+                          </tr>
+                        </tbody>
+                      </table>
+                    </div>
+                  </div>
+
+                  <div class="settings-form-card" style="margin-top: 24px;">
+                    <h4 style="margin-bottom: 16px; font-weight: 600; font-size: 15px; color: var(--text-primary); border-bottom: 1px solid var(--border-color); padding-bottom: 8px;">Riwayat Penarikan</h4>
+                    <div style="overflow-x: auto;">
+                      <table class="pricing-comparison-table" style="width: 100%;">
+                        <thead>
+                          <tr>
+                            <th class="feature-col-header" style="padding: 10px;">Tanggal</th>
+                            <th class="plan-col-header text-center" style="padding: 10px;">Tujuan</th>
+                            <th class="plan-col-header text-center" style="padding: 10px;">Nominal</th>
+                            <th class="plan-col-header text-center" style="padding: 10px;">Status</th>
+                          </tr>
+                        </thead>
+                        <tbody id="affiliate-payouts-table-body">
+                          <tr>
+                            <td colspan="4" class="text-center" style="padding: 20px; color: var(--text-secondary);">Belum ada riwayat penarikan dana.</td>
+                          </tr>
+                        </tbody>
+                      </table>
+                    </div>
+                  </div>
+
+                </div>
+              </div>
+            </div>
+          </section>
+
+          <!-- 10. ADMIN VIEW -->
+          <section id="view-admin" class="view-section">
+            <div class="settings-layout" style="display: block; width: 100%;">
+              <div class="settings-form-card" style="margin-bottom: 24px;">
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px; border-bottom: 1px solid var(--border-color); padding-bottom: 12px;">
+                  <h3 class="panel-section-title" style="margin-bottom: 0;">Kelola Penarikan Komisi</h3>
+                  <button class="btn btn-outline btn-sm" id="btn-refresh-admin-payouts">Segarkan Data</button>
+                </div>
+                
+                <p class="section-desc">Berikut adalah daftar permintaan pencairan komisi oleh user. Silakan lakukan transfer secara manual ke rekening tujuan, kemudian klik "Selesai" untuk menandai transaksi telah diproses, atau "Tolak" jika data rekening tidak valid.</p>
+                
+                <div style="overflow-x: auto; margin-top: 16px;">
+                  <table class="pricing-comparison-table" style="width: 100%;">
+                    <thead>
+                      <tr>
+                        <th class="feature-col-header" style="padding: 12px;">User</th>
+                        <th class="plan-col-header text-center" style="padding: 12px;">Tanggal</th>
+                        <th class="plan-col-header text-center" style="padding: 12px;">Metode & Rekening</th>
+                        <th class="plan-col-header text-center" style="padding: 12px;">Nominal</th>
+                        <th class="plan-col-header text-center" style="padding: 12px;">Status</th>
+                        <th class="plan-col-header text-center" style="padding: 12px;">Aksi</th>
+                      </tr>
+                    </thead>
+                    <tbody id="admin-payouts-table-body">
+                      <tr>
+                        <td colspan="6" class="text-center" style="padding: 30px; color: var(--text-secondary);">Memuat data permintaan penarikan...</td>
+                      </tr>
+                    </tbody>
+                  </table>
                 </div>
               </div>
             </div>
@@ -995,9 +2421,15 @@
             <label class="form-label">Event Title</label>
             <input type="text" id="new-event-title" class="form-input" placeholder="e.g. Weekly Sync Meeting" />
           </div>
-          <div class="form-group">
-            <label class="form-label">Time</label>
-            <input type="time" id="new-event-time" class="form-input" value="10:00" />
+          <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 16px;">
+            <div class="form-group" style="margin-bottom: 0;">
+              <label class="form-label">Date</label>
+              <input type="date" id="new-event-date" class="form-input" />
+            </div>
+            <div class="form-group" style="margin-bottom: 0;">
+              <label class="form-label">Time</label>
+              <input type="time" id="new-event-time" class="form-input" value="10:00" />
+            </div>
           </div>
           <div class="form-group">
             <label class="form-label">Details / Notes</label>
@@ -1059,6 +2491,124 @@
       </div>
     </div>
 
+    <!-- 6b. Memory Details Side Drawer -->
+    <div class="drawer-overlay" id="drawer-memory-details">
+      <div class="drawer-panel">
+        <div class="drawer-header">
+          <h3 id="drawer-memory-title">Memory Title</h3>
+          <button class="drawer-close-btn" id="close-memory-drawer">&times;</button>
+        </div>
+        <div class="drawer-body">
+          <!-- Memory info summary -->
+          <div class="drawer-info-grid">
+            <div class="info-item">
+              <span class="info-label">Category</span>
+              <span class="info-value" id="drawer-memory-category">Notes</span>
+            </div>
+            <div class="info-item">
+              <span class="info-label">Created At</span>
+              <span class="info-value" id="drawer-memory-date">June 11, 2026</span>
+            </div>
+          </div>
+
+          <div class="drawer-section border-top">
+            <h4 class="drawer-subtitle">Content</h4>
+            <div class="drawer-summary-text" id="drawer-memory-content" style="white-space: pre-wrap; line-height: 1.6; font-size: 14px;">Memory Content details...</div>
+          </div>
+        </div>
+        <div class="drawer-footer">
+          <button class="btn btn-outline w-full" id="btn-close-memory-drawer-bottom">Close Panel</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- 6c. Task Details Side Drawer -->
+    <div class="drawer-overlay" id="drawer-task-details">
+      <div class="drawer-panel">
+        <div class="drawer-header">
+          <h3 id="drawer-task-title-header">Task Details</h3>
+          <button class="drawer-close-btn" id="close-task-drawer">&times;</button>
+        </div>
+        <div class="drawer-body">
+          <div class="form-group">
+            <label class="form-label">Task Name</label>
+            <input type="text" id="drawer-task-title-input" class="form-input" />
+          </div>
+
+          <div class="form-group">
+            <label class="form-label">Tags (comma separated)</label>
+            <input type="text" id="drawer-task-tags-input" class="form-input" />
+          </div>
+
+          <div class="form-group-row" style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:16px;">
+            <div class="form-group" style="margin-bottom:0;">
+              <label class="form-label">Priority</label>
+              <select id="drawer-task-priority-input" class="form-input">
+                <option value="Low">Low</option>
+                <option value="Medium">Medium</option>
+                <option value="High">High</option>
+              </select>
+            </div>
+            <div class="form-group" style="margin-bottom:0;">
+              <label class="form-label">Status</label>
+              <select id="drawer-task-status-input" class="form-input">
+                <option value="todo">Todo</option>
+                <option value="doing">Doing</option>
+                <option value="done">Done</option>
+              </select>
+            </div>
+          </div>
+        </div>
+        <div class="drawer-footer" style="display:grid;grid-template-columns:1fr 1fr;gap:10px;">
+          <button class="btn btn-outline" id="btn-close-task-drawer-bottom">Close</button>
+          <button class="btn btn-primary" id="btn-save-task-drawer">Save Changes</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- 6d. Reminder Details Side Drawer -->
+    <div class="drawer-overlay" id="drawer-reminder-details">
+      <div class="drawer-panel">
+        <div class="drawer-header">
+          <h3 id="drawer-reminder-title-header">Reminder Details</h3>
+          <button class="drawer-close-btn" id="close-reminder-drawer">&times;</button>
+        </div>
+        <div class="drawer-body">
+          <div class="form-group">
+            <label class="form-label">Reminder Title / Text</label>
+            <input type="text" id="drawer-reminder-text-input" class="form-input" />
+          </div>
+
+          <div class="form-group">
+            <label class="form-label">Scheduled Time (HH:MM)</label>
+            <input type="time" id="drawer-reminder-time-input" class="form-input" />
+          </div>
+
+          <div class="form-group">
+            <label class="form-label">Timeframe Group</label>
+            <select id="drawer-reminder-group-input" class="form-input">
+              <option value="Today">Today</option>
+              <option value="Tomorrow">Tomorrow</option>
+              <option value="This Week">This Week</option>
+              <option value="This Month">This Month</option>
+            </select>
+          </div>
+
+          <div class="form-group" style="display:flex;align-items:center;justify-content:space-between;margin-top:16px;padding:12px;background:#F8FAFC;border-radius:8px;border:1px solid var(--border-color);">
+            <label class="form-label" for="drawer-reminder-completed-input" style="margin-bottom:0;cursor:pointer;font-weight:600;">Mark as Completed</label>
+            <label class="switch">
+              <input type="checkbox" id="drawer-reminder-completed-input" />
+              <span class="slider round"></span>
+            </label>
+          </div>
+        </div>
+        <div class="drawer-footer" style="display:grid;grid-template-columns:1fr 1fr;gap:10px;">
+          <button class="btn btn-outline" id="btn-close-reminder-drawer-bottom">Close</button>
+          <button class="btn btn-primary" id="btn-save-reminder-drawer">Save Changes</button>
+        </div>
+      </div>
+    </div>
+
     <!-- 7. Emoji Picker Modal -->
     <div class="modal-overlay" id="modal-emoji-picker">
       <div class="modal-card" style="max-width: 340px;">
@@ -1093,6 +2643,262 @@
             <span class="emoji-picker-item" data-emoji="☕">☕</span>
             <span class="emoji-picker-item" data-emoji="🥑">🥑</span>
           </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Reset Memory Modal -->
+    <div class="modal-overlay" id="modal-reset-memory">
+      <div class="modal-container">
+        <div class="modal-header">
+          <div class="modal-warning-icon" style="color: #dc2626; display: flex; align-items: center;">
+            <svg viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"></path><line x1="12" y1="9" x2="12" y2="13"></line><line x1="12" y1="17" x2="12.01" y2="17"></line></svg>
+          </div>
+          <div class="modal-title-wrapper" style="margin-left: 12px;">
+            <h3 style="font-size:16px;font-weight:700;margin:0;">Reset AI Memory?</h3>
+          </div>
+        </div>
+        <div class="modal-body" style="padding: 12px 24px 20px;">
+          <p style="font-size:13px;color:var(--text-secondary);line-height:1.6;margin:0;">This will permanently flush all your learned preferences, vector memory embeddings, and raw text histories. Your assistant will be reset to its default state. This action cannot be undone.</p>
+        </div>
+        <div class="modal-footer" style="padding: 16px 24px 20px; background: rgba(15, 23, 42, 0.02); display: flex; justify-content: flex-end; gap: 12px; border-top: 1px solid var(--border-color);">
+          <button class="btn btn-outline" id="btn-cancel-reset" style="padding: 8px 16px;">Cancel</button>
+          <button class="btn btn-primary" id="btn-confirm-reset" style="background-color:#dc2626;border-color:#dc2626;padding: 8px 16px;">Confirm Reset</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Delete Account Modal -->
+    <div class="modal-overlay" id="modal-delete-account">
+      <div class="modal-container">
+        <div class="modal-header">
+          <div class="modal-warning-icon" style="color: #dc2626; display: flex; align-items: center;">
+            <svg viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"></path><line x1="12" y1="9" x2="12" y2="13"></line><line x1="12" y1="17" x2="12.01" y2="17"></line></svg>
+          </div>
+          <div class="modal-title-wrapper" style="margin-left: 12px;">
+            <h3 style="font-size:16px;font-weight:700;margin:0;">Delete Account Permanently?</h3>
+          </div>
+        </div>
+        <div class="modal-body" style="padding: 12px 24px 20px;">
+          <p style="font-size:13px;color:var(--text-secondary);line-height:1.6;margin:0;">Are you sure you want to delete your MyVA account? This will immediately terminate your subscription, wipe all credentials, and permanently delete all your data. This action is irreversible.</p>
+        </div>
+        <div class="modal-footer" style="padding: 16px 24px 20px; background: rgba(15, 23, 42, 0.02); display: flex; justify-content: flex-end; gap: 12px; border-top: 1px solid var(--border-color);">
+          <button class="btn btn-outline" id="btn-cancel-delete" style="padding: 8px 16px;">Cancel</button>
+          <button class="btn btn-primary" id="btn-confirm-delete" style="background-color:#dc2626;border-color:#dc2626;padding: 8px 16px;">Delete Account</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Google OAuth Simulation Modal -->
+    <div class="modal-overlay" id="modal-oauth-simulation">
+      <div class="google-oauth-card">
+        <div class="google-logo-box" style="margin-bottom: 20px; text-align: center; display: flex; justify-content: center; align-items: center;">
+          <svg width="40" height="40" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+            <path d="M24 12.235c0-.739-.074-1.448-.199-2.128H12.24v4.023h6.678c-.286 1.545-1.163 2.852-2.476 3.733v2.632h3.974c2.327-2.146 3.684-5.305 3.684-9.06z" fill="#4285F4"/>
+            <path d="M12.24 24c3.348 0 6.157-1.11 8.21-3.003l-3.974-2.632c-1.102.739-2.513 1.178-4.236 1.178-3.256 0-6.012-2.201-6.996-5.158H1.144v2.716C3.218 21.054 7.375 24 12.24 24z" fill="#34A853"/>
+            <path d="M5.244 14.385c-.25-.739-.387-1.536-.387-2.385s.137-1.646.387-2.385V6.899H1.144C.417 8.358 0 9.998 0 11.724s.417 3.366 1.144 4.825l4.1-2.164z" fill="#FBBC05"/>
+            <path d="M12.24 4.773c1.77 0 3.366.608 4.619 1.801l3.465-3.465C18.15 1.196 15.341 0 12.24 0 7.375 0 3.218 2.946 1.144 6.899l4.1 2.716c.984-2.957 3.74-5.158 6.996-5.158z" fill="#EA4335"/>
+          </svg>
+        </div>
+        <div class="oauth-header-title">Sign in with Google</div>
+        <div class="oauth-header-subtitle">to continue to <strong style="color:var(--primary-color)"><span class="brand-my" style="color: #000000">My</span><span class="brand-va" style="color: var(--primary-color)">VA</span> AI</strong></div>
+        
+        <div class="oauth-profile-card">
+          <div class="oauth-profile-avatar" id="oauth-avatar-display">🤖</div>
+          <div class="oauth-profile-info">
+            <span class="oauth-profile-name" id="oauth-name-display">Muis</span>
+            <span class="oauth-profile-email" id="oauth-email-display">muis@myva.ai</span>
+          </div>
+        </div>
+
+        <div class="oauth-scope-section">
+          <div class="oauth-scope-section-title">Grant permissions to MyVA:</div>
+          <div id="oauth-scopes-container">
+            <!-- Dynamic scopes go here -->
+          </div>
+        </div>
+
+        <div class="oauth-action-footer">
+          <button class="btn-oauth-action btn-oauth-deny" id="btn-oauth-deny">Deny</button>
+          <button class="btn-oauth-action btn-oauth-allow" id="btn-oauth-allow">Allow</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Dynamic Integration Settings Modal -->
+    <div class="modal-overlay" id="modal-integration-settings">
+      <div class="modal-container" style="max-width: 460px;">
+        <div class="modal-header">
+          <h3 id="int-settings-title" style="font-size:16px;font-weight:700;margin:0;">Integration Settings</h3>
+          <button class="modal-close-btn" id="close-int-settings-modal">&times;</button>
+        </div>
+        <div class="modal-body" id="int-settings-body" style="padding: 20px 24px;">
+          <!-- Dynamic settings fields go here -->
+        </div>
+        <div class="modal-footer" style="padding: 16px 24px 20px; background: rgba(15, 23, 42, 0.02); display: flex; justify-content: flex-end; gap: 12px; border-top: 1px solid var(--border-color);">
+          <button class="btn btn-outline" id="btn-cancel-int-settings" style="padding: 8px 16px;">Cancel</button>
+          <button class="btn btn-primary" id="btn-save-int-settings" style="padding: 8px 24px;">Save Settings</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Compliance Modal: Syarat & Ketentuan -->
+    <div class="modal-overlay" id="modal-compliance-tos">
+      <div class="modal-card" style="max-width: 650px; max-height: 85vh; display: flex; flex-direction: column;">
+        <div class="modal-header">
+          <h3 style="font-size: 18px; font-weight: 700; margin: 0;">Syarat & Ketentuan Layanan</h3>
+          <button class="modal-close-btn">&times;</button>
+        </div>
+        <div class="modal-body" style="overflow-y: auto; font-size: 13.5px; line-height: 1.6; color: #475569; padding: 24px;">
+          <h4 style="font-weight: 700; color: #0F172A; margin-top: 0; margin-bottom: 8px;">1. Pengenalan</h4>
+          <p style="margin-bottom: 16px;">Selamat datang di MyVA ("Layanan"), sebuah asisten pribadi virtual berbasis Kecerdasan Buatan (AI) yang diintegrasikan dengan aplikasi WhatsApp dan layanan Google. Dengan mengakses atau menggunakan Layanan kami, Anda setuju untuk terikat oleh Syarat & Ketentuan ini.</p>
+          
+          <h4 style="font-weight: 700; color: #0F172A; margin-top: 16px; margin-bottom: 8px;">2. Penggunaan Layanan</h4>
+          <p style="margin-bottom: 16px;">Anda wajib menggunakan Layanan ini dengan cara yang bertanggung jawab dan sesuai hukum yang berlaku di Republik Indonesia. Anda dilarang keras untuk:</p>
+          <ul style="padding-left: 20px; margin-bottom: 16px; list-style-type: disc;">
+            <li>Mengirimkan pesan spam, kasar, tidak sopan, atau melanggar hak pihak lain melalui asisten virtual.</li>
+            <li>Menggunakan Layanan untuk aktivitas penipuan, pelanggaran hukum, atau tindakan berbahaya lainnya.</li>
+            <li>Melakukan rekayasa balik (reverse engineering) atau mencoba merusak sistem keamanan MyVA.</li>
+          </ul>
+          
+          <h4 style="font-weight: 700; color: #0F172A; margin-top: 16px; margin-bottom: 8px;">3. Akun dan Keamanan</h4>
+          <p style="margin-bottom: 16px;">Anda bertanggung jawab penuh atas keamanan akun MyVA Anda dan nomor WhatsApp yang dihubungkan ke Layanan. Kami tidak bertanggung jawab atas kerugian yang disebabkan oleh kelalaian Anda dalam menjaga keamanan akses akun.</p>
+          
+          <h4 style="font-weight: 700; color: #0F172A; margin-top: 16px; margin-bottom: 8px;">4. Biaya & Langganan</h4>
+          <p style="margin-bottom: 16px;">Layanan kami menyediakan masa uji coba gratis (Free Trial) selama 7 hari. Setelah masa uji coba berakhir, Anda harus memilih paket berlangganan berbayar bulanan (Basic / Pro) agar dapat terus menggunakan seluruh fitur. Biaya berlangganan akan ditagih secara berulang setiap bulan.</p>
+          
+          <h4 style="font-weight: 700; color: #0F172A; margin-top: 16px; margin-bottom: 8px;">5. Batasan Tanggung Jawab</h4>
+          <p style="margin-bottom: 16px;">Layanan ini disediakan "sebagaimana adanya" (as is) tanpa jaminan apa pun. Kami tidak bertanggung jawab atas keterlambatan, kegagalan, atau kehilangan data yang disebabkan oleh gangguan penyedia layanan pihak ketiga (seperti WhatsApp Cloud API, OpenAI API, atau Google API).</p>
+          
+          <h4 style="font-weight: 700; color: #0F172A; margin-top: 16px; margin-bottom: 8px;">6. Perubahan Ketentuan</h4>
+          <p style="margin-bottom: 0;">Kami berhak untuk mengubah Syarat & Ketentuan ini kapan saja. Perubahan akan berlaku segera setelah dipublikasikan di halaman ini.</p>
+        </div>
+        <div class="modal-footer" style="padding: 16px 24px 20px; background: rgba(15, 23, 42, 0.02); display: flex; justify-content: flex-end; gap: 12px; border-top: 1px solid var(--border-color);">
+          <button class="btn btn-outline" id="btn-cancel-compliance-tos" style="padding: 8px 16px;">Tutup</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Compliance Modal: Kebijakan Privasi -->
+    <div class="modal-overlay" id="modal-compliance-privacy">
+      <div class="modal-card" style="max-width: 650px; max-height: 85vh; display: flex; flex-direction: column;">
+        <div class="modal-header">
+          <h3 style="font-size: 18px; font-weight: 700; margin: 0;">Kebijakan Privasi</h3>
+          <button class="modal-close-btn">&times;</button>
+        </div>
+        <div class="modal-body" style="overflow-y: auto; font-size: 13.5px; line-height: 1.6; color: #475569; padding: 24px;">
+          <p style="margin-bottom: 16px; margin-top: 0;">Privasi Anda sangat penting bagi kami. Kebijakan Privasi ini menjelaskan bagaimana MyVA mengumpulkan, menggunakan, menyimpan, dan melindungi informasi pribadi Anda.</p>
+          
+          <h4 style="font-weight: 700; color: #0F172A; margin-top: 16px; margin-bottom: 8px;">1. Informasi yang Kami Kumpulkan</h4>
+          <p style="margin-bottom: 8px;">Kami mengumpulkan informasi berikut untuk memproses fitur-fitur asisten pribadi Anda:</p>
+          <ul style="padding-left: 20px; margin-bottom: 16px; list-style-type: disc;">
+            <li><strong>Informasi Pendaftaran:</strong> Nama lengkap, alamat email, kata sandi terenkripsi, dan nomor WhatsApp aktif Anda.</li>
+            <li><strong>Data Percakapan:</strong> Pesan teks, tautan, dan memo suara yang Anda kirimkan ke asisten virtual MyVA di WhatsApp untuk diproses oleh AI.</li>
+            <li><strong>Dokumen & Berkas:</strong> File yang Anda unggah ke Vault Dokumen untuk diringkas atau dianalisis.</li>
+            <li><strong>Koneksi Pihak Ketiga:</strong> Token akses Google (Calendar/Drive/Contacts) jika Anda mengaktifkan fitur integrasi Google.</li>
+          </ul>
+          
+          <h4 style="font-weight: 700; color: #0F172A; margin-top: 16px; margin-bottom: 8px;">2. Penggunaan Informasi</h4>
+          <p style="margin-bottom: 8px;">Kami menggunakan data yang dikumpulkan hanya untuk keperluan operasional layanan:</p>
+          <ul style="padding-left: 20px; margin-bottom: 16px; list-style-type: disc;">
+            <li>Memproses dan menjawab percakapan Anda menggunakan sistem AI.</li>
+            <li>Mengirim pengingat agenda, tugas, dan ringkasan langsung ke nomor WhatsApp Anda.</li>
+            <li>Menyinkronkan jadwal acara dan dokumen ke Google Calendar dan Google Drive Anda sesuai persetujuan eksplisit Anda.</li>
+          </ul>
+          
+          <h4 style="font-weight: 700; color: #0F172A; margin-top: 16px; margin-bottom: 8px;">3. Perlindungan & Keamanan Data</h4>
+          <p style="margin-bottom: 16px;">Semua transmisi data dilindungi oleh enkripsi SSL/HTTPS yang aman. Data sensitif Anda, termasuk riwayat memo dan data rahasia, dienkripsi di server kami menggunakan algoritma enkripsi standar industri AES-256. Kami tidak pernah menjual, menyewakan, atau memberikan data pribadi Anda ke pihak ketiga manapun selain untuk memproses permintaan API AI resmi.</p>
+          
+          <h4 style="font-weight: 700; color: #0F172A; margin-top: 16px; margin-bottom: 8px;">4. Pengungkapan API Google (Google API Disclosure)</h4>
+          <p style="margin-bottom: 16px;">Penggunaan informasi MyVA yang diterima dari Google API akan mematuhi Kebijakan Data Pengguna Layanan Google API, termasuk persyaratan Penggunaan Terbatas. Data dari Google Calendar atau Google Drive tidak akan pernah dibagikan kepada pihak ketiga atau digunakan untuk tujuan periklanan.</p>
+          
+          <h4 style="font-weight: 700; color: #0F172A; margin-top: 16px; margin-bottom: 0;">5. Hak Pengguna</h4>
+          <p style="margin-bottom: 0;">Anda memiliki hak untuk melihat, memperbarui, atau menghapus informasi pribadi Anda dari sistem kami kapan saja dengan menghubungi kami atau melalui menu pengaturan akun di Dashboard Anda.</p>
+        </div>
+        <div class="modal-footer" style="padding: 16px 24px 20px; background: rgba(15, 23, 42, 0.02); display: flex; justify-content: flex-end; gap: 12px; border-top: 1px solid var(--border-color);">
+          <button class="btn btn-outline" id="btn-cancel-compliance-privacy" style="padding: 8px 16px;">Tutup</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Compliance Modal: Kebijakan Refund -->
+    <div class="modal-overlay" id="modal-compliance-refund">
+      <div class="modal-card" style="max-width: 650px; max-height: 85vh; display: flex; flex-direction: column;">
+        <div class="modal-header">
+          <h3 style="font-size: 18px; font-weight: 700; margin: 0;">Kebijakan Refund & Pembatalan</h3>
+          <button class="modal-close-btn">&times;</button>
+        </div>
+        <div class="modal-body" style="overflow-y: auto; font-size: 13.5px; line-height: 1.6; color: #475569; padding: 24px;">
+          <h4 style="font-weight: 700; color: #0F172A; margin-top: 0; margin-bottom: 8px;">1. Pembatalan Langganan</h4>
+          <p style="margin-bottom: 16px;">Anda dapat melakukan pembatalan paket langganan berbayar (Basic atau Pro) kapan saja melalui menu Billing / Langganan di Dashboard MyVA Anda. Setelah langganan dibatalkan, Anda tetap dapat mengakses fitur premium paket tersebut hingga akhir masa periode penagihan bulanan yang sedang berjalan.</p>
+          
+          <h4 style="font-weight: 700; color: #0F172A; margin-top: 16px; margin-bottom: 8px;">2. Kebijakan Pengembalian Dana (Refund Policy)</h4>
+          <p style="margin-bottom: 16px;">Setiap pembayaran paket berlangganan bulanan di MyVA bersifat final dan <strong>tidak dapat dikembalikan (non-refundable)</strong> setelah transaksi berhasil diproses oleh payment gateway rekanan kami (Duitku). Kami tidak memberikan pengembalian dana atau kredit untuk sisa hari penggunaan atau pembatalan di tengah periode.</p>
+          
+          <h4 style="font-weight: 700; color: #0F172A; margin-top: 16px; margin-bottom: 8px;">3. Pengecualian Khusus</h4>
+          <p style="margin-bottom: 16px;">Pengembalian dana hanya dapat diajukan dan diproses dalam kondisi-kondisi khusus berikut:</p>
+          <ul style="padding-left: 20px; margin-bottom: 16px; list-style-type: disc;">
+            <li><strong>Kesalahan Sistem / Overcharge:</strong> Terjadi kesalahan penagihan ganda (double-billing) untuk transaksi yang sama dari sistem kami.</li>
+            <li><strong>Layanan Tidak Berfungsi:</strong> Terjadi gangguan teknis total dari server MyVA yang berlangsung lebih dari 5 hari berturut-turut yang dikonfirmasi oleh tim developer kami, dan pengguna tidak dapat menggunakan layanan sama sekali.</li>
+          </ul>
+          
+          <h4 style="font-weight: 700; color: #0F172A; margin-top: 16px; margin-bottom: 8px;">4. Cara Pengajuan Refund</h4>
+          <p style="margin-bottom: 0;">Untuk mengajukan permohonan pengembalian dana berdasarkan pengecualian di atas, silakan hubungi tim dukungan kami melalui email di <strong>studio6ma@gmail.com</strong> dengan menyertakan bukti pembayaran (Nomor Invoice / Bukti Transfer) beserta bukti pendukung kendala sistem Anda.</p>
+        </div>
+        <div class="modal-footer" style="padding: 16px 24px 20px; background: rgba(15, 23, 42, 0.02); display: flex; justify-content: flex-end; gap: 12px; border-top: 1px solid var(--border-color);">
+          <button class="btn btn-outline" id="btn-cancel-compliance-refund" style="padding: 8px 16px;">Tutup</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Compliance Modal: Hubungi Kami -->
+    <div class="modal-overlay" id="modal-compliance-contact">
+      <div class="modal-card" style="max-width: 500px; max-height: 85vh; display: flex; flex-direction: column;">
+        <div class="modal-header">
+          <h3 style="font-size: 18px; font-weight: 700; margin: 0;">Hubungi Kami</h3>
+          <button class="modal-close-btn">&times;</button>
+        </div>
+        <div class="modal-body" style="overflow-y: auto; font-size: 13.5px; line-height: 1.6; color: #475569; padding: 24px;">
+          <p style="margin-bottom: 20px; margin-top: 0;">Jika Anda memiliki pertanyaan, kendala teknis, atau membutuhkan bantuan operasional terkait layanan MyVA, silakan hubungi saluran resmi kami berikut:</p>
+          
+          <div style="display: flex; flex-direction: column; gap: 16px; margin-bottom: 20px;">
+            <div style="display: flex; align-items: flex-start; gap: 12px;">
+              <span style="display: flex; align-items: center; justify-content: center; width: 32px; height: 32px; border-radius: 8px; background: rgba(37, 211, 102, 0.08); color: #25D366; flex-shrink: 0;">
+                <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"></path></svg>
+              </span>
+              <div>
+                <strong style="display: block; color: #0F172A; font-size: 13px;">WhatsApp Support</strong>
+                <a href="https://wa.me/6282233009457" target="_blank" style="color: #128C7E; text-decoration: none; font-weight: 600;">+62 822-3300-9457</a>
+              </div>
+            </div>
+            
+            <div style="display: flex; align-items: flex-start; gap: 12px;">
+              <span style="display: flex; align-items: center; justify-content: center; width: 32px; height: 32px; border-radius: 8px; background: rgba(59, 130, 246, 0.08); color: #3B82F6; flex-shrink: 0;">
+                <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"></path><polyline points="22,6 12,13 2,6"></polyline></svg>
+              </span>
+              <div>
+                <strong style="display: block; color: #0F172A; font-size: 13px;">Layanan Email</strong>
+                <a href="mailto:studio6ma@gmail.com" style="color: #3B82F6; text-decoration: none; font-weight: 600;">studio6ma@gmail.com</a>
+              </div>
+            </div>
+            
+            <div style="display: flex; align-items: flex-start; gap: 12px;">
+              <span style="display: flex; align-items: center; justify-content: center; width: 32px; height: 32px; border-radius: 8px; background: rgba(139, 92, 246, 0.08); color: #8B5CF6; flex-shrink: 0;">
+                <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"></path><circle cx="12" cy="10" r="3"></circle></svg>
+              </span>
+              <div>
+                <strong style="display: block; color: #0F172A; font-size: 13px;">Lokasi Operasional</strong>
+                <span style="font-size: 13px; color: #475569;">Bekasi, Jawa Barat, Indonesia</span>
+              </div>
+            </div>
+          </div>
+          
+          <p style="margin-bottom: 0; font-size: 12px; color: #64748B; background: #F8FAFC; padding: 12px; border-radius: 8px; border: 1px solid rgba(15, 23, 42, 0.04);">
+            Tim verifikasi Duitku dapat menghubungi kontak di atas untuk memverifikasi detail merchant MyVA.
+          </p>
+        </div>
+        <div class="modal-footer" style="padding: 16px 24px 20px; background: rgba(15, 23, 42, 0.02); display: flex; justify-content: flex-end; gap: 12px; border-top: 1px solid var(--border-color);">
+          <button class="btn btn-outline" id="btn-cancel-compliance-contact" style="padding: 8px 16px;">Tutup</button>
         </div>
       </div>
     </div>
