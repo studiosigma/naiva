@@ -937,8 +937,16 @@
             <!-- Landing Footer -->
             <footer class="landing-footer">
               <div class="landing-footer-container">
-                <span class="footer-brand"><span class="brand-my">My</span><span class="brand-va">VA</span> © 2026. Hak Cipta Dilindungi Undang-Undang.</span>
-                <span class="footer-sub">WhatsApp Second Brain Personal Assistant</span>
+                <div>
+                  <span class="footer-brand"><span class="brand-my">My</span><span class="brand-va">VA</span> © 2026. Hak Cipta Dilindungi Undang-Undang.</span>
+                  <span class="footer-sub" style="display: block; margin-top: 4px;">WhatsApp Second Brain Personal Assistant</span>
+                </div>
+                <div class="landing-footer-links" style="display: flex; gap: 16px; font-size: 13px; font-weight: 500; flex-wrap: wrap;">
+                  <a href="#" id="link-compliance-tos" style="color: var(--text-secondary); text-decoration: none; transition: color 0.2s;">Syarat & Ketentuan</a>
+                  <a href="#" id="link-compliance-privacy" style="color: var(--text-secondary); text-decoration: none; transition: color 0.2s;">Kebijakan Privasi</a>
+                  <a href="#" id="link-compliance-refund" style="color: var(--text-secondary); text-decoration: none; transition: color 0.2s;">Kebijakan Refund</a>
+                  <a href="#" id="link-compliance-contact" style="color: var(--text-secondary); text-decoration: none; transition: color 0.2s;">Hubungi Kami</a>
+                </div>
               </div>
             </footer>
           </section>
@@ -990,6 +998,12 @@
 
                 <div class="login-footer-links">
                   Belum punya akun? <a href="#signup" class="link-switch-auth">Daftar Sekarang</a>
+                  <div class="compliance-footer-links" style="margin-top: 16px; display: flex; gap: 10px; justify-content: center; font-size: 11px; opacity: 0.8; flex-wrap: wrap;">
+                    <a href="#" class="link-compliance-tos" style="color: var(--text-muted); text-decoration: none;">Syarat & Ketentuan</a> •
+                    <a href="#" class="link-compliance-privacy" style="color: var(--text-muted); text-decoration: none;">Kebijakan Privasi</a> •
+                    <a href="#" class="link-compliance-refund" style="color: var(--text-muted); text-decoration: none;">Kebijakan Refund</a> •
+                    <a href="#" class="link-compliance-contact" style="color: var(--text-muted); text-decoration: none;">Hubungi Kami</a>
+                  </div>
                 </div>
               </div>
             </div>
@@ -1034,6 +1048,12 @@
 
                 <div class="login-footer-links">
                   Sudah memiliki akun? <a href="#login" class="link-switch-auth">Masuk di sini</a>
+                  <div class="compliance-footer-links" style="margin-top: 16px; display: flex; gap: 10px; justify-content: center; font-size: 11px; opacity: 0.8; flex-wrap: wrap;">
+                    <a href="#" class="link-compliance-tos" style="color: var(--text-muted); text-decoration: none;">Syarat & Ketentuan</a> •
+                    <a href="#" class="link-compliance-privacy" style="color: var(--text-muted); text-decoration: none;">Kebijakan Privasi</a> •
+                    <a href="#" class="link-compliance-refund" style="color: var(--text-muted); text-decoration: none;">Kebijakan Refund</a> •
+                    <a href="#" class="link-compliance-contact" style="color: var(--text-muted); text-decoration: none;">Hubungi Kami</a>
+                  </div>
                 </div>
               </div>
             </div>
@@ -2715,6 +2735,167 @@
         <div class="modal-footer" style="padding: 16px 24px 20px; background: rgba(15, 23, 42, 0.02); display: flex; justify-content: flex-end; gap: 12px; border-top: 1px solid var(--border-color);">
           <button class="btn btn-outline" id="btn-cancel-int-settings" style="padding: 8px 16px;">Cancel</button>
           <button class="btn btn-primary" id="btn-save-int-settings" style="padding: 8px 24px;">Save Settings</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Compliance Modal: Syarat & Ketentuan -->
+    <div class="modal-overlay" id="modal-compliance-tos">
+      <div class="modal-card" style="max-width: 650px; max-height: 85vh; display: flex; flex-direction: column;">
+        <div class="modal-header">
+          <h3 style="font-size: 18px; font-weight: 700; margin: 0;">Syarat & Ketentuan Layanan</h3>
+          <button class="modal-close-btn">&times;</button>
+        </div>
+        <div class="modal-body" style="overflow-y: auto; font-size: 13.5px; line-height: 1.6; color: #475569; padding: 24px;">
+          <h4 style="font-weight: 700; color: #0F172A; margin-top: 0; margin-bottom: 8px;">1. Pengenalan</h4>
+          <p style="margin-bottom: 16px;">Selamat datang di MyVA ("Layanan"), sebuah asisten pribadi virtual berbasis Kecerdasan Buatan (AI) yang diintegrasikan dengan aplikasi WhatsApp dan layanan Google. Dengan mengakses atau menggunakan Layanan kami, Anda setuju untuk terikat oleh Syarat & Ketentuan ini.</p>
+          
+          <h4 style="font-weight: 700; color: #0F172A; margin-top: 16px; margin-bottom: 8px;">2. Penggunaan Layanan</h4>
+          <p style="margin-bottom: 16px;">Anda wajib menggunakan Layanan ini dengan cara yang bertanggung jawab dan sesuai hukum yang berlaku di Republik Indonesia. Anda dilarang keras untuk:</p>
+          <ul style="padding-left: 20px; margin-bottom: 16px; list-style-type: disc;">
+            <li>Mengirimkan pesan spam, kasar, tidak sopan, atau melanggar hak pihak lain melalui asisten virtual.</li>
+            <li>Menggunakan Layanan untuk aktivitas penipuan, pelanggaran hukum, atau tindakan berbahaya lainnya.</li>
+            <li>Melakukan rekayasa balik (reverse engineering) atau mencoba merusak sistem keamanan MyVA.</li>
+          </ul>
+          
+          <h4 style="font-weight: 700; color: #0F172A; margin-top: 16px; margin-bottom: 8px;">3. Akun dan Keamanan</h4>
+          <p style="margin-bottom: 16px;">Anda bertanggung jawab penuh atas keamanan akun MyVA Anda dan nomor WhatsApp yang dihubungkan ke Layanan. Kami tidak bertanggung jawab atas kerugian yang disebabkan oleh kelalaian Anda dalam menjaga keamanan akses akun.</p>
+          
+          <h4 style="font-weight: 700; color: #0F172A; margin-top: 16px; margin-bottom: 8px;">4. Biaya & Langganan</h4>
+          <p style="margin-bottom: 16px;">Layanan kami menyediakan masa uji coba gratis (Free Trial) selama 7 hari. Setelah masa uji coba berakhir, Anda harus memilih paket berlangganan berbayar bulanan (Basic / Pro) agar dapat terus menggunakan seluruh fitur. Biaya berlangganan akan ditagih secara berulang setiap bulan.</p>
+          
+          <h4 style="font-weight: 700; color: #0F172A; margin-top: 16px; margin-bottom: 8px;">5. Batasan Tanggung Jawab</h4>
+          <p style="margin-bottom: 16px;">Layanan ini disediakan "sebagaimana adanya" (as is) tanpa jaminan apa pun. Kami tidak bertanggung jawab atas keterlambatan, kegagalan, atau kehilangan data yang disebabkan oleh gangguan penyedia layanan pihak ketiga (seperti WhatsApp Cloud API, OpenAI API, atau Google API).</p>
+          
+          <h4 style="font-weight: 700; color: #0F172A; margin-top: 16px; margin-bottom: 8px;">6. Perubahan Ketentuan</h4>
+          <p style="margin-bottom: 0;">Kami berhak untuk mengubah Syarat & Ketentuan ini kapan saja. Perubahan akan berlaku segera setelah dipublikasikan di halaman ini.</p>
+        </div>
+        <div class="modal-footer" style="padding: 16px 24px 20px; background: rgba(15, 23, 42, 0.02); display: flex; justify-content: flex-end; gap: 12px; border-top: 1px solid var(--border-color);">
+          <button class="btn btn-outline" id="btn-cancel-compliance-tos" style="padding: 8px 16px;">Tutup</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Compliance Modal: Kebijakan Privasi -->
+    <div class="modal-overlay" id="modal-compliance-privacy">
+      <div class="modal-card" style="max-width: 650px; max-height: 85vh; display: flex; flex-direction: column;">
+        <div class="modal-header">
+          <h3 style="font-size: 18px; font-weight: 700; margin: 0;">Kebijakan Privasi</h3>
+          <button class="modal-close-btn">&times;</button>
+        </div>
+        <div class="modal-body" style="overflow-y: auto; font-size: 13.5px; line-height: 1.6; color: #475569; padding: 24px;">
+          <p style="margin-bottom: 16px; margin-top: 0;">Privasi Anda sangat penting bagi kami. Kebijakan Privasi ini menjelaskan bagaimana MyVA mengumpulkan, menggunakan, menyimpan, dan melindungi informasi pribadi Anda.</p>
+          
+          <h4 style="font-weight: 700; color: #0F172A; margin-top: 16px; margin-bottom: 8px;">1. Informasi yang Kami Kumpulkan</h4>
+          <p style="margin-bottom: 8px;">Kami mengumpulkan informasi berikut untuk memproses fitur-fitur asisten pribadi Anda:</p>
+          <ul style="padding-left: 20px; margin-bottom: 16px; list-style-type: disc;">
+            <li><strong>Informasi Pendaftaran:</strong> Nama lengkap, alamat email, kata sandi terenkripsi, dan nomor WhatsApp aktif Anda.</li>
+            <li><strong>Data Percakapan:</strong> Pesan teks, tautan, dan memo suara yang Anda kirimkan ke asisten virtual MyVA di WhatsApp untuk diproses oleh AI.</li>
+            <li><strong>Dokumen & Berkas:</strong> File yang Anda unggah ke Vault Dokumen untuk diringkas atau dianalisis.</li>
+            <li><strong>Koneksi Pihak Ketiga:</strong> Token akses Google (Calendar/Drive/Contacts) jika Anda mengaktifkan fitur integrasi Google.</li>
+          </ul>
+          
+          <h4 style="font-weight: 700; color: #0F172A; margin-top: 16px; margin-bottom: 8px;">2. Penggunaan Informasi</h4>
+          <p style="margin-bottom: 8px;">Kami menggunakan data yang dikumpulkan hanya untuk keperluan operasional layanan:</p>
+          <ul style="padding-left: 20px; margin-bottom: 16px; list-style-type: disc;">
+            <li>Memproses dan menjawab percakapan Anda menggunakan sistem AI.</li>
+            <li>Mengirim pengingat agenda, tugas, dan ringkasan langsung ke nomor WhatsApp Anda.</li>
+            <li>Menyinkronkan jadwal acara dan dokumen ke Google Calendar dan Google Drive Anda sesuai persetujuan eksplisit Anda.</li>
+          </ul>
+          
+          <h4 style="font-weight: 700; color: #0F172A; margin-top: 16px; margin-bottom: 8px;">3. Perlindungan & Keamanan Data</h4>
+          <p style="margin-bottom: 16px;">Semua transmisi data dilindungi oleh enkripsi SSL/HTTPS yang aman. Data sensitif Anda, termasuk riwayat memo dan data rahasia, dienkripsi di server kami menggunakan algoritma enkripsi standar industri AES-256. Kami tidak pernah menjual, menyewakan, atau memberikan data pribadi Anda ke pihak ketiga manapun selain untuk memproses permintaan API AI resmi.</p>
+          
+          <h4 style="font-weight: 700; color: #0F172A; margin-top: 16px; margin-bottom: 8px;">4. Pengungkapan API Google (Google API Disclosure)</h4>
+          <p style="margin-bottom: 16px;">Penggunaan informasi MyVA yang diterima dari Google API akan mematuhi Kebijakan Data Pengguna Layanan Google API, termasuk persyaratan Penggunaan Terbatas. Data dari Google Calendar atau Google Drive tidak akan pernah dibagikan kepada pihak ketiga atau digunakan untuk tujuan periklanan.</p>
+          
+          <h4 style="font-weight: 700; color: #0F172A; margin-top: 16px; margin-bottom: 0;">5. Hak Pengguna</h4>
+          <p style="margin-bottom: 0;">Anda memiliki hak untuk melihat, memperbarui, atau menghapus informasi pribadi Anda dari sistem kami kapan saja dengan menghubungi kami atau melalui menu pengaturan akun di Dashboard Anda.</p>
+        </div>
+        <div class="modal-footer" style="padding: 16px 24px 20px; background: rgba(15, 23, 42, 0.02); display: flex; justify-content: flex-end; gap: 12px; border-top: 1px solid var(--border-color);">
+          <button class="btn btn-outline" id="btn-cancel-compliance-privacy" style="padding: 8px 16px;">Tutup</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Compliance Modal: Kebijakan Refund -->
+    <div class="modal-overlay" id="modal-compliance-refund">
+      <div class="modal-card" style="max-width: 650px; max-height: 85vh; display: flex; flex-direction: column;">
+        <div class="modal-header">
+          <h3 style="font-size: 18px; font-weight: 700; margin: 0;">Kebijakan Refund & Pembatalan</h3>
+          <button class="modal-close-btn">&times;</button>
+        </div>
+        <div class="modal-body" style="overflow-y: auto; font-size: 13.5px; line-height: 1.6; color: #475569; padding: 24px;">
+          <h4 style="font-weight: 700; color: #0F172A; margin-top: 0; margin-bottom: 8px;">1. Pembatalan Langganan</h4>
+          <p style="margin-bottom: 16px;">Anda dapat melakukan pembatalan paket langganan berbayar (Basic atau Pro) kapan saja melalui menu Billing / Langganan di Dashboard MyVA Anda. Setelah langganan dibatalkan, Anda tetap dapat mengakses fitur premium paket tersebut hingga akhir masa periode penagihan bulanan yang sedang berjalan.</p>
+          
+          <h4 style="font-weight: 700; color: #0F172A; margin-top: 16px; margin-bottom: 8px;">2. Kebijakan Pengembalian Dana (Refund Policy)</h4>
+          <p style="margin-bottom: 16px;">Setiap pembayaran paket berlangganan bulanan di MyVA bersifat final dan <strong>tidak dapat dikembalikan (non-refundable)</strong> setelah transaksi berhasil diproses oleh payment gateway rekanan kami (Duitku). Kami tidak memberikan pengembalian dana atau kredit untuk sisa hari penggunaan atau pembatalan di tengah periode.</p>
+          
+          <h4 style="font-weight: 700; color: #0F172A; margin-top: 16px; margin-bottom: 8px;">3. Pengecualian Khusus</h4>
+          <p style="margin-bottom: 16px;">Pengembalian dana hanya dapat diajukan dan diproses dalam kondisi-kondisi khusus berikut:</p>
+          <ul style="padding-left: 20px; margin-bottom: 16px; list-style-type: disc;">
+            <li><strong>Kesalahan Sistem / Overcharge:</strong> Terjadi kesalahan penagihan ganda (double-billing) untuk transaksi yang sama dari sistem kami.</li>
+            <li><strong>Layanan Tidak Berfungsi:</strong> Terjadi gangguan teknis total dari server MyVA yang berlangsung lebih dari 5 hari berturut-turut yang dikonfirmasi oleh tim developer kami, dan pengguna tidak dapat menggunakan layanan sama sekali.</li>
+          </ul>
+          
+          <h4 style="font-weight: 700; color: #0F172A; margin-top: 16px; margin-bottom: 8px;">4. Cara Pengajuan Refund</h4>
+          <p style="margin-bottom: 0;">Untuk mengajukan permohonan pengembalian dana berdasarkan pengecualian di atas, silakan hubungi tim dukungan kami melalui email di <strong>studio6ma@gmail.com</strong> dengan menyertakan bukti pembayaran (Nomor Invoice / Bukti Transfer) beserta bukti pendukung kendala sistem Anda.</p>
+        </div>
+        <div class="modal-footer" style="padding: 16px 24px 20px; background: rgba(15, 23, 42, 0.02); display: flex; justify-content: flex-end; gap: 12px; border-top: 1px solid var(--border-color);">
+          <button class="btn btn-outline" id="btn-cancel-compliance-refund" style="padding: 8px 16px;">Tutup</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Compliance Modal: Hubungi Kami -->
+    <div class="modal-overlay" id="modal-compliance-contact">
+      <div class="modal-card" style="max-width: 500px; max-height: 85vh; display: flex; flex-direction: column;">
+        <div class="modal-header">
+          <h3 style="font-size: 18px; font-weight: 700; margin: 0;">Hubungi Kami</h3>
+          <button class="modal-close-btn">&times;</button>
+        </div>
+        <div class="modal-body" style="overflow-y: auto; font-size: 13.5px; line-height: 1.6; color: #475569; padding: 24px;">
+          <p style="margin-bottom: 20px; margin-top: 0;">Jika Anda memiliki pertanyaan, kendala teknis, atau membutuhkan bantuan operasional terkait layanan MyVA, silakan hubungi saluran resmi kami berikut:</p>
+          
+          <div style="display: flex; flex-direction: column; gap: 16px; margin-bottom: 20px;">
+            <div style="display: flex; align-items: flex-start; gap: 12px;">
+              <span style="display: flex; align-items: center; justify-content: center; width: 32px; height: 32px; border-radius: 8px; background: rgba(37, 211, 102, 0.08); color: #25D366; flex-shrink: 0;">
+                <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"></path></svg>
+              </span>
+              <div>
+                <strong style="display: block; color: #0F172A; font-size: 13px;">WhatsApp Support</strong>
+                <a href="https://wa.me/6282233009457" target="_blank" style="color: #128C7E; text-decoration: none; font-weight: 600;">+62 822-3300-9457</a>
+              </div>
+            </div>
+            
+            <div style="display: flex; align-items: flex-start; gap: 12px;">
+              <span style="display: flex; align-items: center; justify-content: center; width: 32px; height: 32px; border-radius: 8px; background: rgba(59, 130, 246, 0.08); color: #3B82F6; flex-shrink: 0;">
+                <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"></path><polyline points="22,6 12,13 2,6"></polyline></svg>
+              </span>
+              <div>
+                <strong style="display: block; color: #0F172A; font-size: 13px;">Layanan Email</strong>
+                <a href="mailto:studio6ma@gmail.com" style="color: #3B82F6; text-decoration: none; font-weight: 600;">studio6ma@gmail.com</a>
+              </div>
+            </div>
+            
+            <div style="display: flex; align-items: flex-start; gap: 12px;">
+              <span style="display: flex; align-items: center; justify-content: center; width: 32px; height: 32px; border-radius: 8px; background: rgba(139, 92, 246, 0.08); color: #8B5CF6; flex-shrink: 0;">
+                <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"></path><circle cx="12" cy="10" r="3"></circle></svg>
+              </span>
+              <div>
+                <strong style="display: block; color: #0F172A; font-size: 13px;">Lokasi Operasional</strong>
+                <span style="font-size: 13px; color: #475569;">Bekasi, Jawa Barat, Indonesia</span>
+              </div>
+            </div>
+          </div>
+          
+          <p style="margin-bottom: 0; font-size: 12px; color: #64748B; background: #F8FAFC; padding: 12px; border-radius: 8px; border: 1px solid rgba(15, 23, 42, 0.04);">
+            Tim verifikasi Duitku dapat menghubungi kontak di atas untuk memverifikasi detail merchant MyVA.
+          </p>
+        </div>
+        <div class="modal-footer" style="padding: 16px 24px 20px; background: rgba(15, 23, 42, 0.02); display: flex; justify-content: flex-end; gap: 12px; border-top: 1px solid var(--border-color);">
+          <button class="btn btn-outline" id="btn-cancel-compliance-contact" style="padding: 8px 16px;">Tutup</button>
         </div>
       </div>
     </div>

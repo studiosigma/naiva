@@ -4034,6 +4034,21 @@ function initEventListeners() {
       btnRefreshAdmin.textContent = 'Segarkan Data';
     });
   }
+
+  // Duitku Compliance Modals Triggers
+  const bindComplianceModal = (selector, modalId) => {
+    document.querySelectorAll(selector).forEach(el => {
+      el.addEventListener('click', (e) => {
+        e.preventDefault();
+        openModal(modalId);
+      });
+    });
+  };
+
+  bindComplianceModal('#link-compliance-tos, .link-compliance-tos', 'modal-compliance-tos');
+  bindComplianceModal('#link-compliance-privacy, .link-compliance-privacy', 'modal-compliance-privacy');
+  bindComplianceModal('#link-compliance-refund, .link-compliance-refund', 'modal-compliance-refund');
+  bindComplianceModal('#link-compliance-contact, .link-compliance-contact', 'modal-compliance-contact');
 }
 
 // --- FILE MOCK UPLOAD & SUMMARY ---

@@ -2,8 +2,8 @@ const API_BASE_URL = (window.location.origin.includes('localhost') ? 'http://loc
 
 // Admin Session State
 const state = {
-  token: localStorage.getItem('auth_token'),
-  profile: JSON.parse(localStorage.getItem('user_profile') || '{}'),
+  token: localStorage.getItem('myva_token'),
+  profile: JSON.parse(localStorage.getItem('myva_profile') || '{}'),
   currentView: 'dashboard',
   usersSearch: '',
   usersPage: 1,
@@ -27,8 +27,8 @@ function verifyAuth() {
   // Set founder display details
   const avatarEl = document.getElementById('founder-avatar');
   const nameEl = document.getElementById('founder-name');
-  if (avatarEl) avatarEl.textContent = state.profile.username ? state.profile.username.charAt(0).toUpperCase() : 'A';
-  if (nameEl) nameEl.textContent = state.profile.username || 'Founder';
+  if (avatarEl) avatarEl.textContent = (state.profile.username || state.profile.name || 'A').charAt(0).toUpperCase();
+  if (nameEl) nameEl.textContent = state.profile.username || state.profile.name || 'Founder';
   return true;
 }
 
@@ -808,8 +808,8 @@ function setupActionListeners() {
           const data = await res.json();
           if (data.success && data.accessToken) {
             // Save token and open dashboard in a new tab
-            localStorage.setItem('auth_token', data.accessToken);
-            localStorage.setItem('user_profile', JSON.stringify({
+            localStorage.setItem('myva_token', data.accessToken);
+            localStorage.setItem('myva_profile', JSON.stringify({
               username: data.user.name || 'User Impersonate',
               email: data.user.email,
               role: 'user'
@@ -818,8 +818,8 @@ function setupActionListeners() {
             setTimeout(() => {
               window.open('/index.html#dashboard', '_blank');
               // Restore admin session
-              localStorage.setItem('auth_token', state.token);
-              localStorage.setItem('user_profile', JSON.stringify(state.profile));
+              localStorage.setItem('myva_token', state.token);
+              localStorage.setItem('myva_profile', JSON.stringify(state.profile));
             }, 1000);
           }
         } else {
@@ -1033,8 +1033,8 @@ function setupActionListeners() {
   const logoutBtn = document.getElementById('btn-logout-admin');
   if (logoutBtn) {
     logoutBtn.addEventListener('click', () => {
-      localStorage.removeItem('auth_token');
-      localStorage.removeItem('user_profile');
+      localStorage.removeItem('myva_token');
+      localStorage.removeItem('myva_profile');
       window.location.href = '/index.html#login';
     });
   }
