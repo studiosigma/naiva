@@ -486,9 +486,10 @@ async function loadPrompts() {
       document.getElementById('prompt-global-editor').value = p['prompt:global'] || '';
       document.getElementById('prompt-persona-professional').value = p['prompt:personality:professional'] || '';
       document.getElementById('prompt-persona-friendly').value = p['prompt:personality:friendly'] || '';
-      document.getElementById('prompt-persona-executive').value = p['prompt:personality:executive'] || '';
-      document.getElementById('prompt-persona-motivator').value = p['prompt:personality:motivator'] || '';
       document.getElementById('prompt-persona-islamic').value = p['prompt:personality:islamic'] || '';
+      document.getElementById('prompt-persona-business_partner').value = p['prompt:personality:business_partner'] || '';
+      document.getElementById('prompt-persona-grumpy_boss').value = p['prompt:personality:grumpy_boss'] || '';
+      document.getElementById('prompt-persona-romantic_partner').value = p['prompt:personality:romantic_partner'] || '';
       document.getElementById('prompt-briefing-editor').value = p['prompt:briefing'] || '';
     }
   }
@@ -921,9 +922,10 @@ function setupActionListeners() {
         await updateKeyVal('prompt:global', document.getElementById('prompt-global-editor').value);
         await updateKeyVal('prompt:personality:professional', document.getElementById('prompt-persona-professional').value);
         await updateKeyVal('prompt:personality:friendly', document.getElementById('prompt-persona-friendly').value);
-        await updateKeyVal('prompt:personality:executive', document.getElementById('prompt-persona-executive').value);
-        await updateKeyVal('prompt:personality:motivator', document.getElementById('prompt-persona-motivator').value);
         await updateKeyVal('prompt:personality:islamic', document.getElementById('prompt-persona-islamic').value);
+        await updateKeyVal('prompt:personality:business_partner', document.getElementById('prompt-persona-business_partner').value);
+        await updateKeyVal('prompt:personality:grumpy_boss', document.getElementById('prompt-persona-grumpy_boss').value);
+        await updateKeyVal('prompt:personality:romantic_partner', document.getElementById('prompt-persona-romantic_partner').value);
         await updateKeyVal('prompt:briefing', document.getElementById('prompt-briefing-editor').value);
 
         showToast('Semua perubahan prompt berhasil disimpan!');

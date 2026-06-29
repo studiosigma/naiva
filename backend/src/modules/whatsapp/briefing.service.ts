@@ -63,6 +63,7 @@ export class BriefingService implements OnApplicationBootstrap {
           `- ${r.title} (${new Date(r.scheduledAt).toLocaleTimeString('id-ID', {
             hour: '2-digit',
             minute: '2-digit',
+            timeZone: 'Asia/Jakarta',
           })})`,
       )
       .join('\n') || '- Tidak ada pengingat hari ini.';
@@ -132,8 +133,10 @@ Format dengan bahasa Indonesia yang alami, berikan motivasi singkat untuk memula
 
   async checkAndSendBriefings(): Promise<void> {
     const now = new Date();
-    const currentHours = String(now.getHours()).padStart(2, '0');
-    const currentMinutes = String(now.getMinutes()).padStart(2, '0');
+    // Convert current UTC time to Jakarta (WIB, UTC+7)
+    const jakartaTime = new Date(now.getTime() + 7 * 60 * 60 * 1000);
+    const currentHours = String(jakartaTime.getUTCHours()).padStart(2, '0');
+    const currentMinutes = String(jakartaTime.getUTCMinutes()).padStart(2, '0');
     const currentTimeString = `${currentHours}:${currentMinutes}`;
 
     this.logger.debug(`Checking daily briefings for time: ${currentTimeString}`);

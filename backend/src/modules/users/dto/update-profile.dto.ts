@@ -21,4 +21,14 @@ export class UpdateProfileDto {
   @IsOptional()
   @IsString()
   avatar?: string;
+
+  @ApiProperty({ required: false })
+  @IsOptional()
+  @IsString()
+  assistantName?: string;
+
+  @ApiProperty({ required: false })
+  @IsOptional()
+  @IsString()
+  assistantEmoji?: string;
 }

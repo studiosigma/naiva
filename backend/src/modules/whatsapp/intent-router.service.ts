@@ -87,9 +87,9 @@ export class IntentRouterService {
       });
 
       if (isGcalConnected) {
-        return `⏰ Reminder berhasil dibuat & disinkronkan ke Google Calendar!\n\n*Reminder:* ${reminder.title}\n*Waktu:* ${reminder.scheduledAt.toLocaleString()}`;
+        return `⏰ Reminder berhasil dibuat & disinkronkan ke Google Calendar!\n\n*Reminder:* ${reminder.title}\n*Waktu:* ${reminder.scheduledAt.toLocaleString('id-ID', { timeZone: 'Asia/Jakarta' })}`;
       }
-      return `⏰ Reminder berhasil dibuat secara lokal!\n\n*Reminder:* ${reminder.title}\n*Waktu:* ${reminder.scheduledAt.toLocaleString()}`;
+      return `⏰ Reminder berhasil dibuat secara lokal!\n\n*Reminder:* ${reminder.title}\n*Waktu:* ${reminder.scheduledAt.toLocaleString('id-ID', { timeZone: 'Asia/Jakarta' })}`;
     }
 
     // 2.5. INTENT: CREATE CALENDAR EVENT
@@ -137,11 +137,11 @@ export class IntentRouterService {
 
       if (isGcalConnected) {
         this.logger.log(`Syncing event "${title}" to Google Calendar for user ${userId}`);
-        return `🗓️ *Event Google Calendar Berhasil Dibuat & Disinkronkan!*\n\n*Acara:* ${title || 'Acara Kalender'}\n*Waktu:* ${reminder.scheduledAt.toLocaleString()}${
+        return `🗓️ *Event Google Calendar Berhasil Dibuat & Disinkronkan!*\n\n*Acara:* ${title || 'Acara Kalender'}\n*Waktu:* ${reminder.scheduledAt.toLocaleString('id-ID', { timeZone: 'Asia/Jakarta' })}${
           meetLink ? `\n*Google Meet:* ${meetLink}` : ''
         }\n\n_Status: Google Calendar Connected_`;
       } else {
-        return `🗓️ *Event Berhasil Dibuat secara Lokal!*\n\n*Acara:* ${title || 'Acara Kalender'}\n*Waktu:* ${reminder.scheduledAt.toLocaleString()}${
+        return `🗓️ *Event Berhasil Dibuat secara Lokal!*\n\n*Acara:* ${title || 'Acara Kalender'}\n*Waktu:* ${reminder.scheduledAt.toLocaleString('id-ID', { timeZone: 'Asia/Jakarta' })}${
           meetLink ? `\n*Google Meet:* ${meetLink}` : ''
         }\n\n_Catatan: Sambungkan Google Calendar di dasbor Settings untuk sinkronisasi otomatis._`;
       }
@@ -304,13 +304,15 @@ export class IntentRouterService {
       messages.push({ role: 'user', content: text });
     }
 
-    const aiResponse = await this.aiService.chat(messages, persona);
+    const aiResponse = await this.aiService.chat(messages, persona, user?.assistantName || 'MyVA');
     return aiResponse;
   }
 
   private async handleWebSearch(userId: string, query: string): Promise<string> {
     this.logger.log(`Performing web search for query: "${query}"`);
     try {
+      const user = await this.prisma.user.findUnique({ where: { id: userId } });
+      const assistantName = user?.assistantName || 'MyVA';
       const USER_AGENTS = [
         'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36',
         'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/121.0.0.0 Safari/537.36',
@@ -426,7 +428,7 @@ export class IntentRouterService {
 
       // Request OpenAI to summarize these search results and formulate a solid response
       const prompt = `
-        Anda adalah MyVA, personal AI assistant. Pengguna meminta Anda mencari informasi berikut di internet: "${query}".
+        Anda adalah ${assistantName}, personal AI assistant. Pengguna meminta Anda mencari informasi berikut di internet: "${query}".
         
         Berikut adalah hasil pencarian yang berhasil kami dapatkan dari internet:
         ${resultsText}
@@ -440,7 +442,7 @@ export class IntentRouterService {
 
       const aiAnswer = await this.aiService.chat([
         { role: 'user', content: prompt }
-      ]);
+      ], undefined, assistantName);
 
       // Save the search summary to Memory Center as category 'Links'
       const title = `Hasil Pencarian: ${query}`;

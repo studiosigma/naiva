@@ -19,6 +19,8 @@ model User {
   status       String   @default("active") // active, suspended
   role         String   @default("user") // user, admin
   persona      String   @default("professional") // friendly, professional, islamic, business_partner, grumpy_boss, romantic_partner
+  assistantName String  @default("MyVA") @map("assistant_name")
+  assistantEmoji String @default("🤖") @map("assistant_emoji")
   gcalConnected       Boolean  @default(false) @map("gcal_connected")
   gdriveConnected     Boolean  @default(false) @map("gdrive_connected")
   contactsSyncEnabled Boolean  @default(false) @map("contacts_sync_enabled")

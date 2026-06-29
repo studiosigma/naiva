@@ -337,7 +337,7 @@ export class WhatsAppService {
 
       await this.whatsappApiService.sendMessage(
         from,
-        `⏳ *Reminder Ditunda*:\nReminder "*${reminder.title}*" ditunda selama 10 menit. Kami akan mengingatkan Anda lagi pada pukul ${nextTime.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}.`,
+        `⏳ *Reminder Ditunda*:\nReminder "*${reminder.title}*" ditunda selama 10 menit. Kami akan mengingatkan Anda lagi pada pukul ${nextTime.toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit', timeZone: 'Asia/Jakarta' })}.`,
       );
       this.logger.log(`Reminder ${reminderId} snoozed for 10 minutes.`);
     }

@@ -38,6 +38,8 @@ export class UsersController {
     if (dto.waNumber !== undefined) updateData.waNumber = dto.waNumber;
     if (dto.plan !== undefined) updateData.plan = dto.plan;
     if (dto.avatar !== undefined) updateData.avatar = dto.avatar;
+    if (dto.assistantName !== undefined) updateData.assistantName = dto.assistantName;
+    if (dto.assistantEmoji !== undefined) updateData.assistantEmoji = dto.assistantEmoji;
 
     const user = await this.usersService.update(userId, updateData);
     const { passwordHash, ...sanitized } = user;

@@ -120,8 +120,8 @@ class AppState {
         this.save('profile', this.profile);
 
         this.studio = {
-          name: this.studio.name || 'MyVA',
-          emoji: this.studio.emoji || '🤖',
+          name: user.assistantName || this.studio.name || 'MyVA',
+          emoji: user.assistantEmoji || this.studio.emoji || '🤖',
           personality: user.persona || this.studio.personality || 'friendly',
           style: this.studio.style || 'normal',
           language: this.studio.language || 'id',
@@ -449,6 +449,21 @@ class AppState {
 
     if (this.token) {
       try {
+        if (config.name !== undefined || config.emoji !== undefined) {
+          const payload = {};
+          if (config.name !== undefined) payload.assistantName = config.name;
+          if (config.emoji !== undefined) payload.assistantEmoji = config.emoji;
+
+          await fetch(`${API_BASE_URL}/users/profile`, {
+            method: 'PATCH',
+            headers: {
+              'Content-Type': 'application/json',
+              'Authorization': `Bearer ${this.token}`
+            },
+            body: JSON.stringify(payload)
+          });
+        }
+
         if (config.personality) {
           await fetch(`${API_BASE_URL}/users/persona`, {
             method: 'PATCH',

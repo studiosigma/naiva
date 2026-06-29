@@ -40,7 +40,7 @@ export class SubscriptionService {
       : 'https://passport.duitku.com/webapi/api/merchant/v2/inquiry';
 
     const price = plan === 'basic' ? 25000 : 49000;
-    const refId = `${user.id}:${plan}:${Date.now()}`;
+    const refId = `${user.id}_${plan}_${Date.now()}`;
 
     // Signature MD5: merchantCode + merchantOrderId + paymentAmount + apiKey
     const signature = crypto
@@ -115,7 +115,7 @@ export class SubscriptionService {
 
     // Duitku success resultCode is '00'
     if (resultCode === '00') {
-      const parts = merchantOrderId.split(':');
+      const parts = merchantOrderId.split('_');
       if (parts.length >= 2) {
         const userId = parts[0];
         const plan = parts[1] as 'basic' | 'pro';
