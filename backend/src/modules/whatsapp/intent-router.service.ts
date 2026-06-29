@@ -262,7 +262,7 @@ export class IntentRouterService {
       return this.handleWebSearch(userId, query);
     }
 
-    // 7. FALLBACK: AI ASSISTANT CHAT (with RAG context)
+    // 7. FALLBACK: AI ASSISTANT CHAT (with RAG context & conversation history)
     // Retrieve relevant memories for RAG context
     const memories = await this.aiService.semanticSearch(userId, text);
     let contextPrompt = '';
@@ -275,11 +275,34 @@ export class IntentRouterService {
       contextPrompt = `Berikut adalah beberapa informasi relevan dari Memory Center (Second Brain) pengguna yang bisa membantu Anda menjawab pertanyaan mereka:\n\n${contextItems}\n\nInstruksi: Gunakan informasi di atas jika relevan untuk menjawab pertanyaan pengguna. Berikan jawaban yang natural dalam bahasa yang sama dengan pengguna, dan sebutkan bahwa informasi ini berasal dari catatan/link yang mereka simpan jika sesuai. Jika informasi di atas tidak relevan, abaikan saja dan jawablah secara normal.`;
     }
 
+    // Retrieve conversation history
+    const conversation = await this.prisma.conversation.findFirst({
+      where: { userId },
+      include: {
+        messages: {
+          orderBy: { createdAt: 'desc' },
+          take: 10, // last 10 messages for context
+        },
+      },
+    });
+
+    const recentMessages = conversation?.messages ? [...conversation.messages].reverse() : [];
+
     const messages: any[] = [];
     if (contextPrompt) {
       messages.push({ role: 'system', content: contextPrompt });
     }
-    messages.push({ role: 'user', content: text });
+
+    if (recentMessages.length > 0) {
+      recentMessages.forEach((msg) => {
+        if (msg.text) {
+          const role = msg.senderType === 'user' ? 'user' : 'assistant';
+          messages.push({ role, content: msg.text });
+        }
+      });
+    } else {
+      messages.push({ role: 'user', content: text });
+    }
 
     const aiResponse = await this.aiService.chat(messages, persona);
     return aiResponse;

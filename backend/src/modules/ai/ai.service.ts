@@ -36,6 +36,23 @@ export class AIService {
           : personaPrompt;
       }
 
+      // Inject dynamic temporal and political context so Gemini answers naturally and accurately
+      const today = new Date();
+      const currentYear = today.getFullYear();
+      const dateString = today.toLocaleDateString('id-ID', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' });
+      const timeString = today.toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit' });
+      
+      const timeContext = `[TEMPORAL CONTEXT]
+- Hari/Tanggal saat ini: ${dateString}
+- Waktu saat ini: ${timeString} WIB (Waktu Indonesia Barat)
+- Tahun saat ini: ${currentYear} (Gunakan tahun ini untuk menjawab pertanyaan tentang waktu saat ini atau peristiwa terbaru)
+- Presiden Republik Indonesia saat ini (tahun 2026): Bapak Prabowo Subianto (menjabat sejak 20 Oktober 2024, didampingi Wakil Presiden Gibran Rakabuming Raka)
+[/TEMPORAL CONTEXT]`;
+
+      systemInstructionText = systemInstructionText 
+        ? `${timeContext}\n\n${systemInstructionText}`
+        : timeContext;
+
       // Convert messages to Gemini format (user and model roles)
       const contents = chatMessages.map(m => {
         const role = m.role === 'assistant' ? 'model' : 'user';

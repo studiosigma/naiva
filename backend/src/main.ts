@@ -9,6 +9,9 @@ async function bootstrap() {
   const logger = new Logger('Bootstrap');
   const app = await NestFactory.create(AppModule, { rawBody: true });
 
+  // Enable graceful shutdown hooks to close Redis/Prisma connections cleanly on exit/reload
+  app.enableShutdownHooks();
+
   // Security Headers
   app.use(helmet());
 
