@@ -110,7 +110,7 @@ class AppState {
         const user = profileData.user;
         this.profile = {
           username: user.name || 'User',
-          phone: user.waNumber || '8123456789',
+          phone: user.waNumber || '8212117810',
           avatar: user.avatar || '🤖',
           email: user.email || 'muis@myva.ai',
           bio: this.profile.bio || '',
@@ -1985,7 +1985,7 @@ async function handleStudioSendMessage() {
         },
         body: JSON.stringify({
           message: text,
-          from: state.profile.phone || '6281234567890'
+          from: state.profile.phone || '628212117810'
         })
       });
       const data = await response.json();
@@ -2169,7 +2169,7 @@ async function renderSettingsPage() {
         if (data.success && data.user) {
           state.profile = {
             username: data.user.name || 'User',
-            phone: data.user.waNumber || '8123456789',
+            phone: data.user.waNumber || '8212117810',
             avatar: data.user.avatar || '🤖',
             email: data.user.email || 'muis@myva.ai',
             bio: state.profile.bio || '',
@@ -2219,7 +2219,7 @@ async function renderSettingsPage() {
       const code = state.profile.waVerificationCode || 'MYVA-0000';
       if (commandEl) commandEl.textContent = `verifikasi ${code}`;
       if (linkEl) {
-        linkEl.href = `https://wa.me/6281234567890?text=verifikasi%20${code}`;
+        linkEl.href = `https://wa.me/628212117810?text=verifikasi%20${code}`;
       }
       boxEl.style.display = 'block';
     }
@@ -2713,7 +2713,7 @@ function initEventListeners() {
       const waClean = waNumber.replace(/\D/g, '');
       if (waClean.length < 10 || waClean.length > 15) {
         if (errorEl) {
-          errorEl.textContent = 'Nomor WhatsApp harus berisi 10-15 digit angka (contoh: 628123456789).';
+          errorEl.textContent = 'Nomor WhatsApp harus berisi 10-15 digit angka (contoh: 628212117810).';
           errorEl.style.display = 'block';
         }
         return;
@@ -3528,7 +3528,7 @@ function initEventListeners() {
         exportDate: new Date().toISOString(),
         profile: {
           username: state.profile.username || "User",
-          phone: state.profile.phone || "+628123456789",
+          phone: state.profile.phone || "+628212117810",
           plan: state.profile.plan || "free",
           backupEnabled: state.profile.backupEnabled !== false,
           twoFactorEnabled: document.getElementById('security-2fa-toggle')?.checked || false
@@ -4002,7 +4002,7 @@ function initEventListeners() {
       const langVal = config.language || 'id';
       const responses = PERSONALITY_RESPONSES[langVal] || PERSONALITY_RESPONSES['id'];
       let greeting = responses[config.personality].greeting;
-      greeting = formatMessageByStyle(greeting, config.style);
+      greeting = formatMessageByStyle(greeting, state.studio.style);
       
       studioChatLog.push({ sender: 'assistant', text: greeting, time: '14:21' });
       renderMockupChat();
@@ -4538,7 +4538,7 @@ function syncSidebarProfile() {
 
 async function saveUserProfile() {
   const username = document.getElementById('settings-username').value.trim() || 'User';
-  const phone = document.getElementById('settings-phone').value.trim() || '8123456789';
+  const phone = document.getElementById('settings-phone').value.trim() || '8212117810';
   const bio = document.getElementById('settings-bio').value.trim();
 
   const saveBtn = document.getElementById('btn-save-profile');

@@ -119,7 +119,7 @@ export class WhatsAppController {
   @Post('simulate')
   @ApiOperation({ summary: 'Simulate a WhatsApp message and get the AI reply' })
   async simulateMessage(@Body() body: { message: string; from?: string }) {
-    const from = body.from || '6281234567890';
+    const from = body.from || '628212117810';
     const reply = await this.whatsappService.simulateMessage(from, body.message);
     return {
       success: true,

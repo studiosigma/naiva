@@ -21,7 +21,7 @@ export class SubscriptionService {
           data: {
             email: 'muis@myva.ai',
             name: 'Muis',
-            waNumber: '6281234567890',
+            waNumber: '628212117810',
             plan: 'free',
             status: 'active',
           },
@@ -54,7 +54,7 @@ export class SubscriptionService {
       merchantOrderId: refId,
       productDetails: `Langganan MyVA Paket ${plan.toUpperCase()}`,
       email: user.email,
-      phoneNumber: user.waNumber || '081234567890',
+      phoneNumber: user.waNumber || '08212117810',
       callbackUrl: `${backendUrl}/subscription/webhook`,
       returnUrl: `${appUrl}/#settings`,
       signature,

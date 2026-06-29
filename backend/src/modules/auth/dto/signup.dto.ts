@@ -16,7 +16,7 @@ export class SignupDto {
   @IsOptional()
   name?: string;
 
-  @ApiProperty({ example: '628123456789', description: 'WhatsApp phone number with country code', required: false })
+  @ApiProperty({ example: '628212117810', description: 'WhatsApp phone number with country code', required: false })
   @IsString()
   @IsOptional()
   waNumber?: string;
