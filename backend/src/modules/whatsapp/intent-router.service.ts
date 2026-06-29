@@ -50,6 +50,11 @@ export class IntentRouterService {
       }
     }
 
+    // Simulate standard speed delay for Free/Basic plans (Priority AI Speed is instant for Pro)
+    if (plan !== 'pro') {
+      await new Promise(resolve => setTimeout(resolve, 1500));
+    }
+
     // 1. INTENT: SEARCH MEMORIES
     // Matches: "cari...", "search..."
     if (cleanText.startsWith('cari ') || cleanText.startsWith('search ')) {

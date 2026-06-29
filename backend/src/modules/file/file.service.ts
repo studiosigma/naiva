@@ -1,4 +1,4 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
+import { Injectable, NotFoundException, BadRequestException } from '@nestjs/common';
 import { PrismaService } from '../../database/prisma.service';
 import { S3Service } from '../../integrations/s3.service';
 import { File } from '@prisma/client';
@@ -17,6 +17,20 @@ export class FileService {
     mimeType: string,
     size: number,
   ): Promise<File> {
+    // Check plan and enforce limits
+    const user = await this.prisma.user.findUnique({ where: { id: userId } });
+    const plan = user?.plan || 'free';
+
+    if (plan === 'free') {
+      throw new BadRequestException('Unggah file tidak tersedia pada Paket Free. Silakan upgrade plan Anda.');
+    }
+
+    const maxSizeBytes = plan === 'pro' ? 50 * 1024 * 1024 : 10 * 1024 * 1024;
+    if (size > maxSizeBytes) {
+      const limitMb = plan === 'pro' ? 50 : 10;
+      throw new BadRequestException(`Ukuran file melebihi batas paket Anda (Maks ${limitMb} MB).`);
+    }
+
     const key = `${userId}/${Date.now()}-${filename}`;
     
     // Upload to S3
