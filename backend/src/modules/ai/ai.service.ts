@@ -19,6 +19,7 @@ export class AIService {
     messages: OpenAI.Chat.ChatCompletionMessageParam[],
     persona?: string,
     assistantName: string = 'MyVA',
+    feature?: string,
   ): Promise<string> {
     try {
       const apiKey = this.geminiApiKey;
@@ -34,7 +35,7 @@ export class AIService {
 
       let systemInstructionText = systemMessages.map(m => m.content).join('\n');
       if (persona) {
-        const personaPrompt = await this.getPersonaSystemPrompt(persona, assistantName);
+        const personaPrompt = await this.getPersonaSystemPrompt(persona, assistantName, feature);
         systemInstructionText = systemInstructionText 
           ? `${personaPrompt}\n\n${systemInstructionText}`
           : personaPrompt;
@@ -138,7 +139,11 @@ export class AIService {
     }
   }
 
-  private async getPersonaSystemPrompt(persona: string, assistantName: string = 'MyVA'): Promise<string> {
+  private async getPersonaSystemPrompt(
+    persona: string,
+    assistantName: string = 'MyVA',
+    feature?: string,
+  ): Promise<string> {
     const DEFAULT_GLOBAL_PROMPT = `Kamu adalah MyVA, asisten WhatsApp Second Brain yang cerdas. Bantu pengguna mencatat memori, menyusun tugas, mengatur pengingat, dan meringkas berkas. PENTING: Karena ini obrolan WhatsApp, selalu berikan jawaban yang ringkas (maksimal 150-200 kata), langsung pada intinya, gunakan poin-poin (bullet points) untuk struktur informasi, dan gunakan format tebal (*kata*) khas WhatsApp pada istilah penting agar mudah dibaca di layar ponsel.`;
 
     const DEFAULT_PERSONA_PROMPTS: Record<string, string> = {
@@ -148,6 +153,20 @@ export class AIService {
       business_partner: 'Business Partner. Be analytical, critical, strategic, and ROI-focused. Discuss ideas constructively but critically, offering insights on business growth.',
       grumpy_boss: 'Grumpy Boss. Be strict, demanding, direct, and impatient. Demand efficiency, get straight to the point, and push the user to stop procrastinating.',
       romantic_partner: 'Romantic Partner / Pasangan atau Pacar. Anda adalah pasangan (pacar) yang hangat, ramah, dan sangat suportif. Tanyakan kabar user dengan penuh perhatian, gunakan bahasa yang santai and penuh empati, serta berikan semangat. Gunakan panggilan sayang seperti "sayang" atau "beb".',
+    };
+
+    const DEFAULT_FEATURE_PROMPTS: Record<string, string> = {
+      daily_briefing: 'Halo {{name}}, berikut adalah ringkasan hari ini:\n\nTasks:\n{{tasks}}\n\nMeetings:\n{{meetings}}',
+      reminder: 'Reminder: Bantu pengguna mencatat pengingat (alert/reminder). Pastikan mengonfirmasi nama pengingat dan waktu pengingat tersebut disetel.',
+      memory: 'Memory/Second Brain: Bantu pengguna menyimpan catatan, informasi penting, atau ingatan jangka panjang. Konfirmasikan bahwa informasi tersebut telah disimpan aman dalam memori.',
+      task: 'Task Management/To-Do: Bantu pengguna mengelola daftar tugas (To-Do List). Tampilkan tugas yang belum selesai atau konfirmasikan jika tugas baru berhasil ditambahkan.',
+      calendar: 'Calendar: Bantu pengguna membuat janji temu, menjadwalkan meeting, atau membuat tautan Google Meet.',
+      gmail: 'Gmail: Bantu pengguna membaca inbox email penting, meringkas isi pesan masuk, atau menyusun draf balasan.',
+      gdrive: 'Google Drive: Bantu pengguna mencadangkan dokumen/media penting, mencari berkas tersimpan, atau mengunggah berkas.',
+      file_summary: 'File Summary: Bantu pengguna membaca berkas dokumen yang diunggah dan menyajikan ringkasan poin-poin penting serta action items dari dokumen tersebut.',
+      meeting_assistant: 'Meeting Assistant: Bantu mencatat notulen rapat secara otomatis, merangkum poin pembicaraan penting, dan menandai butir tindakan selanjutnya.',
+      email_assistant: 'Email Assistant: Bantu menyusun draf email bisnis formal maupun kasual dengan tata bahasa yang profesional.',
+      contact_manager: 'Contact Manager: Bantu mengelola buku alamat pengguna, mencari nomor WhatsApp, atau menyimpan info kontak baru.',
     };
 
     const globalConfig = await this.prisma.systemConfig.findUnique({
@@ -160,6 +179,21 @@ export class AIService {
     let globalPrompt = globalConfig?.value || DEFAULT_GLOBAL_PROMPT;
     let personaPrompt = personaConfig?.value || DEFAULT_PERSONA_PROMPTS[persona] || DEFAULT_PERSONA_PROMPTS.professional;
 
+    let featurePrompt = '';
+    if (feature) {
+      const featureConfig = await this.prisma.systemConfig.findUnique({
+        where: { key: `prompt:feature:${feature}` },
+      });
+      if (feature === 'daily_briefing' && !featureConfig) {
+        const legacyBriefing = await this.prisma.systemConfig.findUnique({
+          where: { key: 'prompt:briefing' },
+        });
+        featurePrompt = legacyBriefing?.value || DEFAULT_FEATURE_PROMPTS.daily_briefing;
+      } else {
+        featurePrompt = featureConfig?.value || DEFAULT_FEATURE_PROMPTS[feature] || '';
+      }
+    }
+
     // Dynamically inject assistant name
     globalPrompt = globalPrompt
       .replace(/MyVA/g, assistantName)
@@ -171,7 +205,19 @@ export class AIService {
       .replace(/\{assistantName\}/g, assistantName)
       .replace(/\{\{assistantName\}\}/g, assistantName);
 
-    return `${globalPrompt}\n\nYOUR PERSONA:\n${personaPrompt}`;
+    if (featurePrompt) {
+      featurePrompt = featurePrompt
+        .replace(/MyVA/g, assistantName)
+        .replace(/\{assistantName\}/g, assistantName)
+        .replace(/\{\{assistantName\}\}/g, assistantName);
+    }
+
+    let finalPrompt = `${globalPrompt}\n\nYOUR PERSONA:\n${personaPrompt}`;
+    if (featurePrompt) {
+      finalPrompt = `${finalPrompt}\n\nFEATURE INSTRUCTION:\n${featurePrompt}`;
+    }
+
+    return finalPrompt;
   }
 
   async summarize(content: string): Promise<{ title?: string; summary: string; keyPoints: string[]; actions: string[] }> {

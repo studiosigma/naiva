@@ -85,7 +85,12 @@ ${taskList}
 
 Format dengan bahasa Indonesia yang alami, berikan motivasi singkat untuk memulai hari, dan gunakan format markdown WhatsApp (seperti bold menggunakan bintang *text*).`;
 
-    const briefingText = await this.aiService.chat([{ role: 'user', content: prompt }], user.persona);
+    const briefingText = await this.aiService.chat(
+      [{ role: 'user', content: prompt }],
+      user.persona,
+      user.assistantName || 'MyVA',
+      'daily_briefing'
+    );
     return briefingText;
   }
 

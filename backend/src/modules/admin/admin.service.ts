@@ -628,6 +628,17 @@ export class AdminService {
       'prompt:personality:grumpy_boss': 'Grumpy Boss. Be strict, demanding, direct, and impatient. Demand efficiency, get straight to the point, and push the user to stop procrastinating.',
       'prompt:personality:romantic_partner': 'Romantic Partner / Pasangan atau Pacar. Anda adalah pasangan (pacar) yang hangat, ramah, dan sangat suportif. Tanyakan kabar user dengan penuh perhatian, gunakan bahasa yang santai and penuh empati, serta berikan semangat. Gunakan panggilan sayang seperti "sayang" atau "beb".',
       'prompt:briefing': 'Halo {{name}}, berikut adalah ringkasan hari ini:\n\nTasks:\n{{tasks}}\n\nMeetings:\n{{meetings}}',
+      'prompt:feature:daily_briefing': 'Halo {{name}}, berikut adalah ringkasan hari ini:\n\nTasks:\n{{tasks}}\n\nMeetings:\n{{meetings}}',
+      'prompt:feature:reminder': 'Reminder: Bantu pengguna mencatat pengingat (alert/reminder). Pastikan mengonfirmasi nama pengingat dan waktu pengingat tersebut disetel.',
+      'prompt:feature:memory': 'Memory/Second Brain: Bantu pengguna menyimpan catatan, informasi penting, atau ingatan jangka panjang. Konfirmasikan bahwa informasi tersebut telah disimpan aman dalam memori.',
+      'prompt:feature:task': 'Task Management/To-Do: Bantu pengguna mengelola daftar tugas (To-Do List). Tampilkan tugas yang belum selesai atau konfirmasikan jika tugas baru berhasil ditambahkan.',
+      'prompt:feature:calendar': 'Calendar: Bantu pengguna membuat janji temu, menjadwalkan meeting, atau membuat tautan Google Meet.',
+      'prompt:feature:gmail': 'Gmail: Bantu pengguna membaca inbox email penting, meringkas isi pesan masuk, atau menyusun draf balasan.',
+      'prompt:feature:gdrive': 'Google Drive: Bantu pengguna mencadangkan dokumen/media penting, mencari berkas tersimpan, atau mengunggah berkas.',
+      'prompt:feature:file_summary': 'File Summary: Bantu pengguna membaca berkas dokumen yang diunggah dan menyajikan ringkasan poin-poin penting serta action items dari dokumen tersebut.',
+      'prompt:feature:meeting_assistant': 'Meeting Assistant: Bantu mencatat notulen rapat secara otomatis, merangkum poin pembicaraan penting, dan menandai butir tindakan selanjutnya.',
+      'prompt:feature:email_assistant': 'Email Assistant: Bantu menyusun draf email bisnis formal maupun kasual dengan tata bahasa yang profesional.',
+      'prompt:feature:contact_manager': 'Contact Manager: Bantu mengelola buku alamat pengguna, mencari nomor WhatsApp, atau menyimpan info kontak baru.',
     };
 
     Object.keys(defaults).forEach(k => {

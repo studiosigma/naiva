@@ -490,7 +490,17 @@ async function loadPrompts() {
       document.getElementById('prompt-persona-business_partner').value = p['prompt:personality:business_partner'] || '';
       document.getElementById('prompt-persona-grumpy_boss').value = p['prompt:personality:grumpy_boss'] || '';
       document.getElementById('prompt-persona-romantic_partner').value = p['prompt:personality:romantic_partner'] || '';
-      document.getElementById('prompt-briefing-editor').value = p['prompt:briefing'] || '';
+      document.getElementById('prompt-feature-daily_briefing').value = p['prompt:feature:daily_briefing'] || p['prompt:briefing'] || '';
+      document.getElementById('prompt-feature-reminder').value = p['prompt:feature:reminder'] || '';
+      document.getElementById('prompt-feature-memory').value = p['prompt:feature:memory'] || '';
+      document.getElementById('prompt-feature-task').value = p['prompt:feature:task'] || '';
+      document.getElementById('prompt-feature-calendar').value = p['prompt:feature:calendar'] || '';
+      document.getElementById('prompt-feature-gmail').value = p['prompt:feature:gmail'] || '';
+      document.getElementById('prompt-feature-gdrive').value = p['prompt:feature:gdrive'] || '';
+      document.getElementById('prompt-feature-file_summary').value = p['prompt:feature:file_summary'] || '';
+      document.getElementById('prompt-feature-meeting_assistant').value = p['prompt:feature:meeting_assistant'] || '';
+      document.getElementById('prompt-feature-email_assistant').value = p['prompt:feature:email_assistant'] || '';
+      document.getElementById('prompt-feature-contact_manager').value = p['prompt:feature:contact_manager'] || '';
     }
   }
 }
@@ -926,7 +936,18 @@ function setupActionListeners() {
         await updateKeyVal('prompt:personality:business_partner', document.getElementById('prompt-persona-business_partner').value);
         await updateKeyVal('prompt:personality:grumpy_boss', document.getElementById('prompt-persona-grumpy_boss').value);
         await updateKeyVal('prompt:personality:romantic_partner', document.getElementById('prompt-persona-romantic_partner').value);
-        await updateKeyVal('prompt:briefing', document.getElementById('prompt-briefing-editor').value);
+        await updateKeyVal('prompt:feature:daily_briefing', document.getElementById('prompt-feature-daily_briefing').value);
+        await updateKeyVal('prompt:briefing', document.getElementById('prompt-feature-daily_briefing').value);
+        await updateKeyVal('prompt:feature:reminder', document.getElementById('prompt-feature-reminder').value);
+        await updateKeyVal('prompt:feature:memory', document.getElementById('prompt-feature-memory').value);
+        await updateKeyVal('prompt:feature:task', document.getElementById('prompt-feature-task').value);
+        await updateKeyVal('prompt:feature:calendar', document.getElementById('prompt-feature-calendar').value);
+        await updateKeyVal('prompt:feature:gmail', document.getElementById('prompt-feature-gmail').value);
+        await updateKeyVal('prompt:feature:gdrive', document.getElementById('prompt-feature-gdrive').value);
+        await updateKeyVal('prompt:feature:file_summary', document.getElementById('prompt-feature-file_summary').value);
+        await updateKeyVal('prompt:feature:meeting_assistant', document.getElementById('prompt-feature-meeting_assistant').value);
+        await updateKeyVal('prompt:feature:email_assistant', document.getElementById('prompt-feature-email_assistant').value);
+        await updateKeyVal('prompt:feature:contact_manager', document.getElementById('prompt-feature-contact_manager').value);
 
         showToast('Semua perubahan prompt berhasil disimpan!');
       } catch (err) {
