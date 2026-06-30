@@ -58,4 +58,19 @@ export class S3Service {
       throw error;
     }
   }
+
+  async getObjectStream(key: string) {
+    try {
+      const response = await this.client.send(
+        new GetObjectCommand({
+          Bucket: this.bucketName,
+          Key: key,
+        }),
+      );
+      return response.Body;
+    } catch (error) {
+      this.logger.error(`S3 getObject error for key ${key}: ${error.message}`);
+      throw error;
+    }
+  }
 }

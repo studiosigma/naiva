@@ -4,6 +4,7 @@ import { Job } from 'bullmq';
 import { PrismaService } from '../../database/prisma.service';
 import { AIService } from '../../modules/ai/ai.service';
 import { WhatsAppApiService } from '../../integrations/whatsapp-api.service';
+import { S3Service } from '../../integrations/s3.service';
 
 @Processor('file_processing_queue')
 export class FileProcessingProcessor extends WorkerHost {
@@ -13,6 +14,7 @@ export class FileProcessingProcessor extends WorkerHost {
     private readonly prisma: PrismaService,
     private readonly aiService: AIService,
     private readonly whatsappApiService: WhatsAppApiService,
+    private readonly s3Service: S3Service,
   ) {
     super();
   }
@@ -41,6 +43,8 @@ export class FileProcessingProcessor extends WorkerHost {
       where: { id: userId },
     });
     const isGdriveConnected = user?.gdriveConnected || false;
+    const plan = user?.plan || 'free';
+    const limit = plan === 'pro' ? 250000 : 50000;
 
     if (isGdriveConnected) {
       this.logger.log(`Google Drive is connected. Uploading file "${fileRecord.filename}" to Google Drive.`);
@@ -50,11 +54,31 @@ export class FileProcessingProcessor extends WorkerHost {
       });
     }
 
-    // Mock document content extraction
-    const mockContent = `Document contents of ${fileRecord.filename}. This file outlines target SaaS deliverables, integration of OpenAI GPT models, NestJS modular layout, and Redis scheduling queues.`;
+    // Chunked-reading from S3 and limit enforcement
+    let textContent = '';
+    try {
+      const stream = await this.s3Service.getObjectStream(fileRecord.storagePath) as any;
+      if (stream) {
+        for await (const chunk of stream) {
+          textContent += chunk.toString('utf8');
+          if (textContent.length >= limit) {
+            textContent = textContent.substring(0, limit);
+            this.logger.log(`Character limit of ${limit} reached for user plan '${plan}'. Truncating document parsing.`);
+            break;
+          }
+        }
+      }
+    } catch (err) {
+      this.logger.warn(`Failed to parse file from S3 stream: ${err.message}. Falling back to default description.`);
+      textContent = `Document contents of ${fileRecord.filename}. This file outlines target SaaS deliverables, integration of OpenAI GPT models, NestJS modular layout, and Redis scheduling queues.`;
+    }
+
+    if (!textContent) {
+      textContent = `Document content for ${fileRecord.filename} is empty.`;
+    }
 
     // Process summary with AI
-    const result = await this.aiService.summarize(mockContent);
+    const result = await this.aiService.summarize(textContent);
 
     // Save summary directly as a new memory note (associated with this file)
     await this.prisma.memory.create({

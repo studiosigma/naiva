@@ -2,43 +2,43 @@
    MyVA DESIGN SYSTEM & GLOBAL CSS
    ========================================================================== */
 
-/* Variables */
+/* Variables — Notion Minimal Design System */
 :root {
-  --primary-color: #25D366;       /* WhatsApp Green */
-  --primary-hover: #1ebd57;
-  --secondary-color: #128C7E;     /* WhatsApp Teal */
-  --secondary-hover: #0b685d;
-  --bg-color: #F8FAFC;            /* Slate 50 */
+  --primary-color: #6366F1;       /* Indigo/Purple Accent */
+  --primary-hover: #4F46E5;
+  --secondary-color: #37352F;     /* Notion Dark Brown-Black */
+  --secondary-hover: #2b2926;
+  --bg-color: #FFFFFF;            /* Pure White */
   --card-bg: #FFFFFF;
-  --text-primary: #0F172A;        /* Slate 900 */
-  --text-secondary: #64748B;      /* Slate 500 */
-  --border-color: #E2E8F0;        /* Slate 200 */
+  --text-primary: #37352F;        /* Notion Brown-Black */
+  --text-secondary: #787774;      /* Notion Gray */
+  --border-color: #E3E2DE;        /* Notion Border */
   
-  --primary-light: #DCF8C6;       /* WhatsApp Chat Bubble Green */
-  --primary-bg-light: #EBFDF2;    /* Extralight green background */
-  --accent-purple: #F3E8FF;
-  --accent-purple-text: #7C3AED;
-  --accent-blue: #DBEAFE;
-  --accent-blue-text: #2563EB;
-  --accent-teal: #CCFBF1;
-  --accent-teal-text: #0D9488;
-  --accent-green: #D1FAE5;
-  --accent-green-text: #059669;
-  --accent-orange: #FFEDD5;
-  --accent-orange-text: #D97706;
-  --accent-red: #FEE2E2;
-  --accent-red-text: #DC2626;
+  --primary-light: #EEF2FF;       /* Very light Indigo */
+  --primary-bg-light: #F1F1EF;    /* Notion Hover Gray */
+  --accent-purple: #F4E6FA;
+  --accent-purple-text: #9065B0;
+  --accent-blue: #D3E5EF;
+  --accent-blue-text: #2E7DB5;
+  --accent-teal: #DBEDDB;
+  --accent-teal-text: #448361;
+  --accent-green: #DBEDDB;
+  --accent-green-text: #448361;
+  --accent-orange: #FADEC9;
+  --accent-orange-text: #D9730D;
+  --accent-red: #FFE2DD;
+  --accent-red-text: #E03E3E;
 
   --shadow-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
-  --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.05), 0 2px 4px -2px rgba(0, 0, 0, 0.05);
-  --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.05), 0 4px 6px -4px rgba(0, 0, 0, 0.05);
-  --shadow-premium: 0 20px 25px -5px rgba(18, 140, 126, 0.03), 0 8px 10px -6px rgba(18, 140, 126, 0.03);
+  --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.05), 0 2px 4px -1px rgba(0, 0, 0, 0.03);
+  --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.05), 0 4px 6px -2px rgba(0, 0, 0, 0.02);
+  --shadow-premium: 0 20px 25px -5px rgba(0, 0, 0, 0.05), 0 10px 10px -5px rgba(0, 0, 0, 0.02);
 
-  --font-family: 'Inter', system-ui, -apple-system, sans-serif;
+  --font-family: 'Inter', ui-sans-serif, -apple-system, BlinkMacSystemFont, sans-serif;
   --sidebar-width: 260px;
-  --radius-sm: 6px;
-  --radius-md: 10px;
-  --radius-lg: 16px;
+  --radius-sm: 4px;
+  --radius-md: 6px;
+  --radius-lg: 8px;
 }
 
 /* Base Styles */
@@ -74,11 +74,11 @@ input, button, select, textarea {
   background: transparent;
 }
 ::-webkit-scrollbar-thumb {
-  background: #CBD5E1;
+  background: #D3D1CB;
   border-radius: 10px;
 }
 ::-webkit-scrollbar-thumb:hover {
-  background: #94A3B8;
+  background: #AEACA6;
 }
 
 /* Buttons */
@@ -97,11 +97,11 @@ input, button, select, textarea {
 }
 
 .btn-primary {
-  background-color: var(--secondary-color);
+  background-color: var(--primary-color);
   color: #FFFFFF;
 }
 .btn-primary:hover {
-  background-color: var(--secondary-hover);
+  background-color: var(--primary-hover);
 }
 
 .btn-outline {
@@ -110,8 +110,8 @@ input, button, select, textarea {
   color: var(--text-primary);
 }
 .btn-outline:hover {
-  background-color: #F1F5F9;
-  border-color: #CBD5E1;
+  background-color: var(--primary-bg-light);
+  border-color: #D3D1CB;
 }
 
 .btn-sm {
@@ -134,10 +134,10 @@ input, button, select, textarea {
 .badge {
   display: inline-flex;
   align-items: center;
-  padding: 2px 8px;
-  font-size: 11px;
-  font-weight: 600;
-  border-radius: 100px;
+  padding: 3px 6px;
+  font-size: 11.5px;
+  font-weight: 500;
+  border-radius: var(--radius-sm);
   text-transform: capitalize;
 }
 
@@ -146,7 +146,7 @@ input, button, select, textarea {
 .badge-contacts { background-color: var(--accent-teal); color: var(--accent-teal-text); }
 .badge-ideas { background-color: var(--accent-orange); color: var(--accent-orange-text); }
 .badge-business { background-color: var(--accent-red); color: var(--accent-red-text); }
-.badge-neutral { background-color: #F1F5F9; color: var(--text-secondary); }
+.badge-neutral { background-color: var(--primary-bg-light); color: var(--text-primary); }
 
 /* Animation Utility */
 .animate-pulse {
@@ -155,6 +155,15 @@ input, button, select, textarea {
 @keyframes pulse {
   0%, 100% { opacity: 1; }
   50% { opacity: .5; }
+}
+
+.card-hover-effect {
+  transition: transform 0.2s cubic-bezier(0.4, 0, 0.2, 1), box-shadow 0.2s cubic-bezier(0.4, 0, 0.2, 1), background-color 0.15s ease, border-color 0.15s ease !important;
+}
+
+.card-hover-effect:hover {
+  transform: translateY(-2px);
+  box-shadow: var(--shadow-md) !important;
 }
 
 /* ==========================================================================
@@ -170,7 +179,7 @@ input, button, select, textarea {
 /* Sidebar Styling */
 .sidebar {
   width: var(--sidebar-width);
-  background-color: var(--card-bg);
+  background-color: #F9F9FB;
   border-right: 1px solid var(--border-color);
   display: flex;
   flex-direction: column;
@@ -245,13 +254,13 @@ input, button, select, textarea {
 }
 
 .nav-item:hover {
-  background-color: #F1F5F9;
+  background-color: #EFEFEF;
   color: var(--text-primary);
 }
 
 .nav-item.active {
-  background-color: var(--primary-bg-light);
-  color: var(--secondary-color);
+  background-color: #EFEFEF;
+  color: var(--text-primary);
   font-weight: 600;
 }
 
@@ -259,6 +268,14 @@ input, button, select, textarea {
   width: 18px;
   height: 18px;
   flex-shrink: 0;
+}
+
+.nav-emoji {
+  font-size: 18px;
+  line-height: 1;
+  flex-shrink: 0;
+  width: 22px;
+  text-align: center;
 }
 
 .sidebar-footer {
@@ -272,14 +289,14 @@ input, button, select, textarea {
   gap: 12px;
   padding: 8px;
   border-radius: var(--radius-md);
-  background-color: #F8FAFC;
+  background-color: #F1F1EF;
 }
 
 .user-avatar {
   width: 36px;
   height: 36px;
-  background-color: var(--secondary-color);
-  color: #FFFFFF;
+  background-color: #E3E2DE;
+  color: var(--text-primary);
   font-weight: 600;
   border-radius: 50%;
   display: flex;
@@ -419,13 +436,13 @@ input, button, select, textarea {
 }
 
 .app-header {
-  height: 70px;
-  background-color: var(--card-bg);
+  height: 56px;
+  background-color: #FFFFFF;
   border-bottom: 1px solid var(--border-color);
   display: flex;
   align-items: center;
   justify-content: space-between;
-  padding: 0 32px;
+  padding: 0 24px;
   flex-shrink: 0;
 }
 
@@ -536,16 +553,17 @@ input, button, select, textarea {
    VIEW 1: DASHBOARD HOME
    ========================================================================== */
 .hero-card {
-  background: linear-gradient(135deg, var(--secondary-color) 0%, var(--primary-color) 100%);
+  background: #F6F5F4;
   border-radius: var(--radius-lg);
-  padding: 32px;
-  color: #FFFFFF;
+  padding: 24px 28px;
+  color: var(--text-primary);
   display: flex;
   justify-content: space-between;
   position: relative;
   overflow: hidden;
-  box-shadow: var(--shadow-lg);
-  margin-bottom: 32px;
+  box-shadow: none;
+  margin-bottom: 24px;
+  border: 1px solid var(--border-color);
 }
 
 .hero-content {
@@ -555,16 +573,17 @@ input, button, select, textarea {
 }
 
 .hero-greeting {
-  font-size: 26px;
+  font-size: 22px;
   font-weight: 700;
-  margin-bottom: 8px;
-  letter-spacing: -0.5px;
+  margin-bottom: 6px;
+  letter-spacing: -0.3px;
+  color: var(--text-primary);
 }
 
 .hero-tagline {
-  font-size: 15px;
-  opacity: 0.9;
-  margin-bottom: 24px;
+  font-size: 14px;
+  color: var(--text-secondary);
+  margin-bottom: 20px;
 }
 
 .hero-stats {
@@ -573,12 +592,10 @@ input, button, select, textarea {
 }
 
 .hero-stat-pill {
-  background-color: rgba(255, 255, 255, 0.15);
-  backdrop-filter: blur(8px);
-  -webkit-backdrop-filter: blur(8px);
+  background-color: #FFFFFF;
   padding: 8px 16px;
   border-radius: var(--radius-md);
-  border: 1px solid rgba(255, 255, 255, 0.2);
+  border: 1px solid var(--border-color);
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -588,11 +605,12 @@ input, button, select, textarea {
 .hero-stat-number {
   font-size: 20px;
   font-weight: 700;
+  color: var(--text-primary);
 }
 
 .hero-stat-label {
   font-size: 11px;
-  opacity: 0.8;
+  color: var(--text-secondary);
   font-weight: 500;
   text-transform: uppercase;
   letter-spacing: 0.5px;
@@ -631,14 +649,12 @@ input, button, select, textarea {
   align-items: flex-start;
   gap: 16px;
   cursor: pointer;
-  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-  box-shadow: var(--shadow-sm);
+  transition: background-color 0.15s ease;
+  box-shadow: none;
 }
 
 .stat-card:hover {
-  transform: translateY(-4px);
-  box-shadow: var(--shadow-md), 0 10px 20px -10px rgba(18, 140, 126, 0.15);
-  border-color: var(--secondary-color);
+  background-color: #F7F7F5;
 }
 
 .stat-icon-wrapper {
@@ -696,7 +712,7 @@ input, button, select, textarea {
   border: 1px solid var(--border-color);
   border-radius: var(--radius-lg);
   padding: 24px;
-  box-shadow: var(--shadow-sm);
+  box-shadow: none;
   display: flex;
   flex-direction: column;
   min-height: 320px;
@@ -707,7 +723,7 @@ input, button, select, textarea {
   justify-content: space-between;
   align-items: center;
   margin-bottom: 20px;
-  border-bottom: 1px solid #F1F5F9;
+  border-bottom: 1px solid var(--border-color);
   padding-bottom: 12px;
 }
 
@@ -720,9 +736,9 @@ input, button, select, textarea {
 .panel-action-btn {
   background: none;
   border: none;
-  color: var(--secondary-color);
+  color: var(--text-secondary);
   font-size: 13px;
-  font-weight: 600;
+  font-weight: 500;
   cursor: pointer;
 }
 .panel-action-btn:hover {
@@ -742,20 +758,20 @@ input, button, select, textarea {
   align-items: center;
   gap: 16px;
   padding: 12px 16px;
-  background-color: #F8FAFC;
-  border-left: 4px solid var(--secondary-color);
-  border-radius: 4px var(--radius-md) var(--radius-md) 4px;
-  transition: background-color 0.2s ease;
+  background-color: #F7F7F5;
+  border-left: 3px solid var(--primary-color);
+  border-radius: 2px var(--radius-md) var(--radius-md) 2px;
+  transition: background-color 0.15s ease;
 }
 
 .agenda-card:hover {
-  background-color: #F1F5F9;
+  background-color: #F1F1EF;
 }
 
 .agenda-time {
   font-size: 13px;
-  font-weight: 700;
-  color: var(--secondary-color);
+  font-weight: 600;
+  color: var(--text-primary);
   background-color: var(--primary-bg-light);
   padding: 4px 8px;
   border-radius: var(--radius-sm);
@@ -6307,4 +6323,84 @@ input:checked + .slider:before {
   width: 36px;
   height: 36px;
 }
+
+/* WhatsApp Interactive Command Guide Styles */
+.guide-tabs {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+  margin-bottom: 16px;
+  border-bottom: 1px solid var(--border-color);
+  padding-bottom: 10px;
+}
+
+.guide-tab-btn {
+  background: transparent;
+  border: 1px solid transparent;
+  padding: 8px 16px;
+  border-radius: 20px;
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--text-secondary);
+  cursor: pointer;
+  white-space: nowrap;
+  transition: all 0.2s ease;
+  font-family: 'Inter', sans-serif;
+}
+
+.guide-tab-btn:hover {
+  background-color: var(--bg-hover, #F1F5F9);
+  color: var(--text-primary);
+}
+
+.guide-tab-btn.active {
+  background-color: rgba(37, 211, 102, 0.1);
+  color: #128C7E;
+  border-color: rgba(37, 211, 102, 0.2);
+  font-weight: 600;
+}
+
+.command-example-box {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  background: rgba(0, 0, 0, 0.03);
+  padding: 10px 14px;
+  border-radius: 8px;
+  font-family: 'Fira Code', 'Courier New', Courier, monospace;
+  font-size: 0.85rem;
+  color: #128C7E;
+  border: 1px dashed rgba(37, 211, 102, 0.3);
+  transition: all 0.2s ease;
+}
+
+.command-example-box:hover {
+  background: rgba(0, 0, 0, 0.05);
+  border-color: rgba(37, 211, 102, 0.5);
+}
+
+.btn-copy-command {
+  background: none;
+  border: none;
+  color: var(--text-secondary);
+  cursor: pointer;
+  padding: 4px;
+  display: flex;
+  align-items: center;
+  transition: all 0.2s ease;
+}
+
+.btn-copy-command:hover {
+  color: #128C7E;
+  transform: scale(1.1);
+}
+
+.btn-copy-command.copied {
+  color: #25D366;
+}
+
+#whatsapp-guide-panel {
+  transition: max-height 0.3s ease-out, opacity 0.3s ease-out;
+}
+
 

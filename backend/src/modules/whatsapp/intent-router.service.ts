@@ -3,10 +3,12 @@ import { MemoryService } from '../memory/memory.service';
 import { ReminderService } from '../reminder/reminder.service';
 import { TaskService } from '../task/task.service';
 import { ContactService } from '../contact/contact.service';
-import { AIService } from '../ai/ai.service';
+import { AIService, IntentClassification } from '../ai/ai.service';
 import { MemoryCategory } from '../memory/dto/create-memory.dto';
 import { ExpenseService } from '../expense/expense.service';
 import { PrismaService } from '../../database/prisma.service';
+import { GoogleApiService } from '../../integrations/google-api.service';
+import { google } from 'googleapis';
 
 @Injectable()
 export class IntentRouterService {
@@ -20,6 +22,7 @@ export class IntentRouterService {
     private readonly aiService: AIService,
     private readonly expenseService: ExpenseService,
     private readonly prisma: PrismaService,
+    private readonly googleApiService: GoogleApiService,
   ) {}
 
   async routeMessage(userId: string, text: string, persona?: string): Promise<string> {
@@ -55,232 +58,235 @@ export class IntentRouterService {
       await new Promise(resolve => setTimeout(resolve, 1500));
     }
 
-    // 1. INTENT: SEARCH MEMORIES
-    // Matches: "cari...", "search..."
-    if (cleanText.startsWith('cari ') || cleanText.startsWith('search ')) {
-      const query = text.substring(5).trim();
-      const results = await this.aiService.semanticSearch(userId, query);
-      if (results.length === 0) {
-        return `Tidak ditemukan catatan/memory tentang "${query}".`;
-      }
-      const list = results.map((r, i) => `${i + 1}. [${r.category}] *${r.title}*: ${r.content}`).join('\n\n');
-      return `Hasil pencarian memory untuk "${query}":\n\n${list}`;
+    // Check for hardcoded overrides first (help / bantuan commands are instant)
+    if (cleanText === 'help' || cleanText === 'bantuan' || cleanText === 'menu' || cleanText === 'panduan' || cleanText === '/help') {
+      return this.getHelpGuide();
     }
 
-    // 2. INTENT: CREATE REMINDER
-    // Matches: "ingatkan...", "reminder..."
-    if (cleanText.startsWith('ingatkan ') || cleanText.startsWith('reminder ')) {
-      const content = text.substring(9).trim();
-      
-      let scheduledAt = new Date(Date.now() + 60 * 60 * 1000);
-      let title = content;
+    // Call Gemini 2.5 Flash for smart intent classification
+    const classification = await this.aiService.classifyIntent(text);
+    const { intent, confidence, extracted } = classification;
+    this.logger.log(`Classified intent: ${intent} (Confidence: ${confidence})`);
 
-      // Extract precise date/time using AI
-      const aiParsed = await this.aiService.parseDateTime(text);
-      if (aiParsed.scheduledAt) {
-        scheduledAt = new Date(aiParsed.scheduledAt);
-        title = aiParsed.title;
-      } else {
-        if (cleanText.includes('besok')) {
-          scheduledAt = new Date();
-          scheduledAt.setDate(scheduledAt.getDate() + 1);
-          scheduledAt.setHours(10, 0, 0, 0); // default to 10:00 AM tomorrow
-          title = content.replace(/besok.*/i, '').trim();
-        } else if (cleanText.includes('nanti')) {
-          scheduledAt = new Date(Date.now() + 2 * 60 * 60 * 1000); // 2 hours from now
-          title = content.replace(/nanti.*/i, '').trim();
+    // Only route to intent logic if confidence is sufficiently high
+    if (confidence >= 0.6) {
+      // 1. INTENT: SEARCH MEMORIES
+      if (intent === 'SEARCH_MEMORIES') {
+        const query = extracted?.query || text.replace(/^(cari|search)\s+/i, '').trim();
+        const results = await this.aiService.semanticSearch(userId, query);
+        if (results.length === 0) {
+          return `Tidak ditemukan catatan/memory tentang "${query}".`;
         }
+        const list = results.map((r, i) => `${i + 1}. [${r.category}] *${r.title}*: ${r.content}`).join('\n\n');
+        return `Hasil pencarian memory untuk "${query}":\n\n${list}`;
       }
 
-      const user = await this.prisma.user.findUnique({ where: { id: userId } });
-      const isGcalConnected = user?.gcalConnected || false;
-
-      const reminder = await this.reminderService.create(userId, {
-        title: title || 'WhatsApp Reminder',
-        scheduledAt: scheduledAt.toISOString(),
-      });
-
-      if (isGcalConnected) {
-        return `⏰ Reminder berhasil dibuat & disinkronkan ke Google Calendar!\n\n*Reminder:* ${reminder.title}\n*Waktu:* ${reminder.scheduledAt.toLocaleString('id-ID', { timeZone: 'Asia/Jakarta' })}`;
-      }
-      return `⏰ Reminder berhasil dibuat secara lokal!\n\n*Reminder:* ${reminder.title}\n*Waktu:* ${reminder.scheduledAt.toLocaleString('id-ID', { timeZone: 'Asia/Jakarta' })}`;
-    }
-
-    // 2.5. INTENT: CREATE CALENDAR EVENT
-    // Matches: "jadwal...", "meeting...", "pertemuan...", "janji...", "calendar..."
-    if (
-      cleanText.startsWith('jadwal ') ||
-      cleanText.startsWith('meeting ') ||
-      cleanText.startsWith('pertemuan ') ||
-      cleanText.startsWith('janji ') ||
-      cleanText.startsWith('calendar ')
-    ) {
-      if (plan === 'free') {
-        return `⚠️ *Fitur Penjadwalan Terbatas* ⚠️\n\nFitur pembuatan event & Google Meet link via WhatsApp hanya tersedia pada paket *Basic* atau *Pro*. Silakan upgrade paket Anda di dasbor MyVA! 🗓️`;
-      }
-      const content = text.replace(/^(jadwal|meeting|pertemuan|janji|calendar)\s+/i, '').trim();
-      
-      let scheduledAt = new Date(Date.now() + 60 * 60 * 1000);
-      let title = content;
-
-      // Extract precise date/time using AI
-      const aiParsed = await this.aiService.parseDateTime(text);
-      if (aiParsed.scheduledAt) {
-        scheduledAt = new Date(aiParsed.scheduledAt);
-        title = aiParsed.title;
-      } else {
-        if (cleanText.includes('besok')) {
-          scheduledAt = new Date();
-          scheduledAt.setDate(scheduledAt.getDate() + 1);
-          scheduledAt.setHours(14, 0, 0, 0); // default to 2:00 PM tomorrow
-          title = content.replace(/besok.*/i, '').trim();
-        } else if (cleanText.includes('nanti')) {
-          scheduledAt = new Date(Date.now() + 2 * 60 * 60 * 1000); // 2 hours from now
-          title = content.replace(/nanti.*/i, '').trim();
+      // 2. INTENT: CREATE REMINDER
+      if (intent === 'CREATE_REMINDER') {
+        let scheduledAt = new Date(Date.now() + 60 * 60 * 1000);
+        let title = extracted?.title || text;
+        
+        if (extracted?.scheduledAt) {
+          scheduledAt = new Date(`${extracted.scheduledAt}+07:00`);
         }
-      }
 
-      const isGcalConnected = user?.gcalConnected || false;
-
-      const isMeeting =
-        cleanText.startsWith('meeting ') ||
-        cleanText.startsWith('pertemuan ') ||
-        cleanText.includes('meeting') ||
-        cleanText.includes('pertemuan');
-      const meetLink = isMeeting
-        ? `https://meet.google.com/${Math.random().toString(36).substring(2, 5)}-${Math.random().toString(36).substring(2, 6)}-${Math.random().toString(36).substring(2, 5)}`
-        : null;
-
-      const reminder = await this.reminderService.create(userId, {
-        title: `[Calendar] ${title || 'Acara Kalender'}${meetLink ? ` | Meet: ${meetLink}` : ''}`,
-        scheduledAt: scheduledAt.toISOString(),
-      });
-
-      if (isGcalConnected) {
-        this.logger.log(`Syncing event "${title}" to Google Calendar for user ${userId}`);
-        return `🗓️ *Event Google Calendar Berhasil Dibuat & Disinkronkan!*\n\n*Acara:* ${title || 'Acara Kalender'}\n*Waktu:* ${reminder.scheduledAt.toLocaleString('id-ID', { timeZone: 'Asia/Jakarta' })}${
-          meetLink ? `\n*Google Meet:* ${meetLink}` : ''
-        }\n\n_Status: Google Calendar Connected_`;
-      } else {
-        return `🗓️ *Event Berhasil Dibuat secara Lokal!*\n\n*Acara:* ${title || 'Acara Kalender'}\n*Waktu:* ${reminder.scheduledAt.toLocaleString('id-ID', { timeZone: 'Asia/Jakarta' })}${
-          meetLink ? `\n*Google Meet:* ${meetLink}` : ''
-        }\n\n_Catatan: Sambungkan Google Calendar di dasbor Settings untuk sinkronisasi otomatis._`;
-      }
-    }
-
-    // 3. INTENT: CREATE TASK
-    // Matches: "todo...", "task...", "buat todo..."
-    if (cleanText.startsWith('todo ') || cleanText.startsWith('task ') || cleanText.startsWith('buat todo ')) {
-      if (plan === 'free') {
-        return `⚠️ *Fitur Task Management Terbatas* ⚠️\n\nFitur manajemen tugas/To-Do list via WhatsApp hanya tersedia pada paket *Basic* atau *Pro*. Silakan upgrade paket Anda di dasbor MyVA! 📋`;
-      }
-      let title = text.replace(/^(todo|task|buat todo)\s+/i, '').trim();
-      const task = await this.taskService.create(userId, { title });
-      return `📋 Task berhasil ditambahkan ke To-Do List!\n\n*Task:* ${task.title}\n*Status:* To-Do`;
-    }
-
-    // 3.5. INTENT: SMART EXPENSE TRACKER
-    // Matches "catat beli kopi 25rb" or "catat bayar listrik 150ribu"
-    if (cleanText.startsWith('catat ') || cleanText.startsWith('pengeluaran ')) {
-      const parsed = this.parseExpense(text);
-      if (parsed) {
-        const expense = await this.expenseService.create(userId, {
-          amount: parsed.amount,
-          description: parsed.description,
-          category: parsed.category,
+        const isGcalConnected = user?.gcalConnected || false;
+        const reminder = await this.reminderService.create(userId, {
+          title: title || 'WhatsApp Reminder',
+          scheduledAt: scheduledAt.toISOString(),
         });
 
-        const formattedAmount = new Intl.NumberFormat('id-ID', {
-          style: 'currency',
-          currency: 'IDR',
-          maximumFractionDigits: 0
-        }).format(expense.amount);
-
-        return `💸 *Pengeluaran Berhasil Dicatat!*\n\n*Deskripsi:* ${expense.description}\n*Jumlah:* ${formattedAmount}\n*Kategori:* ${expense.category}\n\n_Catatan keuangan Anda telah diperbarui di dashboard._`;
-      }
-    }
-
-    // 4. INTENT: CREATE MEMORY (NOTE)
-    // Matches: "catat...", "tulis catatan...", "remember..."
-    if (cleanText.startsWith('catat ') || cleanText.startsWith('remember ') || cleanText.startsWith('tulis catatan ')) {
-      const fullContent = text.replace(/^(catat|remember|tulis catatan)\s+/i, '').trim();
-      const title = fullContent.split('\n')[0].substring(0, 40) + (fullContent.length > 40 ? '...' : '');
-      
-      const memory = await this.memoryService.create(userId, {
-        title,
-        content: fullContent,
-        category: MemoryCategory.NOTES,
-      });
-
-      return `🧠 Catatan berhasil disimpan di Memory Center!\n\n*Judul:* ${memory.title}\n*Category:* Notes`;
-    }
-
-    // 5. INTENT: CREATE CONTACT
-    // Matches: "simpan kontak...", "save contact..."
-    if (cleanText.startsWith('kontak ') || cleanText.startsWith('contact ') || cleanText.startsWith('simpan kontak ')) {
-      const rawInfo = text.replace(/^(kontak|contact|simpan kontak)\s+/i, '').trim();
-      const parts = rawInfo.split(/\s+/);
-      const phone = parts.find(p => /^[+0-9-]{7,15}$/.test(p));
-      const name = parts.filter(p => p !== phone).join(' ') || 'WhatsApp Contact';
-
-      if (!phone) {
-        return 'Format kontak salah. Contoh: "kontak John Doe +628991234567"';
+        if (isGcalConnected) {
+          return `⏰ Reminder berhasil dibuat & disinkronkan ke Google Calendar!\n\n*Reminder:* ${reminder.title}\n*Waktu:* ${reminder.scheduledAt.toLocaleString('id-ID', { timeZone: 'Asia/Jakarta' })}`;
+        }
+        return `⏰ Reminder berhasil dibuat secara lokal!\n\n*Reminder:* ${reminder.title}\n*Waktu:* ${reminder.scheduledAt.toLocaleString('id-ID', { timeZone: 'Asia/Jakarta' })}`;
       }
 
-      const user = await this.prisma.user.findUnique({ where: { id: userId } });
-      const isContactsSyncEnabled = user?.contactsSyncEnabled || false;
+      // 2.5. INTENT: CREATE CALENDAR EVENT
+      if (intent === 'CREATE_CALENDAR_EVENT') {
+        if (plan === 'free') {
+          return `⚠️ *Fitur Penjadwalan Terbatas* ⚠️\n\nFitur pembuatan event & Google Meet link via WhatsApp hanya tersedia pada paket *Basic* atau *Pro*. Silakan upgrade paket Anda di dasbor MyVA! 🗓️`;
+        }
+        let scheduledAt = new Date(Date.now() + 60 * 60 * 1000);
+        let title = extracted?.title || text;
 
-      const contact = await this.contactService.create(userId, {
-        name,
-        phone,
-      });
+        if (extracted?.scheduledAt) {
+          scheduledAt = new Date(`${extracted.scheduledAt}+07:00`);
+        }
 
-      if (isContactsSyncEnabled) {
-        return `👤 Kontak berhasil disimpan & disinkronkan ke Google Contacts!\n\n*Nama:* ${contact.name}\n*No. HP:* ${contact.phone}`;
+        const isMeeting = extracted?.isMeeting || false;
+
+        const reminder = await this.reminderService.create(userId, {
+          title: `[Calendar] ${title || 'Acara Kalender'}`,
+          scheduledAt: scheduledAt.toISOString(),
+        });
+
+        const isGcalConnected = user?.gcalConnected || false;
+        let generatedMeetLink = null;
+        let syncError = false;
+
+        if (isGcalConnected) {
+          try {
+            const oauth2Client = await this.googleApiService.getClientForUser(userId);
+            const calendar = google.calendar({ version: 'v3', auth: oauth2Client });
+            const endDateTime = new Date(scheduledAt.getTime() + 60 * 60 * 1000);
+
+            const eventResource: any = {
+              summary: title,
+              description: isMeeting ? 'Google Meet automatically generated by MyVA.' : 'Created via MyVA WhatsApp assistant.',
+              start: {
+                dateTime: scheduledAt.toISOString(),
+                timeZone: 'Asia/Jakarta',
+              },
+              end: {
+                dateTime: endDateTime.toISOString(),
+                timeZone: 'Asia/Jakarta',
+              },
+            };
+
+            if (isMeeting) {
+              eventResource.conferenceData = {
+                createRequest: {
+                  requestId: `meet-${Date.now()}`,
+                  conferenceSolutionKey: {
+                    type: 'hangoutsMeet',
+                  },
+                },
+              };
+            }
+
+            const response = (await calendar.events.insert({
+              calendarId: 'primary',
+              requestBody: eventResource,
+              conferenceDataVersion: isMeeting ? 1 : 0,
+            })) as any;
+
+            generatedMeetLink = response.data.conferenceData?.entryPoints?.find(
+              ep => ep.entryPointType === 'video'
+            )?.uri || null;
+            
+            this.logger.log(`Successfully synced event "${title}" to Google Calendar. Meet: ${generatedMeetLink}`);
+          } catch (error) {
+            this.logger.error(`Error syncing event to Google Calendar: ${error.message}`);
+            syncError = true;
+          }
+        }
+
+        if (isGcalConnected && !syncError) {
+          return `🗓️ *Event Berhasil Dibuat & Disinkronkan ke Google Calendar!*\n\n*Acara:* ${title || 'Acara Kalender'}\n*Waktu:* ${reminder.scheduledAt.toLocaleString('id-ID', { timeZone: 'Asia/Jakarta' })}${
+            generatedMeetLink ? `\n*Google Meet:* ${generatedMeetLink}` : ''
+          }\n\n_Status: Google Calendar Connected_`;
+        } else if (syncError) {
+          return `🗓️ *Event Berhasil Dibuat secara Lokal!* (Koneksi Google Bermasalah)\n\n*Acara:* ${title || 'Acara Kalender'}\n*Waktu:* ${reminder.scheduledAt.toLocaleString('id-ID', { timeZone: 'Asia/Jakarta' })}\n\n_Catatan: Gagal menyinkronkan ke Google Calendar (Mungkin kredensial kedaluwarsa). Silakan hubungkan kembali akun Google Anda di dasbor Settings._`;
+        } else {
+          return `🗓️ *Event Berhasil Dibuat secara Lokal!*\n\n*Acara:* ${title || 'Acara Kalender'}\n*Waktu:* ${reminder.scheduledAt.toLocaleString('id-ID', { timeZone: 'Asia/Jakarta' })}${
+            generatedMeetLink ? `\n*Google Meet:* ${generatedMeetLink}` : ''
+          }\n\n_Catatan: Sambungkan Google Calendar di dasbor Settings untuk sinkronisasi otomatis._`;
+        }
       }
-      return `👤 Kontak berhasil disimpan secara lokal!\n\n*Nama:* ${contact.name}\n*No. HP:* ${contact.phone}\n\n_Catatan: Sambungkan integrasi Google Contacts di dasbor Settings untuk sinkronisasi otomatis._`;
-    }
 
-    // 5.5. INTENT: GMAIL ASSISTANT
-    // Matches: "cari email...", "cek email...", "baca email...", "gmail...", "email..."
-    if (
-      cleanText.startsWith('cari email') ||
-      cleanText.startsWith('cek email') ||
-      cleanText.startsWith('baca email') ||
-      cleanText.startsWith('gmail') ||
-      cleanText.startsWith('email')
-    ) {
-      if (plan === 'free') {
-        return `⚠️ *Fitur Gmail Assistant Terbatas* ⚠️\n\nFitur membaca atau mencari email via WhatsApp hanya tersedia pada paket *Basic* atau *Pro*. Silakan upgrade paket Anda di dasbor MyVA! 📧`;
-      }
-      const isGmailConnected = user?.gmailConnected || false;
-
-      if (!isGmailConnected) {
-        return `📧 *Gmail Assistant belum aktif.*\n\nSilakan sambungkan integrasi Gmail Anda di dasbor Settings untuk membaca dan mencari email langsung lewat WhatsApp.`;
+      // 3. INTENT: CREATE TASK
+      if (intent === 'CREATE_TASK') {
+        if (plan === 'free') {
+          return `⚠️ *Fitur Task Management Terbatas* ⚠️\n\nFitur manajemen tugas/To-Do list via WhatsApp hanya tersedia pada paket *Basic* atau *Pro*. Silakan upgrade paket Anda di dasbor MyVA! 📋`;
+        }
+        const title = extracted?.title || text.replace(/^(todo|task|buat todo)\s+/i, '').trim();
+        const task = await this.taskService.create(userId, { title });
+        return `📋 Task berhasil ditambahkan ke To-Do List!\n\n*Task:* ${task.title}\n*Status:* To-Do`;
       }
 
-      const query = text.replace(/^(cari email|cek email|baca email|gmail|email)\s*/i, '').trim();
+      // 3.5. INTENT: SMART EXPENSE TRACKER
+      if (intent === 'TRACK_EXPENSE') {
+        const amount = extracted?.amount || 0;
+        const description = extracted?.description || text;
+        const category = extracted?.category || 'Other';
 
-      if (query) {
-        return `📧 *Hasil Pencarian Gmail untuk "${query}"*:\n\n1. *Dari:* John Doe <john@javacoffee.co>\n   *Subjek:* Coffee supplier shipment update\n   *Rangkuman:* Pengiriman biji kopi Arabica Preanger dijadwalkan tiba hari Senin depan. Dokumen invoice terlampir.\n\n2. *Dari:* Vercel <noreply@vercel.com>\n   *Subjek:* [Vercel] Deployment Successful\n   *Rangkuman:* Proyek myva-backend berhasil di-deploy ke production.\n\n_Asisten berhasil menyaring email terpenting Anda._`;
-      } else {
-        return `📧 *Email Terpenting Hari Ini (Gmail)*:\n\n1. *Dari:* Sarah Connor <sarah@cyberdyne.io>\n   *Subjek:* Re: Draft Proposal Meeting\n   *Waktu:* 08:15 WIB\n   *Rangkuman:* Sarah menyetujui draft usulan kerja sama sistem AI asisten virtual.\n\n2. *Dari:* Midtrans <support@midtrans.com>\n   *Subjek:* Monthly Invoice Receipt\n   *Waktu:* Kemarin\n   *Rangkuman:* Pembayaran biaya langganan bulanan server sukses diproses.`;
+        if (amount > 0) {
+          const expense = await this.expenseService.create(userId, {
+            amount,
+            description,
+            category,
+          });
+
+          const formattedAmount = new Intl.NumberFormat('id-ID', {
+            style: 'currency',
+            currency: 'IDR',
+            maximumFractionDigits: 0
+          }).format(expense.amount);
+
+          return `💸 *Pengeluaran Berhasil Dicatat!*\n\n*Deskripsi:* ${expense.description}\n*Jumlah:* ${formattedAmount}\n*Kategori:* ${expense.category}\n\n_Catatan keuangan Anda telah diperbarui di dashboard._`;
+        }
       }
-    }
 
-    // 6. INTENT: SUMMARIZE FILE
-    // Matches: "ringkas...", "summarize..."
-    if (cleanText.startsWith('ringkas') || cleanText.startsWith('summarize') || cleanText.startsWith('rangkum')) {
-      return 'Kirimkan file dokumen (PDF/DOCX/TXT) untuk dirangkum oleh AI.';
-    }
+      // 4. INTENT: CREATE MEMORY (NOTE)
+      if (intent === 'CREATE_MEMORY') {
+        const fullContent = extracted?.title || text.replace(/^(catat|remember|tulis catatan)\s+/i, '').trim();
+        const title = fullContent.split('\n')[0].substring(0, 40) + (fullContent.length > 40 ? '...' : '');
+        
+        const memory = await this.memoryService.create(userId, {
+          title,
+          content: fullContent,
+          category: MemoryCategory.NOTES,
+        });
 
-    // 6.5. INTENT: WEB SEARCH
-    // Matches: "cari di internet ", "web search ", "browsing ", "tanya web "
-    const searchPrefixes = ['cari di internet ', 'web search ', 'browsing ', 'tanya web '];
-    const matchedPrefix = searchPrefixes.find(p => cleanText.startsWith(p));
-    if (matchedPrefix) {
-      const query = text.substring(matchedPrefix.length).trim();
-      return this.handleWebSearch(userId, query);
+        return `🧠 Catatan berhasil disimpan di Memory Center!\n\n*Judul:* ${memory.title}\n*Category:* Notes`;
+      }
+
+      // 5. INTENT: CREATE CONTACT
+      if (intent === 'CREATE_CONTACT') {
+        const name = extracted?.name || 'WhatsApp Contact';
+        const phone = extracted?.phone;
+
+        if (!phone) {
+          return 'Format kontak salah. Pastikan menyertakan nama dan nomor telepon (misal: "simpan kontak John Doe 0812345678").';
+        }
+
+        const isContactsSyncEnabled = user?.contactsSyncEnabled || false;
+        const contact = await this.contactService.create(userId, {
+          name,
+          phone,
+        });
+
+        if (isContactsSyncEnabled) {
+          return `👤 Kontak berhasil disimpan & disinkronkan ke Google Contacts!\n\n*Nama:* ${contact.name}\n*No. HP:* ${contact.phone}`;
+        }
+        return `👤 Kontak berhasil disimpan secara lokal!\n\n*Nama:* ${contact.name}\n*No. HP:* ${contact.phone}\n\n_Catatan: Sambungkan integrasi Google Contacts di dasbor Settings untuk sinkronisasi otomatis._`;
+      }
+
+      // 5.5. INTENT: GMAIL ASSISTANT
+      if (intent === 'READ_EMAIL') {
+        if (plan === 'free') {
+          return `⚠️ *Fitur Gmail Assistant Terbatas* ⚠️\n\nFitur membaca atau mencari email via WhatsApp hanya tersedia pada paket *Basic* atau *Pro*. Silakan upgrade paket Anda di dasbor MyVA! 📧`;
+        }
+        const isGmailConnected = user?.gmailConnected || false;
+
+        if (!isGmailConnected) {
+          return `📧 *Gmail Assistant belum aktif.*\n\nSilakan sambungkan integrasi Gmail Anda di dasbor Settings untuk membaca dan mencari email langsung lewat WhatsApp.`;
+        }
+
+        const query = extracted?.query || '';
+        if (query) {
+          return `📧 *Hasil Pencarian Gmail untuk "${query}"*:\n\n1. *Dari:* John Doe <john@javacoffee.co>\n   *Subjek:* Coffee supplier shipment update\n   *Rangkuman:* Pengiriman biji kopi Arabica Preanger dijadwalkan tiba hari Senin depan. Dokumen invoice terlampir.\n\n2. *Dari:* Vercel <noreply@vercel.com>\n   *Subjek:* [Vercel] Deployment Successful\n   *Rangkuman:* Proyek myva-backend berhasil di-deploy ke production.\n\n_Asisten berhasil menyaring email terpenting Anda._`;
+        } else {
+          return `📧 *Email Terpenting Hari Ini (Gmail)*:\n\n1. *Dari:* Sarah Connor <sarah@cyberdyne.io>\n   *Subjek:* Re: Draft Proposal Meeting\n   *Waktu:* 08:15 WIB\n   *Rangkuman:* Sarah menyetujui draft usulan kerja sama sistem AI asisten virtual.\n\n2. *Dari:* Midtrans <support@midtrans.com>\n   *Subjek:* Monthly Invoice Receipt\n   *Waktu:* Kemarin\n   *Rangkuman:* Pembayaran biaya langganan bulanan server sukses diproses.`;
+        }
+      }
+
+      // 6. INTENT: SUMMARIZE FILE
+      if (intent === 'SUMMARIZE_FILE') {
+        return 'Kirimkan file dokumen (PDF/DOCX/TXT) untuk dirangkum oleh AI.';
+      }
+
+      // 6.5. INTENT: WEB SEARCH
+      if (intent === 'WEB_SEARCH') {
+        const query = extracted?.query || text;
+        return this.handleWebSearch(userId, query);
+      }
+
+      // HELP INTENT
+      if (intent === 'HELP') {
+        return this.getHelpGuide();
+      }
     }
 
     // 7. FALLBACK: AI ASSISTANT CHAT (with RAG context & conversation history)
@@ -548,5 +554,50 @@ export class IntentRouterService {
     description = description.charAt(0).toUpperCase() + description.slice(1);
 
     return { amount, description, category };
+  }
+
+  private getHelpGuide(): string {
+    return `💡 *Panduan Penggunaan MyVA Asisten* 💡
+
+Anda dapat berbicara dengan saya menggunakan bahasa alami biasa (misal: "tolong ingetin besok jemput adik jam 5 sore"). Namun, jika Anda ingin menggunakan kata kunci langsung, berikut adalah beberapa perintah yang didukung:
+
+1. *Tugas / To-Do List:*
+   - Format: \`todo <tugas>\` atau \`task <tugas>\`
+   - Contoh: \`todo Kirim laporan bulanan sore ini\`
+
+2. *Pengingat (Reminder):*
+   - Format: \`ingatkan <pengingat> <waktu>\` atau \`reminder <pengingat> <waktu>\`
+   - Contoh: \`ingatkan saya meeting besok jam 10 pagi\`
+
+3. *Jadwal Kalender & Google Meet:*
+   - Format: \`jadwal <acara>\` atau \`meeting <acara>\`
+   - Contoh: \`jadwal Rapat koordinasi besok jam 1 siang\`
+
+4. *Pencatatan Keuangan:*
+   - Format: \`catat <pengeluaran> <nominal>\` atau \`pengeluaran <pengeluaran> <nominal>\`
+   - Contoh: \`catat beli kopi 25rb\`
+
+5. *Menyimpan Catatan (Memory):*
+   - Format: \`catat <informasi>\` atau \`remember <informasi>\`
+   - Contoh: \`catat nomor seri laptop LPT-998822\`
+
+6. *Mencari Catatan:*
+   - Format: \`cari <kata kunci>\` atau \`search <kata kunci>\`
+   - Contoh: \`cari nomor seri laptop\`
+
+7. *Menyimpan Kontak:*
+   - Format: \`kontak <Nama> <Nomor Telepon>\`
+   - Contoh: \`kontak John Doe 08123456789\`
+
+8. *Asisten Gmail:*
+   - Format: \`cek email\` atau \`cari email dari <nama>\`
+
+9. *Merangkum Dokumen:*
+   - Kirim berkas dokumen dengan pesan: \`ringkas\` atau \`rangkum\`
+
+10. *Pencarian Internet:*
+    - Format: \`cari di internet <kueri>\` atau \`browsing <kueri>\`
+
+💡 *Tips:* Ketik *bantuan* atau *help* kapan saja untuk memunculkan pesan panduan ini.`;
   }
 }

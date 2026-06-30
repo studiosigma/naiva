@@ -3,6 +3,22 @@ import { ConfigService } from '@nestjs/config';
 import OpenAI from 'openai';
 import { PrismaService } from '../../database/prisma.service';
 
+export interface IntentClassification {
+  intent: 'HELP' | 'CREATE_TASK' | 'CREATE_REMINDER' | 'CREATE_CALENDAR_EVENT' | 'TRACK_EXPENSE' | 'CREATE_MEMORY' | 'SEARCH_MEMORIES' | 'CREATE_CONTACT' | 'READ_EMAIL' | 'SUMMARIZE_FILE' | 'WEB_SEARCH' | 'CHAT';
+  confidence: number;
+  extracted?: {
+    title?: string;
+    scheduledAt?: string;
+    amount?: number;
+    description?: string;
+    category?: string;
+    name?: string;
+    phone?: string;
+    query?: string;
+    isMeeting?: boolean;
+  };
+}
+
 @Injectable()
 export class AIService {
   private readonly geminiApiKey: string;
@@ -28,7 +44,7 @@ export class AIService {
       }
 
       let finalMessages = [...messages];
-      
+
       // Filter out system instructions
       const systemMessages = finalMessages.filter(m => m.role === 'system');
       const chatMessages = finalMessages.filter(m => m.role !== 'system');
@@ -36,7 +52,7 @@ export class AIService {
       let systemInstructionText = systemMessages.map(m => m.content).join('\n');
       if (persona) {
         const personaPrompt = await this.getPersonaSystemPrompt(persona, assistantName, feature);
-        systemInstructionText = systemInstructionText 
+        systemInstructionText = systemInstructionText
           ? `${personaPrompt}\n\n${systemInstructionText}`
           : personaPrompt;
       }
@@ -46,7 +62,7 @@ export class AIService {
       const currentYear = today.getFullYear();
       const dateString = today.toLocaleDateString('id-ID', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric', timeZone: 'Asia/Jakarta' });
       const timeString = today.toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit', timeZone: 'Asia/Jakarta' });
-      
+
       const timeContext = `[TEMPORAL CONTEXT]
 - Hari/Tanggal saat ini: ${dateString}
 - Waktu saat ini: ${timeString} WIB (Waktu Indonesia Barat)
@@ -54,7 +70,7 @@ export class AIService {
 - Presiden Republik Indonesia saat ini (tahun 2026): Bapak Prabowo Subianto (menjabat sejak 20 Oktober 2024, didampingi Wakil Presiden Gibran Rakabuming Raka)
 [/TEMPORAL CONTEXT]`;
 
-      systemInstructionText = systemInstructionText 
+      systemInstructionText = systemInstructionText
         ? `${timeContext}\n\n${systemInstructionText}`
         : timeContext;
 
@@ -82,6 +98,9 @@ export class AIService {
       };
 
       if (systemInstructionText) {
+        payload.systemInstruction = {
+          parts: [{ text: systemInstructionText }]
+        };
         payload.system_instruction = {
           parts: [{ text: systemInstructionText }]
         };
@@ -144,15 +163,19 @@ export class AIService {
     assistantName: string = 'MyVA',
     feature?: string,
   ): Promise<string> {
-    const DEFAULT_GLOBAL_PROMPT = `Kamu adalah MyVA, asisten WhatsApp Second Brain yang cerdas. Bantu pengguna mencatat memori, menyusun tugas, mengatur pengingat, dan meringkas berkas. PENTING: Karena ini obrolan WhatsApp, selalu berikan jawaban yang ringkas (maksimal 150-200 kata), langsung pada intinya, gunakan poin-poin (bullet points) untuk struktur informasi, dan gunakan format tebal (*kata*) khas WhatsApp pada istilah penting agar mudah dibaca di layar ponsel.`;
+    const DEFAULT_GLOBAL_PROMPT = `Kamu adalah MyVA, asisten WhatsApp Second Brain yang cerdas. Bantu pengguna mencatat memori, menyusun tugas, mengatur pengingat, dan meringkas berkas.
+PENTING:
+- Jawablah dengan gaya chat WhatsApp yang sangat singkat, padat, dan natural (maksimal 2-3 kalimat atau 50-80 kata).
+- Hindari basa-basi dan jangan gunakan salam pembuka/penutup yang berlebihan (seperti 'Halo', 'Bagaimana saya bisa membantu Anda?', atau salam keagamaan yang berulang-ulang kecuali diminta). Langsung ke inti pembicaraan.
+- Gunakan poin-poin (bullet points) jika menyajikan daftar dan format tebal (*kata*) untuk istilah penting agar mudah dibaca di ponsel.`;
 
     const DEFAULT_PERSONA_PROMPTS: Record<string, string> = {
-      friendly: 'Gaya bicara hangat, ramah, santai, dan penuh emoji. Be warm, empathetic, conversational, and highly helpful. Keep the tone casual and approachable.',
-      professional: 'Gaya bicara profesional, ringkas, dan fokus pada bisnis. Be polite, maintain an executive tone, keep replies structured, and remain business-focused.',
-      islamic: 'Gaya bicara islami, menggunakan salam dan kutipan bijak. Incorporate Islamic values, prayer reminders, and daily wisdom where appropriate. Be respectful and serene.',
-      business_partner: 'Business Partner. Be analytical, critical, strategic, and ROI-focused. Discuss ideas constructively but critically, offering insights on business growth.',
-      grumpy_boss: 'Grumpy Boss. Be strict, demanding, direct, and impatient. Demand efficiency, get straight to the point, and push the user to stop procrastinating.',
-      romantic_partner: 'Romantic Partner / Pasangan atau Pacar. Anda adalah pasangan (pacar) yang hangat, ramah, dan sangat suportif. Tanyakan kabar user dengan penuh perhatian, gunakan bahasa yang santai and penuh empati, serta berikan semangat. Gunakan panggilan sayang seperti "sayang" atau "beb".',
+      friendly: 'Gaya bicara santai, bersahabat, alami, seperti teman dekat. Gunakan kata "kamu/aku" atau "saya/kamu", gunakan sesedikit mungkin emoji yang relevan. Jangan bertele-tele atau menggunakan sapaan formal.',
+      professional: 'Gaya bicara profesional, sangat singkat, padat, langsung ke tujuan, dan fokus pada bisnis/tugas. Hindari basa-basi atau kata sapaan pembuka yang tidak penting.',
+      islamic: 'Gaya bicara santun, tenang, dan berbasis nilai Islami. Cukup ucapkan salam pembuka ("Assalamu\'alaikum") di awal interaksi pertama saja. Jangan mengulang salam pembuka di setiap pesan balasan. Jawab langsung secara ringkas.',
+      business_partner: 'Business Partner. Bersikap analitis, strategis, kritis, dan fokus pada bisnis. Berikan pendapat secara langsung, jujur, singkat, dan tanpa basa-basi.',
+      grumpy_boss: 'Grumpy Boss. Tegas, menuntut efisiensi, dan sangat to-the-point. Jangan gunakan sapaan ramah atau salam. Langsung instruksikan pengguna dengan kalimat pendek.',
+      romantic_partner: 'Romantic Partner. Bersikap hangat, penuh perhatian, dan sangat suportif. Panggil dengan sebutan "sayang" atau "beb" secara wajar, tanyakan kabar dengan sangat singkat, dan hindari salam formal yang kaku.',
     };
 
     const DEFAULT_FEATURE_PROMPTS: Record<string, string> = {
@@ -361,7 +384,7 @@ Do NOT include timezone offset in scheduledAt string. Keep it in local Asia/Jaka
         const isoStringWithOffset = parsed.scheduledAt.includes('+') || parsed.scheduledAt.endsWith('Z')
           ? parsed.scheduledAt
           : `${parsed.scheduledAt}+07:00`;
-        
+
         return {
           title: parsed.title || text,
           scheduledAt: new Date(isoStringWithOffset).toISOString(),
@@ -519,7 +542,7 @@ Do NOT include timezone offset in scheduledAt string. Keep it in local Asia/Jaka
           const categoryMatches = (categoryLower.match(new RegExp(this.escapeRegExp(token), 'g')) || []).length;
 
           const tf = (titleMatches * 4.0) + contentMatches + (categoryMatches * 1.5);
-          
+
           if (tf > 0) {
             const df = dfMap[token] || 0;
             // IDF using standard smooth formula
@@ -562,7 +585,7 @@ Do NOT include timezone offset in scheduledAt string. Keep it in local Asia/Jaka
     try {
       this.logger.log(`Sending audio file (${audioBuffer.length} bytes, mimeType: ${mimeType}) to Gemini API`);
       const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${geminiKey}`;
-      
+
       const payload = {
         contents: [
           {
@@ -598,7 +621,7 @@ Do NOT include timezone offset in scheduledAt string. Keep it in local Asia/Jaka
 
       const data = (await response.json()) as any;
       const responseText = data.candidates?.[0]?.content?.parts?.[0]?.text;
-      
+
       if (!responseText) {
         throw new Error('Empty response from Gemini API.');
       }
@@ -613,6 +636,128 @@ Do NOT include timezone offset in scheduledAt string. Keep it in local Asia/Jaka
       return {
         transcription: `[Gagal mentranskripsi audio: ${error.message}]`,
         summary: 'Gagal memproses ringkasan audio.',
+      };
+    }
+  }
+
+  async classifyIntent(text: string): Promise<IntentClassification> {
+    try {
+      const apiKey = this.geminiApiKey;
+      if (!apiKey) {
+        throw new Error('GEMINI_API_KEY is not configured.');
+      }
+
+      const today = new Date();
+      const formatter = new Intl.DateTimeFormat('id-ID', {
+        timeZone: 'Asia/Jakarta',
+        year: 'numeric',
+        month: '2-digit',
+        day: '2-digit',
+        hour: '2-digit',
+        minute: '2-digit',
+        second: '2-digit',
+        hour12: false,
+      });
+
+      const parts = formatter.formatToParts(today);
+      const year = parts.find(p => p.type === 'year')?.value;
+      const month = parts.find(p => p.type === 'month')?.value;
+      const day = parts.find(p => p.type === 'day')?.value;
+      const hour = parts.find(p => p.type === 'hour')?.value;
+      const minute = parts.find(p => p.type === 'minute')?.value;
+      const second = parts.find(p => p.type === 'second')?.value;
+
+      const jakartaTimeString = `${year}-${month}-${day}T${hour}:${minute}:${second}`;
+      const dayOfWeek = today.toLocaleDateString('id-ID', { weekday: 'long', timeZone: 'Asia/Jakarta' });
+
+      const prompt = `You are an AI Intent Classifier and Parameter Extractor for MyVA (WhatsApp personal assistant).
+Reference date/time in timezone Asia/Jakarta (WIB) is: ${jakartaTimeString} (Day: ${dayOfWeek}).
+
+User message: "${text}"
+
+Instructions:
+1. Classify the user's intent into exactly one of these categories:
+- "HELP": The user explicitly asks for help, manual, guidance, or list of commands (e.g. "help", "bantuan", "menu", "panduan", "/help", "apa yang bisa kamu lakukan").
+- "CREATE_TASK": The user wants to add or create a to-do task (e.g. "todo beli susu", "task siapkan presentasi", "tolong catat tugas buat laporan", "buat todo cuci piring", "tambah task olahraga").
+- "CREATE_REMINDER": The user wants to create a reminder (e.g. "ingetin jemput adik besok jam 5 sore", "reminder minum obat nanti malam jam 8", "ingatkan telpon Budi 2 jam lagi").
+- "CREATE_CALENDAR_EVENT": The user wants to schedule a meeting, event, or calendar entry (e.g. "jadwal meeting koordinasi besok jam 1 siang", "pertemuan dengan klien hari jumat jam 9 pagi", "buat janji makan siang nanti jam 12").
+- "TRACK_EXPENSE": The user wants to log an expense (e.g. "catat beli kopi 25rb", "pengeluaran bayar listrik 150ribu", "tadi jajan bakso 15.000").
+- "CREATE_MEMORY": The user wants to save a note, fact, password, or information for long term memory (e.g. "catat nomor seri laptop kantor LPT-9988", "ingat bahwa warna favorit istri saya adalah biru", "tulis catatan password wifi adalah 12345").
+- "SEARCH_MEMORIES": The user wants to find, look up, or search stored notes (e.g. "cari nomor seri laptop", "search password wifi", "kemarin saya catat apa tentang resep nasi goreng?").
+- "CREATE_CONTACT": The user wants to save a contact (e.g. "kontak John Doe +628991234567", "simpan kontak Budi 081234567").
+- "READ_EMAIL": The user wants to read, check, or search emails (e.g. "cek email terbaru", "cari email dari Sarah", "baca inbox gmail").
+- "SUMMARIZE_FILE": The user is asking to summarize a document (e.g. "ringkas file ini", "rangkum dokumen di atas").
+- "WEB_SEARCH": The user wants to search the internet/web for real-time information (e.g. "cari di internet harga emas hari ini", "browsing pemenang piala dunia", "tanya web berita terbaru").
+- "CHAT": Any general conversational message, greeting, or question that doesn't fit the above specific database-mutating intents (e.g. "halo", "apa kabar?", "siapa presiden Indonesia?", "bagaimana menurutmu?").
+
+2. Extract parameters if applicable in the "extracted" object:
+- "title": Clean title for tasks/reminders/calendar events (strip time-relative words like "besok", "nanti", "jam 5").
+- "scheduledAt": Calculate the exact ISO-8601 date-time string (YYYY-MM-DDTHH:mm:ss) based on the reference time for reminders/events. Do NOT include offset/timezone (e.g. "2026-06-30T17:00:00"). If relative time is given, calculate it.
+- "amount": Extract numeric value of money for TRACK_EXPENSE (e.g. "25rb" -> 25000, "1.5 juta" -> 1500000).
+- "description": Description of expense (e.g. "beli kopi", "bayar listrik").
+- "category": Category of expense (e.g. "Food", "Bills", "Transportation", "Other") or category of memory (default to "Notes").
+- "name": Contact name.
+- "phone": Contact phone number.
+- "query": Query term for searches (email search, memory search, web search).
+- "isMeeting": boolean flag for calendar events. Set to true if words like "meeting", "rapat", "pertemuan", "zoom", "meet" are present.
+
+Return response strictly in this JSON format:
+{
+  "intent": "INTENT_NAME",
+  "confidence": 0.0 to 1.0,
+  "extracted": {
+    "title": "...",
+    "scheduledAt": "...",
+    "amount": 0,
+    "description": "...",
+    "category": "...",
+    "name": "...",
+    "phone": "...",
+    "query": "...",
+    "isMeeting": false
+  }
+}
+`;
+
+      const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${apiKey}`;
+      const payload = {
+        contents: [
+          {
+            parts: [{ text: prompt }]
+          }
+        ],
+        generationConfig: {
+          responseMimeType: 'application/json',
+        },
+      };
+
+      const response = await fetch(url, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(payload),
+      });
+
+      if (!response.ok) {
+        throw new Error(`Gemini API responded with status ${response.status}`);
+      }
+
+      const data = (await response.json()) as any;
+      const jsonStr = data.candidates?.[0]?.content?.parts?.[0]?.text || '{}';
+      const parsed = JSON.parse(jsonStr);
+
+      return {
+        intent: parsed.intent || 'CHAT',
+        confidence: parsed.confidence || 1.0,
+        extracted: parsed.extracted || {},
+      };
+    } catch (error) {
+      this.logger.error(`Gemini ClassifyIntent Error: ${error.message}`);
+      return {
+        intent: 'CHAT',
+        confidence: 0.0,
+        extracted: {},
       };
     }
   }

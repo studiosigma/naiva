@@ -704,6 +704,99 @@ function renderDashboardCharts() {
 }
 
 async function loadAnalyticsCharts() {
+  const res = await fetch(`${API_BASE_URL}/admin/analytics`, {
+    headers: { 'Authorization': `Bearer ${state.token}` }
+  });
+
+  let cpuVal = 10;
+  let memVal = 40;
+  let failedVal = 0;
+  let uptimeStr = '1 jam';
+  let planFree = 70;
+  let planPro = 30;
+  let warnings = [];
+
+  if (res.ok) {
+    const data = await res.json();
+    if (data.success) {
+      cpuVal = data.metrics.cpuLoad;
+      memVal = data.metrics.memoryUsage;
+      failedVal = data.metrics.totalFailedJobs;
+      warnings = data.warnings || [];
+      
+      const uptimeSec = data.metrics.uptime;
+      const d = Math.floor(uptimeSec / (3600*24));
+      const h = Math.floor((uptimeSec % (3600*24)) / 3600);
+      const m = Math.floor((uptimeSec % 3600) / 60);
+      uptimeStr = `${d > 0 ? d + ' hari ' : ''}${h > 0 ? h + ' jam ' : ''}${m} menit`;
+
+      planPro = data.platform.paidUsers || 0;
+      planFree = Math.max(0, (data.platform.totalUsers || 0) - planPro);
+
+      const q = data.metrics.queues;
+      const details = [];
+      if (q.reminder.failed > 0) details.push(`Reminder: ${q.reminder.failed}`);
+      if (q.file.failed > 0) details.push(`File: ${q.file.failed}`);
+      if (q.ai.failed > 0) details.push(`AI: ${q.ai.failed}`);
+      if (q.email.failed > 0) details.push(`Email: ${q.email.failed}`);
+      
+      const detailsEl = document.getElementById('metrics-failed-details');
+      if (detailsEl) {
+        detailsEl.textContent = details.length > 0 ? details.join(', ') : 'Semua antrean normal';
+      }
+    }
+  }
+
+  // Update UI Cards
+  const cpuEl = document.getElementById('metrics-cpu');
+  const cpuProgress = document.getElementById('metrics-cpu-progress');
+  if (cpuEl) cpuEl.textContent = cpuVal.toString();
+  if (cpuProgress) {
+    cpuProgress.style.width = `${cpuVal}%`;
+    cpuProgress.style.backgroundColor = cpuVal > 80 ? 'var(--danger)' : (cpuVal > 60 ? 'var(--warning)' : 'var(--success)');
+  }
+
+  const memEl = document.getElementById('metrics-memory');
+  const memProgress = document.getElementById('metrics-memory-progress');
+  if (memEl) memEl.textContent = memVal.toString();
+  if (memProgress) {
+    memProgress.style.width = `${memVal}%`;
+    memProgress.style.backgroundColor = memVal > 85 ? 'var(--danger)' : 'var(--success)';
+  }
+
+  const failedEl = document.getElementById('metrics-failed-jobs');
+  if (failedEl) {
+    failedEl.textContent = failedVal.toString();
+    failedEl.style.color = failedVal > 0 ? 'var(--danger)' : 'var(--success)';
+  }
+
+  const uptimeEl = document.getElementById('metrics-uptime');
+  if (uptimeEl) uptimeEl.textContent = uptimeStr;
+
+  // Render warnings alerts
+  const alertsContainer = document.getElementById('analytics-alerts-container');
+  if (alertsContainer) {
+    if (warnings.length > 0) {
+      alertsContainer.style.display = 'block';
+      alertsContainer.innerHTML = warnings.map(w => {
+        const borderCol = w.level === 'danger' ? 'var(--danger)' : 'var(--warning)';
+        const bgCol = w.level === 'danger' ? 'rgba(239, 68, 68, 0.08)' : 'rgba(245, 158, 11, 0.08)';
+        const textCol = w.level === 'danger' ? 'var(--danger)' : 'var(--warning)';
+        return `
+          <div style="border-left: 4px solid ${borderCol}; background: ${bgCol}; color: ${textCol}; padding: 12px 16px; border-radius: 4px; margin-bottom: 10px; display: flex; align-items: center; justify-content: space-between; font-weight: 500; font-size: 14px;">
+            <div style="display: flex; align-items: center; gap: 8px;">
+              <span>⚠️</span>
+              <span>${w.message}</span>
+            </div>
+          </div>
+        `;
+      }).join('');
+    } else {
+      alertsContainer.style.display = 'none';
+      alertsContainer.innerHTML = '';
+    }
+  }
+
   // 1. MRR Growth Chart
   const mrrCtx = document.getElementById('mrrChart');
   if (mrrCtx) {
@@ -714,7 +807,7 @@ async function loadAnalyticsCharts() {
         labels: ['Jan', 'Feb', 'Mar', 'Apr', 'Mei', 'Jun'],
         datasets: [{
           label: 'MRR Growth',
-          data: [245000, 392000, 588000, 784000, 1078000, 1470000],
+          data: [245000, 392000, 588000, 784000, 1078000, planPro * 49000],
           borderColor: '#25D366',
           borderWidth: 2,
           tension: 0.2,
@@ -734,7 +827,7 @@ async function loadAnalyticsCharts() {
       data: {
         labels: ['Free Trial', 'Pro Plan'],
         datasets: [{
-          data: [70, 30],
+          data: [planFree, planPro],
           backgroundColor: ['#64748B', '#25D366'],
           borderWidth: 0
         }]

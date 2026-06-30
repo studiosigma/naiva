@@ -2605,61 +2605,18 @@ async function handleIntegrationConnect(key) {
     playSuccessChime();
     showToast(`${brandName} disconnected.`);
   } else {
-    // Open OAuth Simulation modal
-    activeOauthKey = key;
-    
-    // Set user profile info in OAuth modal
-    const avatarEl = document.getElementById('oauth-avatar-display');
-    const nameEl = document.getElementById('oauth-name-display');
-    const emailEl = document.getElementById('oauth-email-display');
-    if (avatarEl) avatarEl.textContent = state.profile.avatar || '🤖';
-    if (nameEl) nameEl.textContent = state.profile.username || 'User';
-    if (emailEl) emailEl.textContent = state.profile.email || 'muis@myva.ai';
-
-    // Populate scope check cards
-    const scopesContainer = document.getElementById('oauth-scopes-container');
-    if (scopesContainer) {
-      let scopesHtml = '';
-      if (key === 'gcal') {
-        scopesHtml = `
-          <div class="oauth-scope-checkbox-card">
-            <input type="checkbox" id="scope-cal-1" checked style="width:auto;height:auto;margin-top:4px;">
-            <label for="scope-cal-1" class="oauth-scope-desc">See, edit, share, and permanently delete all the calendars you can access using Google Calendar.</label>
-          </div>
-          <div class="oauth-scope-checkbox-card">
-            <input type="checkbox" id="scope-cal-2" checked style="width:auto;height:auto;margin-top:4px;">
-            <label for="scope-cal-2" class="oauth-scope-desc">View and edit events on all your calendars.</label>
-          </div>
-        `;
-      } else if (key === 'gdrive') {
-        scopesHtml = `
-          <div class="oauth-scope-checkbox-card">
-            <input type="checkbox" id="scope-drive-1" checked style="width:auto;height:auto;margin-top:4px;">
-            <label for="scope-drive-1" class="oauth-scope-desc">See, edit, create, and delete all of your Google Drive files.</label>
-          </div>
-        `;
-      } else if (key === 'gcontacts') {
-        scopesHtml = `
-          <div class="oauth-scope-checkbox-card">
-            <input type="checkbox" id="scope-contacts-1" checked style="width:auto;height:auto;margin-top:4px;">
-            <label for="scope-contacts-1" class="oauth-scope-desc">See, edit, download, and permanently delete your Google Contacts.</label>
-          </div>
-        `;
-      } else if (key === 'gmail') {
-        scopesHtml = `
-          <div class="oauth-scope-checkbox-card">
-            <input type="checkbox" id="scope-gmail-1" checked style="width:auto;height:auto;margin-top:4px;">
-            <label for="scope-gmail-1" class="oauth-scope-desc">Read, compose, send, and permanently delete all your email from Gmail.</label>
-          </div>
-        `;
-      }
-      scopesContainer.innerHTML = scopesHtml;
+    // Redirect to real Google OAuth connect flow
+    const token = state.token;
+    if (!token) {
+      showToast('Anda harus masuk untuk menghubungkan integrasi.', 'error');
+      return;
     }
-
-    openModal('modal-oauth-simulation');
+    showToast('Mengarahkan ke Google Secure Authentication...', 'info');
+    setTimeout(() => {
+      window.location.href = `${API_BASE_URL}/api/auth/google/connect?token=${token}`;
+    }, 800);
   }
 }
-
 // --- GLOBAL ATTACHMENTS & INTERRUPTS ---
 function initEventListeners() {
   // --- Auth Listeners ---
@@ -4112,6 +4069,94 @@ function initEventListeners() {
   bindComplianceModal('#link-compliance-privacy, .link-compliance-privacy', 'modal-compliance-privacy');
   bindComplianceModal('#link-compliance-refund, .link-compliance-refund', 'modal-compliance-refund');
   bindComplianceModal('#link-compliance-contact, .link-compliance-contact', 'modal-compliance-contact');
+
+  // --- WhatsApp Command Guide (Notion Style Toggles & Simulation) ---
+  document.querySelectorAll('.notion-toggle-header').forEach(header => {
+    header.addEventListener('click', (e) => {
+      e.preventDefault();
+      const target = header.getAttribute('data-toggle');
+      const content = document.getElementById(`toggle-content-${target}`);
+      const arrow = header.querySelector('.notion-toggle-arrow');
+      if (content) {
+        const isHidden = content.style.display === 'none';
+        if (isHidden) {
+          content.style.display = 'block';
+          if (arrow) arrow.style.transform = 'rotate(90deg)';
+          header.style.backgroundColor = '#EFEFEF';
+        } else {
+          content.style.display = 'none';
+          if (arrow) arrow.style.transform = 'rotate(0deg)';
+          header.style.backgroundColor = 'transparent';
+        }
+      }
+    });
+    header.addEventListener('mouseenter', () => {
+      const target = header.getAttribute('data-toggle');
+      const content = document.getElementById(`toggle-content-${target}`);
+      if (content && content.style.display === 'none') {
+        header.style.backgroundColor = '#F1F1EF';
+      }
+    });
+    header.addEventListener('mouseleave', () => {
+      const target = header.getAttribute('data-toggle');
+      const content = document.getElementById(`toggle-content-${target}`);
+      if (content && content.style.display === 'none') {
+        header.style.backgroundColor = 'transparent';
+      }
+    });
+  });
+
+  // Simulation button handler
+  document.querySelectorAll('.btn-simulate-command').forEach(btn => {
+    btn.addEventListener('click', (e) => {
+      e.preventDefault();
+      e.stopPropagation();
+      const commandText = btn.getAttribute('data-cmd');
+      if (commandText) {
+        const studioNav = document.querySelector('.nav-item[data-view="studio"]');
+        if (studioNav) {
+          studioNav.click();
+        } else {
+          window.location.hash = '#studio';
+        }
+        setTimeout(() => {
+          const mockupInput = document.getElementById('mockup-chat-input');
+          if (mockupInput) {
+            mockupInput.value = commandText;
+            const sendBtn = document.getElementById('mockup-chat-send-btn');
+            if (sendBtn) {
+              sendBtn.click();
+              showToast('Menjalankan simulasi...', 'info');
+            }
+          }
+        }, 350);
+      }
+    });
+  });
+
+  // Copy command text listener
+  document.querySelectorAll('.btn-copy-command').forEach(btn => {
+    btn.addEventListener('click', (e) => {
+      e.preventDefault();
+      e.stopPropagation();
+      const commandText = btn.getAttribute('data-cmd');
+      if (commandText) {
+        navigator.clipboard.writeText(commandText).then(() => {
+          const originalSVG = btn.innerHTML;
+          btn.innerHTML = `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="14" height="14" style="color: var(--primary-color);"><polyline points="20 6 9 17 4 12"></polyline></svg>`;
+          btn.classList.add('copied');
+          showToast('Perintah disalin ke clipboard!', 'success');
+          setTimeout(() => {
+            btn.innerHTML = originalSVG;
+            btn.classList.remove('copied');
+          }, 2000);
+        }).catch(err => {
+          console.error('Failed to copy text: ', err);
+          showToast('Gagal menyalin perintah', 'error');
+        });
+      }
+    });
+  });
 }
 
 // --- FILE MOCK UPLOAD & SUMMARY ---
@@ -4718,6 +4763,34 @@ const initializeApp = async () => {
   if (googleLoginBtn) {
     googleLoginBtn.href = `${API_BASE_URL}/api/auth/google`;
   }
+
+  // Check for Google OAuth connection status parameter
+  const checkGoogleConnect = () => {
+    const searchParams = new URLSearchParams(window.location.search);
+    let connectStatus = searchParams.get('google_connect');
+    if (!connectStatus && window.location.hash.includes('?')) {
+      const hashQuery = window.location.hash.split('?')[1];
+      const hashParams = new URLSearchParams(hashQuery);
+      connectStatus = hashParams.get('google_connect');
+    }
+
+    if (connectStatus === 'success') {
+      showToast('Akun Google berhasil dihubungkan!', 'success');
+      playSuccessChime();
+      
+      const cleanUrl = new URL(window.location.href);
+      if (cleanUrl.searchParams.has('google_connect')) {
+        cleanUrl.searchParams.delete('google_connect');
+      }
+      if (cleanUrl.hash.includes('google_connect')) {
+        cleanUrl.hash = cleanUrl.hash.split('?')[0];
+      }
+      window.history.replaceState({}, document.title, cleanUrl.pathname + cleanUrl.search + cleanUrl.hash);
+    } else if (connectStatus === 'error') {
+      showToast('Gagal menghubungkan akun Google. Silakan coba lagi.', 'error');
+    }
+  };
+  checkGoogleConnect();
 };
 
 if (document.readyState === 'loading') {

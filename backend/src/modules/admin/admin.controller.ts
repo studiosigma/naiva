@@ -113,6 +113,12 @@ export class AdminController {
     return this.adminService.getQueueStats();
   }
 
+  @Get('analytics')
+  @ApiOperation({ summary: 'Dapatkan metrik observabilitas sistem, CPU, memori, dan kegagalan job antrean' })
+  async getAnalytics() {
+    return this.adminService.getAnalytics();
+  }
+
   // Feature Flags Endpoints
   @Get('feature-flags')
   @ApiOperation({ summary: 'Dapatkan status feature flags sistem' })

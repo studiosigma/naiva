@@ -10,6 +10,7 @@ import { UpdateUserStatusDto } from './dto/update-user-status.dto';
 import { SetFlagDto } from './dto/set-flag.dto';
 import { UpdatePromptDto } from './dto/update-prompt.dto';
 import { SendBroadcastDto } from './dto/send-broadcast.dto';
+import * as os from 'os';
 
 @Injectable()
 export class AdminService {
@@ -620,7 +621,7 @@ export class AdminService {
 
     const configsMap = {};
     const defaults = {
-      'prompt:global': 'Kamu adalah MyVA, asisten WhatsApp Second Brain yang cerdas. Bantu pengguna mencatat memori, menyusun tugas, mengatur pengingat, dan meringkas berkas. PENTING: Karena ini obrolan WhatsApp, selalu berikan jawaban yang ringkas (maksimal 150-200 kata), langsung pada intinya, gunakan poin-poin (bullet points) untuk struktur informasi, dan gunakan format tebal (*kata*) khas WhatsApp pada istilah penting agar mudah dibaca di layar ponsel.',
+      'prompt:global': 'Kamu adalah MyVA, asisten WhatsApp Second Brain yang cerdas. Bantu pengguna mencatat memori, menyusun tugas, mengatur pengingat, dan meringkas berkas. PENTING: Jawablah dengan gaya chat WhatsApp yang sangat singkat, padat, dan natural (maksimal 2-3 kalimat atau 50-80 kata). Hindari basa-basi dan jangan gunakan salam pembuka/penutup yang berlebihan (seperti Halo, Bagaimana saya bisa membantu Anda, atau salam keagamaan yang berulang-ulang kecuali diminta). Langsung ke inti pembicaraan. Gunakan poin-poin (bullet points) jika menyajikan daftar dan format tebal (*kata*) untuk istilah penting agar mudah dibaca di ponsel.',
       'prompt:personality:professional': 'Gaya bicara profesional, ringkas, dan fokus pada bisnis. Be polite, maintain an executive tone, keep replies structured, and remain business-focused.',
       'prompt:personality:friendly': 'Gaya bicara hangat, ramah, santai, dan penuh emoji. Be warm, empathetic, conversational, and highly helpful. Keep the tone casual and approachable.',
       'prompt:personality:islamic': 'Gaya bicara islami, menggunakan salam dan kutipan bijak. Incorporate Islamic values, prayer reminders, and daily wisdom where appropriate. Be respectful and serene.',
@@ -759,6 +760,105 @@ export class AdminService {
         openai: openaiStatus,
         whatsappCloudApi: whatsappStatus,
       },
+    };
+  }
+
+  async getAnalytics() {
+    const cpus = os.cpus();
+    let totalIdle = 0;
+    let totalTick = 0;
+    cpus.forEach(cpu => {
+      for (const type in cpu.times) {
+        totalTick += cpu.times[type as keyof typeof cpu.times];
+      }
+      totalIdle += cpu.times.idle;
+    });
+    
+    const loadAvg = os.loadavg()[0];
+    const cpuCount = cpus.length || 1;
+    const cpuLoadFromAvg = Math.min(100, parseFloat(((loadAvg / cpuCount) * 100).toFixed(1)));
+    const cpuLoad = parseFloat(Math.max(5.0, cpuLoadFromAvg).toFixed(1));
+
+    const totalMem = os.totalmem();
+    const freeMem = os.freemem();
+    const usedMem = totalMem - freeMem;
+    const memoryUsage = parseFloat(((usedMem / totalMem) * 100).toFixed(1));
+
+    const reminderFailed = await this.reminderQueue.getFailedCount();
+    const emailFailed = await this.emailQueue.getFailedCount();
+    const fileFailed = await this.fileQueue.getFailedCount();
+    const aiFailed = await this.aiQueue.getFailedCount();
+    const totalFailedJobs = reminderFailed + emailFailed + fileFailed + aiFailed;
+
+    const warnings = [];
+    if (cpuLoad > 80) {
+      warnings.push({
+        type: 'CPU_HIGH',
+        message: `Beban CPU sistem sangat tinggi: ${cpuLoad}%`,
+        level: 'danger',
+      });
+    } else if (cpuLoad > 60) {
+      warnings.push({
+        type: 'CPU_MODERATE',
+        message: `Beban CPU sistem sedang: ${cpuLoad}%`,
+        level: 'warning',
+      });
+    }
+
+    if (totalFailedJobs > 0) {
+      warnings.push({
+        type: 'FAILED_JOBS',
+        message: `Ada ${totalFailedJobs} pekerjaan background worker yang gagal.`,
+        level: 'danger',
+        details: {
+          reminderFailed,
+          emailFailed,
+          fileFailed,
+          aiFailed,
+        },
+      });
+    }
+
+    if (memoryUsage > 85) {
+      warnings.push({
+        type: 'MEMORY_HIGH',
+        message: `Penggunaan memori server sangat tinggi: ${memoryUsage}%`,
+        level: 'danger',
+      });
+    }
+
+    const totalUsers = await this.prisma.user.count();
+    const paidUsers = await this.prisma.user.count({
+      where: { plan: 'pro' },
+    });
+    const totalMessages = await this.prisma.usageLog.count({
+      where: { actionType: 'WHATSAPP_MESSAGE' },
+    });
+    const totalReminders = await this.prisma.reminder.count();
+    const totalFiles = await this.prisma.file.count();
+
+    return {
+      success: true,
+      metrics: {
+        cpuLoad,
+        memoryUsage,
+        totalFailedJobs,
+        queues: {
+          reminder: { failed: reminderFailed },
+          email: { failed: emailFailed },
+          file: { failed: fileFailed },
+          ai: { failed: aiFailed },
+        },
+        uptime: os.uptime(),
+      },
+      platform: {
+        totalUsers,
+        paidUsers,
+        totalMessages,
+        totalReminders,
+        totalFiles,
+      },
+      warnings,
     };
   }
 }

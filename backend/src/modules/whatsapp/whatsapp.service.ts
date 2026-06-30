@@ -89,6 +89,12 @@ export class WhatsAppService {
         return;
       }
 
+      // Check if code has expired
+      if (targetUser.waVerificationExpires && targetUser.waVerificationExpires < new Date()) {
+        await this.whatsappApiService.sendMessage(from, `❌ Kode verifikasi *${code}* sudah kedaluwarsa. Silakan regenerasi kode baru di dasbor Settings Anda.`);
+        return;
+      }
+
       const conflictingUser = await this.prisma.user.findUnique({
         where: { waNumber: from }
       });
@@ -102,6 +108,7 @@ export class WhatsAppService {
           where: { id: conflictingUser.id },
           data: { waNumber: null }
         });
+        await this.usersService.invalidateCache(conflictingUser.id);
       }
 
       await this.prisma.user.update({
@@ -109,11 +116,16 @@ export class WhatsAppService {
         data: {
           waNumber: from,
           waVerified: true,
-          waVerificationCode: null
+          waVerificationCode: null,
+          waVerificationExpires: null
         }
       });
+      await this.usersService.invalidateCache(targetUser.id);
 
-      await this.whatsappApiService.sendMessage(from, `🎉 *Verifikasi Berhasil!*\n\nAkun MyVA dengan email *${targetUser.email}* kini terhubung secara aman dengan nomor WhatsApp ini.`);
+      await this.whatsappApiService.sendMessage(
+        from,
+        `🎉 *Verifikasi Berhasil!*\n\nAkun MyVA dengan email *${targetUser.email}* kini terhubung secara aman dengan nomor WhatsApp ini.\n\n💡 *Mulai Asisten MyVA Anda!*\nAnda dapat berbicara dengan saya menggunakan bahasa alami biasa (misal: "tolong ingetin besok jemput adik jam 5 sore").\n\nKetik *bantuan* atau *help* kapan saja di chat ini untuk memunculkan daftar lengkap perintah yang didukung. Selamat menggunakan! 🚀`
+      );
       return;
     }
 
@@ -402,6 +414,11 @@ export class WhatsAppService {
         return `❌ Kode verifikasi *${code}* tidak ditemukan atau sudah kedaluwarsa. Silakan periksa kembali kode di dasbor Settings Anda.`;
       }
 
+      // Check if code has expired
+      if (targetUser.waVerificationExpires && targetUser.waVerificationExpires < new Date()) {
+        return `❌ Kode verifikasi *${code}* sudah kedaluwarsa. Silakan regenerasi kode baru di dasbor Settings Anda.`;
+      }
+
       const conflictingUser = await this.prisma.user.findUnique({
         where: { waNumber: from }
       });
@@ -414,6 +431,7 @@ export class WhatsAppService {
           where: { id: conflictingUser.id },
           data: { waNumber: null }
         });
+        await this.usersService.invalidateCache(conflictingUser.id);
       }
 
       await this.prisma.user.update({
@@ -421,11 +439,13 @@ export class WhatsAppService {
         data: {
           waNumber: from,
           waVerified: true,
-          waVerificationCode: null
+          waVerificationCode: null,
+          waVerificationExpires: null
         }
       });
+      await this.usersService.invalidateCache(targetUser.id);
 
-      return `🎉 *Verifikasi Berhasil!*\n\nAkun MyVA dengan email *${targetUser.email}* kini terhubung secara aman dengan nomor WhatsApp ini.`;
+      return `🎉 *Verifikasi Berhasil!*\n\nAkun MyVA dengan email *${targetUser.email}* kini terhubung secara aman dengan nomor WhatsApp ini.\n\n💡 *Mulai Asisten MyVA Anda!*\nAnda dapat berbicara dengan saya menggunakan bahasa alami biasa (misal: "tolong ingetin besok jemput adik jam 5 sore").\n\nKetik *bantuan* atau *help* kapan saja di chat ini untuk memunculkan daftar lengkap perintah yang didukung. Selamat menggunakan! 🚀`;
     }
 
     let user = await this.usersService.findOneByWaNumber(from);

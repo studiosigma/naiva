@@ -15,6 +15,7 @@ import { ExpenseModule } from './modules/expense/expense.module';
 import { SubscriptionModule } from './modules/subscription/subscription.module';
 import { AffiliateModule } from './modules/affiliate/affiliate.module';
 import { AdminModule } from './modules/admin/admin.module';
+import { CacheModule } from './modules/cache/cache.module';
 
 @Module({
   imports: [
@@ -22,6 +23,9 @@ import { AdminModule } from './modules/admin/admin.module';
     ConfigModule.forRoot({
       isGlobal: true,
     }),
+
+    // Redis Cache Global
+    CacheModule,
 
     // Database Global
     DatabaseModule,
