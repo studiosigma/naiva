@@ -308,7 +308,23 @@ export class IntentRouterService {
           maximumFractionDigits: 0
         }).format(expense.amount);
 
-        return `💸 *Pengeluaran Berhasil Dicatat!*\n\n*Deskripsi:* ${expense.description}\n*Jumlah:* ${formattedAmount}\n*Kategori:* ${expense.category}\n\n_Catatan keuangan Anda telah diperbarui di dashboard._`;
+        // Fetch monthly summary stats for enhanced user response
+        const monthlyTotal = await this.expenseService.getMonthlyTotal(userId);
+        const categoryTotal = await this.expenseService.getMonthlyCategoryTotal(userId, category);
+
+        const formattedMonthlyTotal = new Intl.NumberFormat('id-ID', {
+          style: 'currency',
+          currency: 'IDR',
+          maximumFractionDigits: 0
+        }).format(monthlyTotal);
+
+        const formattedCategoryTotal = new Intl.NumberFormat('id-ID', {
+          style: 'currency',
+          currency: 'IDR',
+          maximumFractionDigits: 0
+        }).format(categoryTotal);
+
+        return `💸 *Pengeluaran Berhasil Dicatat!*\n\n*Deskripsi:* ${expense.description}\n*Jumlah:* ${formattedAmount}\n*Kategori:* ${expense.category}\n\n📈 *Rekap Bulan Ini*:\n• Total Kategori *${expense.category}*: ${formattedCategoryTotal}\n• Total Semua Pengeluaran: ${formattedMonthlyTotal}\n\n_Catatan keuangan Anda telah diperbarui di dashboard._`;
       }
 
       // 4. INTENT: CREATE MEMORY (NOTE)

@@ -53,4 +53,48 @@ export class ExpenseService {
       total,
     }));
   }
+
+  async getMonthlyTotal(userId: string): Promise<number> {
+    const startOfMonth = new Date();
+    startOfMonth.setDate(1);
+    startOfMonth.setHours(0, 0, 0, 0);
+
+    const aggregate = await this.prisma.expense.aggregate({
+      where: {
+        userId,
+        createdAt: {
+          gte: startOfMonth,
+        },
+      },
+      _sum: {
+        amount: true,
+      },
+    });
+
+    return aggregate._sum.amount || 0;
+  }
+
+  async getMonthlyCategoryTotal(userId: string, category: string): Promise<number> {
+    const startOfMonth = new Date();
+    startOfMonth.setDate(1);
+    startOfMonth.setHours(0, 0, 0, 0);
+
+    const aggregate = await this.prisma.expense.aggregate({
+      where: {
+        userId,
+        category: {
+          equals: category,
+          mode: 'insensitive',
+        },
+        createdAt: {
+          gte: startOfMonth,
+        },
+      },
+      _sum: {
+        amount: true,
+      },
+    });
+
+    return aggregate._sum.amount || 0;
+  }
 }
