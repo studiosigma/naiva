@@ -1113,44 +1113,80 @@
 
               <div class="notion-toggle-list" style="display: flex; flex-direction: column; gap: 12px;">
                 
-                <!-- Toggle 1: Tugas -->
+                <!-- Toggle 1: Tugas / To-Do List -->
                 <div class="notion-toggle-item">
                   <div class="notion-toggle-header" data-toggle="tugas" style="display: flex; align-items: center; gap: 8px; cursor: pointer; user-select: none; padding: 6px 4px; border-radius: var(--radius-sm); transition: background-color 0.15s ease;">
                     <span class="notion-toggle-arrow" style="font-size: 10px; color: var(--text-secondary); transition: transform 0.15s ease; display: inline-block;">▶</span>
-                    <span style="font-size: 14px; font-weight: 600; color: var(--text-primary);">📋 Tugas (To-Do List)</span>
+                    <span style="font-size: 14px; font-weight: 600; color: var(--text-primary);">📋 Membuat Tugas (To-Do List)</span>
+                    <span class="badge" style="font-size: 10px; padding: 1px 6px; background-color: rgba(99, 102, 241, 0.15); color: var(--primary-color); border-radius: 4px; font-weight: 600; margin-left: auto;">Basic & Pro Only</span>
                   </div>
                   <div class="notion-toggle-content" id="toggle-content-tugas" style="display: none; padding-left: 20px; margin-top: 6px; margin-bottom: 10px;">
-                    <p style="margin: 0 0 8px 0; color: var(--text-secondary); font-size: 12.5px;">Menambahkan item pekerjaan baru ke dasbor To-Do Anda.</p>
-                    <div class="command-example-box" style="display: flex; align-items: center; justify-content: space-between; background: #F7F6F3; border: 1px solid var(--border-color); padding: 8px 12px; border-radius: var(--radius-md);">
-                      <code style="font-family: monospace; font-size: 13px; color: #1E1E1E;">todo Kirim laporan bulanan sore ini</code>
-                      <div style="display: flex; align-items: center; gap: 8px;">
-                        <button class="btn btn-xs btn-outline btn-simulate-command" data-cmd="todo Kirim laporan bulanan sore ini" title="Simulasikan di Live Chat">Simulasikan ⚡</button>
-                        <button class="btn-copy-command" data-cmd="todo Kirim laporan bulanan sore ini" title="Salin Perintah" style="background: none; border: none; cursor: pointer; color: var(--text-secondary); display: flex; align-items: center; padding: 4px;">
-                          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="14" height="14"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path></svg>
-                        </button>
+                    <p style="margin: 0 0 8px 0; color: var(--text-secondary); font-size: 12.5px; line-height: 1.4;">Menambahkan pekerjaan baru ke dashboard tugas Anda.</p>
+                    <div style="display: flex; flex-direction: column; gap: 8px;">
+                      <div class="command-example-box" style="display: flex; align-items: center; justify-content: space-between; background: #F7F6F3; border: 1px solid var(--border-color); padding: 8px 12px; border-radius: var(--radius-md);">
+                        <code style="font-family: monospace; font-size: 13px; color: #1E1E1E;">todo Kirim laporan bulanan sore ini</code>
+                        <div style="display: flex; align-items: center; gap: 8px;">
+                          <button class="btn btn-xs btn-outline btn-simulate-command" data-cmd="todo Kirim laporan bulanan sore ini" title="Simulasikan di Live Chat">Simulasikan ⚡</button>
+                          <button class="btn-copy-command" data-cmd="todo Kirim laporan bulanan sore ini" title="Salin Perintah" style="background: none; border: none; cursor: pointer; color: var(--text-secondary); display: flex; align-items: center; padding: 4px;">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="14" height="14"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path></svg>
+                          </button>
+                        </div>
+                      </div>
+                      <div class="command-example-box" style="display: flex; align-items: center; justify-content: space-between; background: #F7F6F3; border: 1px solid var(--border-color); padding: 8px 12px; border-radius: var(--radius-md);">
+                        <code style="font-family: monospace; font-size: 13px; color: #1E1E1E;">task Beli kopi dan gula</code>
+                        <div style="display: flex; align-items: center; gap: 8px;">
+                          <button class="btn btn-xs btn-outline btn-simulate-command" data-cmd="task Beli kopi dan gula" title="Simulasikan di Live Chat">Simulasikan ⚡</button>
+                          <button class="btn-copy-command" data-cmd="task Beli kopi dan gula" title="Salin Perintah" style="background: none; border: none; cursor: pointer; color: var(--text-secondary); display: flex; align-items: center; padding: 4px;">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="14" height="14"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path></svg>
+                          </button>
+                        </div>
                       </div>
                     </div>
                   </div>
                 </div>
 
-                <!-- Toggle 2: Pengingat -->
+                <!-- Toggle 2: Pengingat (Reminder) -->
                 <div class="notion-toggle-item">
                   <div class="notion-toggle-header" data-toggle="pengingat" style="display: flex; align-items: center; gap: 8px; cursor: pointer; user-select: none; padding: 6px 4px; border-radius: var(--radius-sm); transition: background-color 0.15s ease;">
                     <span class="notion-toggle-arrow" style="font-size: 10px; color: var(--text-secondary); transition: transform 0.15s ease; display: inline-block;">▶</span>
-                    <span style="font-size: 14px; font-weight: 600; color: var(--text-primary);">⏰ Pengingat & Kalender</span>
+                    <span style="font-size: 14px; font-weight: 600; color: var(--text-primary);">⏰ Membuat Pengingat (Reminder)</span>
+                    <span class="badge" style="font-size: 10px; padding: 1px 6px; background-color: rgba(34, 197, 94, 0.1); color: var(--success); border-radius: 4px; font-weight: 600; margin-left: auto;">Semua Paket</span>
                   </div>
                   <div class="notion-toggle-content" id="toggle-content-pengingat" style="display: none; padding-left: 20px; margin-top: 6px; margin-bottom: 10px;">
-                    <p style="margin: 0 0 8px 0; color: var(--text-secondary); font-size: 12.5px;">Menjadwalkan alarm lokal, Google Calendar, serta tautan otomatis Google Meet.</p>
+                    <p style="margin: 0 0 8px 0; color: var(--text-secondary); font-size: 12.5px; line-height: 1.4;">Membuat pengingat alarm lokal. MyVA akan mengekstrak tanggal & waktu secara dinamis menggunakan AI.</p>
                     <div style="display: flex; flex-direction: column; gap: 8px;">
                       <div class="command-example-box" style="display: flex; align-items: center; justify-content: space-between; background: #F7F6F3; border: 1px solid var(--border-color); padding: 8px 12px; border-radius: var(--radius-md);">
-                        <code style="font-family: monospace; font-size: 13px; color: #1E1E1E;">ingatkan meeting besok jam 10 pagi</code>
+                        <code style="font-family: monospace; font-size: 13px; color: #1E1E1E;">ingatkan saya meeting besok jam 10 pagi</code>
                         <div style="display: flex; align-items: center; gap: 8px;">
-                          <button class="btn btn-xs btn-outline btn-simulate-command" data-cmd="ingatkan meeting besok jam 10 pagi" title="Simulasikan di Live Chat">Simulasikan ⚡</button>
-                          <button class="btn-copy-command" data-cmd="ingatkan meeting besok jam 10 pagi" title="Salin Perintah" style="background: none; border: none; cursor: pointer; color: var(--text-secondary); display: flex; align-items: center; padding: 4px;">
+                          <button class="btn btn-xs btn-outline btn-simulate-command" data-cmd="ingatkan saya meeting besok jam 10 pagi" title="Simulasikan di Live Chat">Simulasikan ⚡</button>
+                          <button class="btn-copy-command" data-cmd="ingatkan saya meeting besok jam 10 pagi" title="Salin Perintah" style="background: none; border: none; cursor: pointer; color: var(--text-secondary); display: flex; align-items: center; padding: 4px;">
                             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="14" height="14"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path></svg>
                           </button>
                         </div>
                       </div>
+                      <div class="command-example-box" style="display: flex; align-items: center; justify-content: space-between; background: #F7F6F3; border: 1px solid var(--border-color); padding: 8px 12px; border-radius: var(--radius-md);">
+                        <code style="font-family: monospace; font-size: 13px; color: #1E1E1E;">reminder minum obat nanti malam jam 8</code>
+                        <div style="display: flex; align-items: center; gap: 8px;">
+                          <button class="btn btn-xs btn-outline btn-simulate-command" data-cmd="reminder minum obat nanti malam jam 8" title="Simulasikan di Live Chat">Simulasikan ⚡</button>
+                          <button class="btn-copy-command" data-cmd="reminder minum obat nanti malam jam 8" title="Salin Perintah" style="background: none; border: none; cursor: pointer; color: var(--text-secondary); display: flex; align-items: center; padding: 4px;">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="14" height="14"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path></svg>
+                          </button>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
+                <!-- Toggle 3: Acara Kalender & Google Meet -->
+                <div class="notion-toggle-item">
+                  <div class="notion-toggle-header" data-toggle="acara" style="display: flex; align-items: center; gap: 8px; cursor: pointer; user-select: none; padding: 6px 4px; border-radius: var(--radius-sm); transition: background-color 0.15s ease;">
+                    <span class="notion-toggle-arrow" style="font-size: 10px; color: var(--text-secondary); transition: transform 0.15s ease; display: inline-block;">▶</span>
+                    <span style="font-size: 14px; font-weight: 600; color: var(--text-primary);">📅 Acara Kalender & Google Meet</span>
+                    <span class="badge" style="font-size: 10px; padding: 1px 6px; background-color: rgba(99, 102, 241, 0.15); color: var(--primary-color); border-radius: 4px; font-weight: 600; margin-left: auto;">Basic & Pro Only</span>
+                  </div>
+                  <div class="notion-toggle-content" id="toggle-content-acara" style="display: none; padding-left: 20px; margin-top: 6px; margin-bottom: 10px;">
+                    <p style="margin: 0 0 8px 0; color: var(--text-secondary); font-size: 12.5px; line-height: 1.4;">Membuat event di Google Calendar (harus terhubung). Pertemuan/meeting otomatis ditambahkan tautan <strong>Google Meet</strong>.</p>
+                    <div style="display: flex; flex-direction: column; gap: 8px;">
                       <div class="command-example-box" style="display: flex; align-items: center; justify-content: space-between; background: #F7F6F3; border: 1px solid var(--border-color); padding: 8px 12px; border-radius: var(--radius-md);">
                         <code style="font-family: monospace; font-size: 13px; color: #1E1E1E;">jadwal Rapat koordinasi besok jam 1 siang</code>
                         <div style="display: flex; align-items: center; gap: 8px;">
@@ -1160,48 +1196,93 @@
                           </button>
                         </div>
                       </div>
-                    </div>
-                  </div>
-                </div>
-
-                <!-- Toggle 3: Keuangan -->
-                <div class="notion-toggle-item">
-                  <div class="notion-toggle-header" data-toggle="keuangan" style="display: flex; align-items: center; gap: 8px; cursor: pointer; user-select: none; padding: 6px 4px; border-radius: var(--radius-sm); transition: background-color 0.15s ease;">
-                    <span class="notion-toggle-arrow" style="font-size: 10px; color: var(--text-secondary); transition: transform 0.15s ease; display: inline-block;">▶</span>
-                    <span style="font-size: 14px; font-weight: 600; color: var(--text-primary);">💸 Keuangan (Catat Pengeluaran)</span>
-                  </div>
-                  <div class="notion-toggle-content" id="toggle-content-keuangan" style="display: none; padding-left: 20px; margin-top: 6px; margin-bottom: 10px;">
-                    <p style="margin: 0 0 8px 0; color: var(--text-secondary); font-size: 12.5px;">Mencatat pengeluaran harian dan nominal uang belanja/jajan Anda.</p>
-                    <div class="command-example-box" style="display: flex; align-items: center; justify-content: space-between; background: #F7F6F3; border: 1px solid var(--border-color); padding: 8px 12px; border-radius: var(--radius-md);">
-                      <code style="font-family: monospace; font-size: 13px; color: #1E1E1E;">catat beli kopi Starbucks 55rb</code>
-                      <div style="display: flex; align-items: center; gap: 8px;">
-                        <button class="btn btn-xs btn-outline btn-simulate-command" data-cmd="catat beli kopi Starbucks 55rb" title="Simulasikan di Live Chat">Simulasikan ⚡</button>
-                        <button class="btn-copy-command" data-cmd="catat beli kopi Starbucks 55rb" title="Salin Perintah" style="background: none; border: none; cursor: pointer; color: var(--text-secondary); display: flex; align-items: center; padding: 4px;">
-                          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="14" height="14"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path></svg>
-                        </button>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-
-                <!-- Toggle 4: Memori -->
-                <div class="notion-toggle-item">
-                  <div class="notion-toggle-header" data-toggle="catatan" style="display: flex; align-items: center; gap: 8px; cursor: pointer; user-select: none; padding: 6px 4px; border-radius: var(--radius-sm); transition: background-color 0.15s ease;">
-                    <span class="notion-toggle-arrow" style="font-size: 10px; color: var(--text-secondary); transition: transform 0.15s ease; display: inline-block;">▶</span>
-                    <span style="font-size: 14px; font-weight: 600; color: var(--text-primary);">🧠 Memori / Second Brain</span>
-                  </div>
-                  <div class="notion-toggle-content" id="toggle-content-catatan" style="display: none; padding-left: 20px; margin-top: 6px; margin-bottom: 10px;">
-                    <p style="margin: 0 0 8px 0; color: var(--text-secondary); font-size: 12.5px;">Menyimpan informasi jangka panjang dan mencarinya kembali kapan saja.</p>
-                    <div style="display: flex; flex-direction: column; gap: 8px;">
                       <div class="command-example-box" style="display: flex; align-items: center; justify-content: space-between; background: #F7F6F3; border: 1px solid var(--border-color); padding: 8px 12px; border-radius: var(--radius-md);">
-                        <code style="font-family: monospace; font-size: 13px; color: #1E1E1E;">catat nomor seri laptop kantor LPT-998822</code>
+                        <code style="font-family: monospace; font-size: 13px; color: #1E1E1E;">meeting Klien baru hari Jumat jam 9 pagi</code>
                         <div style="display: flex; align-items: center; gap: 8px;">
-                          <button class="btn btn-xs btn-outline btn-simulate-command" data-cmd="catat nomor seri laptop kantor LPT-998822" title="Simulasikan di Live Chat">Simulasikan ⚡</button>
-                          <button class="btn-copy-command" data-cmd="catat nomor seri laptop kantor LPT-998822" title="Salin Perintah" style="background: none; border: none; cursor: pointer; color: var(--text-secondary); display: flex; align-items: center; padding: 4px;">
+                          <button class="btn btn-xs btn-outline btn-simulate-command" data-cmd="meeting Klien baru hari Jumat jam 9 pagi" title="Simulasikan di Live Chat">Simulasikan ⚡</button>
+                          <button class="btn-copy-command" data-cmd="meeting Klien baru hari Jumat jam 9 pagi" title="Salin Perintah" style="background: none; border: none; cursor: pointer; color: var(--text-secondary); display: flex; align-items: center; padding: 4px;">
                             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="14" height="14"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path></svg>
                           </button>
                         </div>
                       </div>
+                    </div>
+                  </div>
+                </div>
+
+                <!-- Toggle 4: Keuangan (Smart Expense) -->
+                <div class="notion-toggle-item">
+                  <div class="notion-toggle-header" data-toggle="keuangan" style="display: flex; align-items: center; gap: 8px; cursor: pointer; user-select: none; padding: 6px 4px; border-radius: var(--radius-sm); transition: background-color 0.15s ease;">
+                    <span class="notion-toggle-arrow" style="font-size: 10px; color: var(--text-secondary); transition: transform 0.15s ease; display: inline-block;">▶</span>
+                    <span style="font-size: 14px; font-weight: 600; color: var(--text-primary);">💸 Pencatatan Keuangan (Smart Expense)</span>
+                    <span class="badge" style="font-size: 10px; padding: 1px 6px; background-color: rgba(34, 197, 94, 0.1); color: var(--success); border-radius: 4px; font-weight: 600; margin-left: auto;">Semua Paket</span>
+                  </div>
+                  <div class="notion-toggle-content" id="toggle-content-keuangan" style="display: none; padding-left: 20px; margin-top: 6px; margin-bottom: 10px;">
+                    <p style="margin: 0 0 8px 0; color: var(--text-secondary); font-size: 12.5px; line-height: 1.4;">MyVA mengekstrak nominal secara otomatis dan mencatat pengeluaran Anda ke tab laporan pengeluaran.</p>
+                    <div style="display: flex; flex-direction: column; gap: 8px;">
+                      <div class="command-example-box" style="display: flex; align-items: center; justify-content: space-between; background: #F7F6F3; border: 1px solid var(--border-color); padding: 8px 12px; border-radius: var(--radius-md);">
+                        <code style="font-family: monospace; font-size: 13px; color: #1E1E1E;">catat beli kopi 25rb</code>
+                        <div style="display: flex; align-items: center; gap: 8px;">
+                          <button class="btn btn-xs btn-outline btn-simulate-command" data-cmd="catat beli kopi 25rb" title="Simulasikan di Live Chat">Simulasikan ⚡</button>
+                          <button class="btn-copy-command" data-cmd="catat beli kopi 25rb" title="Salin Perintah" style="background: none; border: none; cursor: pointer; color: var(--text-secondary); display: flex; align-items: center; padding: 4px;">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="14" height="14"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path></svg>
+                          </button>
+                        </div>
+                      </div>
+                      <div class="command-example-box" style="display: flex; align-items: center; justify-content: space-between; background: #F7F6F3; border: 1px solid var(--border-color); padding: 8px 12px; border-radius: var(--radius-md);">
+                        <code style="font-family: monospace; font-size: 13px; color: #1E1E1E;">pengeluaran bayar listrik 150ribu</code>
+                        <div style="display: flex; align-items: center; gap: 8px;">
+                          <button class="btn btn-xs btn-outline btn-simulate-command" data-cmd="pengeluaran bayar listrik 150ribu" title="Simulasikan di Live Chat">Simulasikan ⚡</button>
+                          <button class="btn-copy-command" data-cmd="pengeluaran bayar listrik 150ribu" title="Salin Perintah" style="background: none; border: none; cursor: pointer; color: var(--text-secondary); display: flex; align-items: center; padding: 4px;">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="14" height="14"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path></svg>
+                          </button>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
+                <!-- Toggle 5: Menyimpan Memori / Catatan -->
+                <div class="notion-toggle-item">
+                  <div class="notion-toggle-header" data-toggle="catat-memori" style="display: flex; align-items: center; gap: 8px; cursor: pointer; user-select: none; padding: 6px 4px; border-radius: var(--radius-sm); transition: background-color 0.15s ease;">
+                    <span class="notion-toggle-arrow" style="font-size: 10px; color: var(--text-secondary); transition: transform 0.15s ease; display: inline-block;">▶</span>
+                    <span style="font-size: 14px; font-weight: 600; color: var(--text-primary);">🧠 Menyimpan Informasi / Catatan (Memory)</span>
+                    <span class="badge" style="font-size: 10px; padding: 1px 6px; background-color: rgba(34, 197, 94, 0.1); color: var(--success); border-radius: 4px; font-weight: 600; margin-left: auto;">Semua Paket</span>
+                  </div>
+                  <div class="notion-toggle-content" id="toggle-content-catat-memori" style="display: none; padding-left: 20px; margin-top: 6px; margin-bottom: 10px;">
+                    <p style="margin: 0 0 8px 0; color: var(--text-secondary); font-size: 12.5px; line-height: 1.4;">Menyimpan catatan penting ke dalam otak kedua AI Anda (Second Brain).</p>
+                    <div style="display: flex; flex-direction: column; gap: 8px;">
+                      <div class="command-example-box" style="display: flex; align-items: center; justify-content: space-between; background: #F7F6F3; border: 1px solid var(--border-color); padding: 8px 12px; border-radius: var(--radius-md);">
+                        <code style="font-family: monospace; font-size: 13px; color: #1E1E1E;">catat nomor seri laptop kantor adalah LPT-998822</code>
+                        <div style="display: flex; align-items: center; gap: 8px;">
+                          <button class="btn btn-xs btn-outline btn-simulate-command" data-cmd="catat nomor seri laptop kantor adalah LPT-998822" title="Simulasikan di Live Chat">Simulasikan ⚡</button>
+                          <button class="btn-copy-command" data-cmd="catat nomor seri laptop kantor adalah LPT-998822" title="Salin Perintah" style="background: none; border: none; cursor: pointer; color: var(--text-secondary); display: flex; align-items: center; padding: 4px;">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="14" height="14"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path></svg>
+                          </button>
+                        </div>
+                      </div>
+                      <div class="command-example-box" style="display: flex; align-items: center; justify-content: space-between; background: #F7F6F3; border: 1px solid var(--border-color); padding: 8px 12px; border-radius: var(--radius-md);">
+                        <code style="font-family: monospace; font-size: 13px; color: #1E1E1E;">tulis catatan resep nasi goreng: nasi, telur, kecap</code>
+                        <div style="display: flex; align-items: center; gap: 8px;">
+                          <button class="btn btn-xs btn-outline btn-simulate-command" data-cmd="tulis catatan resep nasi goreng: nasi, telur, kecap" title="Simulasikan di Live Chat">Simulasikan ⚡</button>
+                          <button class="btn-copy-command" data-cmd="tulis catatan resep nasi goreng: nasi, telur, kecap" title="Salin Perintah" style="background: none; border: none; cursor: pointer; color: var(--text-secondary); display: flex; align-items: center; padding: 4px;">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="14" height="14"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path></svg>
+                          </button>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
+                <!-- Toggle 6: Mencari Catatan / Memori -->
+                <div class="notion-toggle-item">
+                  <div class="notion-toggle-header" data-toggle="cari-memori" style="display: flex; align-items: center; gap: 8px; cursor: pointer; user-select: none; padding: 6px 4px; border-radius: var(--radius-sm); transition: background-color 0.15s ease;">
+                    <span class="notion-toggle-arrow" style="font-size: 10px; color: var(--text-secondary); transition: transform 0.15s ease; display: inline-block;">▶</span>
+                    <span style="font-size: 14px; font-weight: 600; color: var(--text-primary);">🔍 Mencari Catatan / Memori (Search)</span>
+                    <span class="badge" style="font-size: 10px; padding: 1px 6px; background-color: rgba(34, 197, 94, 0.1); color: var(--success); border-radius: 4px; font-weight: 600; margin-left: auto;">Semua Paket</span>
+                  </div>
+                  <div class="notion-toggle-content" id="toggle-content-cari-memori" style="display: none; padding-left: 20px; margin-top: 6px; margin-bottom: 10px;">
+                    <p style="margin: 0 0 8px 0; color: var(--text-secondary); font-size: 12.5px; line-height: 1.4;">Melakukan pencarian semantik untuk menampilkan kembali catatan yang pernah disimpan.</p>
+                    <div style="display: flex; flex-direction: column; gap: 8px;">
                       <div class="command-example-box" style="display: flex; align-items: center; justify-content: space-between; background: #F7F6F3; border: 1px solid var(--border-color); padding: 8px 12px; border-radius: var(--radius-md);">
                         <code style="font-family: monospace; font-size: 13px; color: #1E1E1E;">cari nomor seri laptop</code>
                         <div style="display: flex; align-items: center; gap: 8px;">
@@ -1211,58 +1292,138 @@
                           </button>
                         </div>
                       </div>
+                      <div class="command-example-box" style="display: flex; align-items: center; justify-content: space-between; background: #F7F6F3; border: 1px solid var(--border-color); padding: 8px 12px; border-radius: var(--radius-md);">
+                        <code style="font-family: monospace; font-size: 13px; color: #1E1E1E;">search resep nasi goreng</code>
+                        <div style="display: flex; align-items: center; gap: 8px;">
+                          <button class="btn btn-xs btn-outline btn-simulate-command" data-cmd="search resep nasi goreng" title="Simulasikan di Live Chat">Simulasikan ⚡</button>
+                          <button class="btn-copy-command" data-cmd="search resep nasi goreng" title="Salin Perintah" style="background: none; border: none; cursor: pointer; color: var(--text-secondary); display: flex; align-items: center; padding: 4px;">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="14" height="14"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path></svg>
+                          </button>
+                        </div>
+                      </div>
                     </div>
                   </div>
                 </div>
 
-                <!-- Toggle 5: Kontak -->
+                <!-- Toggle 7: Menyimpan Kontak Baru -->
                 <div class="notion-toggle-item">
                   <div class="notion-toggle-header" data-toggle="kontak" style="display: flex; align-items: center; gap: 8px; cursor: pointer; user-select: none; padding: 6px 4px; border-radius: var(--radius-sm); transition: background-color 0.15s ease;">
                     <span class="notion-toggle-arrow" style="font-size: 10px; color: var(--text-secondary); transition: transform 0.15s ease; display: inline-block;">▶</span>
-                    <span style="font-size: 14px; font-weight: 600; color: var(--text-primary);">👤 Kontak</span>
+                    <span style="font-size: 14px; font-weight: 600; color: var(--text-primary);">👤 Menyimpan Kontak Baru (Google Contacts)</span>
+                    <span class="badge" style="font-size: 10px; padding: 1px 6px; background-color: rgba(34, 197, 94, 0.1); color: var(--success); border-radius: 4px; font-weight: 600; margin-left: auto;">Semua Paket</span>
                   </div>
                   <div class="notion-toggle-content" id="toggle-content-kontak" style="display: none; padding-left: 20px; margin-top: 6px; margin-bottom: 10px;">
-                    <p style="margin: 0 0 8px 0; color: var(--text-secondary); font-size: 12.5px;">Menyimpan kontak lokal dan menyinkronkan dengan Google Contacts.</p>
-                    <div class="command-example-box" style="display: flex; align-items: center; justify-content: space-between; background: #F7F6F3; border: 1px solid var(--border-color); padding: 8px 12px; border-radius: var(--radius-md);">
-                      <code style="font-family: monospace; font-size: 13px; color: #1E1E1E;">kontak John Doe 08123456789</code>
-                      <div style="display: flex; align-items: center; gap: 8px;">
-                        <button class="btn btn-xs btn-outline btn-simulate-command" data-cmd="kontak John Doe 08123456789" title="Simulasikan di Live Chat">Simulasikan ⚡</button>
-                        <button class="btn-copy-command" data-cmd="kontak John Doe 08123456789" title="Salin Perintah" style="background: none; border: none; cursor: pointer; color: var(--text-secondary); display: flex; align-items: center; padding: 4px;">
-                          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="14" height="14"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path></svg>
-                        </button>
+                    <p style="margin: 0 0 8px 0; color: var(--text-secondary); font-size: 12.5px; line-height: 1.4;">Menyimpan nama & telepon kontak baru ke database dan disinkronkan ke Google Contacts Anda.</p>
+                    <div style="display: flex; flex-direction: column; gap: 8px;">
+                      <div class="command-example-box" style="display: flex; align-items: center; justify-content: space-between; background: #F7F6F3; border: 1px solid var(--border-color); padding: 8px 12px; border-radius: var(--radius-md);">
+                        <code style="font-family: monospace; font-size: 13px; color: #1E1E1E;">kontak John Doe +628991234567</code>
+                        <div style="display: flex; align-items: center; gap: 8px;">
+                          <button class="btn btn-xs btn-outline btn-simulate-command" data-cmd="kontak John Doe +628991234567" title="Simulasikan di Live Chat">Simulasikan ⚡</button>
+                          <button class="btn-copy-command" data-cmd="kontak John Doe +628991234567" title="Salin Perintah" style="background: none; border: none; cursor: pointer; color: var(--text-secondary); display: flex; align-items: center; padding: 4px;">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="14" height="14"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path></svg>
+                          </button>
+                        </div>
+                      </div>
+                      <div class="command-example-box" style="display: flex; align-items: center; justify-content: space-between; background: #F7F6F3; border: 1px solid var(--border-color); padding: 8px 12px; border-radius: var(--radius-md);">
+                        <code style="font-family: monospace; font-size: 13px; color: #1E1E1E;">simpan kontak Sarah Connor 08123456789</code>
+                        <div style="display: flex; align-items: center; gap: 8px;">
+                          <button class="btn btn-xs btn-outline btn-simulate-command" data-cmd="simpan kontak Sarah Connor 08123456789" title="Simulasikan di Live Chat">Simulasikan ⚡</button>
+                          <button class="btn-copy-command" data-cmd="simpan kontak Sarah Connor 08123456789" title="Salin Perintah" style="background: none; border: none; cursor: pointer; color: var(--text-secondary); display: flex; align-items: center; padding: 4px;">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="14" height="14"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path></svg>
+                          </button>
+                        </div>
                       </div>
                     </div>
                   </div>
                 </div>
 
-                <!-- Toggle 6: Email -->
+                <!-- Toggle 8: Asisten Email / Gmail -->
                 <div class="notion-toggle-item">
                   <div class="notion-toggle-header" data-toggle="email" style="display: flex; align-items: center; gap: 8px; cursor: pointer; user-select: none; padding: 6px 4px; border-radius: var(--radius-sm); transition: background-color 0.15s ease;">
                     <span class="notion-toggle-arrow" style="font-size: 10px; color: var(--text-secondary); transition: transform 0.15s ease; display: inline-block;">▶</span>
-                    <span style="font-size: 14px; font-weight: 600; color: var(--text-primary);">📧 Email & Pencarian Internet</span>
+                    <span style="font-size: 14px; font-weight: 600; color: var(--text-primary);">📧 Asisten Email / Gmail</span>
+                    <span class="badge" style="font-size: 10px; padding: 1px 6px; background-color: rgba(99, 102, 241, 0.15); color: var(--primary-color); border-radius: 4px; font-weight: 600; margin-left: auto;">Basic & Pro Only</span>
                   </div>
                   <div class="notion-toggle-content" id="toggle-content-email" style="display: none; padding-left: 20px; margin-top: 6px; margin-bottom: 10px;">
-                    <p style="margin: 0 0 8px 0; color: var(--text-secondary); font-size: 12.5px;">Membaca email terbaru, merangkum file, dan mencari info internet.</p>
+                    <p style="margin: 0 0 8px 0; color: var(--text-secondary); font-size: 12.5px; line-height: 1.4;">Menyinkronkan dan merangkum pesan masuk penting langsung dari akun Gmail Anda.</p>
                     <div style="display: flex; flex-direction: column; gap: 8px;">
                       <div class="command-example-box" style="display: flex; align-items: center; justify-content: space-between; background: #F7F6F3; border: 1px solid var(--border-color); padding: 8px 12px; border-radius: var(--radius-md);">
-                        <code style="font-family: monospace; font-size: 13px; color: #1E1E1E;">cek email terbaru dari Sarah</code>
+                        <code style="font-family: monospace; font-size: 13px; color: #1E1E1E;">cek email terbaru</code>
                         <div style="display: flex; align-items: center; gap: 8px;">
-                          <button class="btn btn-xs btn-outline btn-simulate-command" data-cmd="cek email terbaru dari Sarah" title="Simulasikan di Live Chat">Simulasikan ⚡</button>
-                          <button class="btn-copy-command" data-cmd="cek email terbaru dari Sarah" title="Salin Perintah" style="background: none; border: none; cursor: pointer; color: var(--text-secondary); display: flex; align-items: center; padding: 4px;">
+                          <button class="btn btn-xs btn-outline btn-simulate-command" data-cmd="cek email terbaru" title="Simulasikan di Live Chat">Simulasikan ⚡</button>
+                          <button class="btn-copy-command" data-cmd="cek email terbaru" title="Salin Perintah" style="background: none; border: none; cursor: pointer; color: var(--text-secondary); display: flex; align-items: center; padding: 4px;">
                             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="14" height="14"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path></svg>
                           </button>
                         </div>
                       </div>
                       <div class="command-example-box" style="display: flex; align-items: center; justify-content: space-between; background: #F7F6F3; border: 1px solid var(--border-color); padding: 8px 12px; border-radius: var(--radius-md);">
-                        <code style="font-family: monospace; font-size: 13px; color: #1E1E1E;">cari di internet harga emas hari ini</code>
+                        <code style="font-family: monospace; font-size: 13px; color: #1E1E1E;">cari email dari Sarah</code>
                         <div style="display: flex; align-items: center; gap: 8px;">
-                          <button class="btn btn-xs btn-outline btn-simulate-command" data-cmd="cari di internet harga emas hari ini" title="Simulasikan di Live Chat">Simulasikan ⚡</button>
-                          <button class="btn-copy-command" data-cmd="cari di internet harga emas hari ini" title="Salin Perintah" style="background: none; border: none; cursor: pointer; color: var(--text-secondary); display: flex; align-items: center; padding: 4px;">
+                          <button class="btn btn-xs btn-outline btn-simulate-command" data-cmd="cari email dari Sarah" title="Simulasikan di Live Chat">Simulasikan ⚡</button>
+                          <button class="btn-copy-command" data-cmd="cari email dari Sarah" title="Salin Perintah" style="background: none; border: none; cursor: pointer; color: var(--text-secondary); display: flex; align-items: center; padding: 4px;">
                             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="14" height="14"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path></svg>
                           </button>
                         </div>
                       </div>
                     </div>
+                  </div>
+                </div>
+
+                <!-- Toggle 9: Merangkum Berkas Dokumen -->
+                <div class="notion-toggle-item">
+                  <div class="notion-toggle-header" data-toggle="summarize" style="display: flex; align-items: center; gap: 8px; cursor: pointer; user-select: none; padding: 6px 4px; border-radius: var(--radius-sm); transition: background-color 0.15s ease;">
+                    <span class="notion-toggle-arrow" style="font-size: 10px; color: var(--text-secondary); transition: transform 0.15s ease; display: inline-block;">▶</span>
+                    <span style="font-size: 14px; font-weight: 600; color: var(--text-primary);">📄 Merangkum Berkas Dokumen (Summarize)</span>
+                    <span class="badge" style="font-size: 10px; padding: 1px 6px; background-color: rgba(34, 197, 94, 0.1); color: var(--success); border-radius: 4px; font-weight: 600; margin-left: auto;">Semua Paket</span>
+                  </div>
+                  <div class="notion-toggle-content" id="toggle-content-summarize" style="display: none; padding-left: 20px; margin-top: 6px; margin-bottom: 10px;">
+                    <p style="margin: 0; color: var(--text-secondary); font-size: 12.5px; line-height: 1.4;">Kirim berkas dokumen (PDF, DOCX, TXT) ke nomor WhatsApp MyVA Anda dengan caption <code>ringkas</code>, <code>summarize</code>, atau <code>rangkum</code>.</p>
+                  </div>
+                </div>
+
+                <!-- Toggle 10: Pencarian Web / Browsing -->
+                <div class="notion-toggle-item">
+                  <div class="notion-toggle-header" data-toggle="browsing" style="display: flex; align-items: center; gap: 8px; cursor: pointer; user-select: none; padding: 6px 4px; border-radius: var(--radius-sm); transition: background-color 0.15s ease;">
+                    <span class="notion-toggle-arrow" style="font-size: 10px; color: var(--text-secondary); transition: transform 0.15s ease; display: inline-block;">▶</span>
+                    <span style="font-size: 14px; font-weight: 600; color: var(--text-primary);">🌐 Pencarian Web / Browsing</span>
+                    <span class="badge" style="font-size: 10px; padding: 1px 6px; background-color: rgba(34, 197, 94, 0.1); color: var(--success); border-radius: 4px; font-weight: 600; margin-left: auto;">Semua Paket</span>
+                  </div>
+                  <div class="notion-toggle-content" id="toggle-content-browsing" style="display: none; padding-left: 20px; margin-top: 6px; margin-bottom: 10px;">
+                    <p style="margin: 0 0 8px 0; color: var(--text-secondary); font-size: 12.5px; line-height: 1.4;">Mencari informasi real-time dan ter-update dari internet.</p>
+                    <div style="display: flex; flex-direction: column; gap: 8px;">
+                      <div class="command-example-box" style="display: flex; align-items: center; justify-content: space-between; background: #F7F6F3; border: 1px solid var(--border-color); padding: 8px 12px; border-radius: var(--radius-md);">
+                        <code style="font-family: monospace; font-size: 13px; color: #1E1E1E;">cari di internet harga saham terbaru hari ini</code>
+                        <div style="display: flex; align-items: center; gap: 8px;">
+                          <button class="btn btn-xs btn-outline btn-simulate-command" data-cmd="cari di internet harga saham terbaru hari ini" title="Simulasikan di Live Chat">Simulasikan ⚡</button>
+                          <button class="btn-copy-command" data-cmd="cari di internet harga saham terbaru hari ini" title="Salin Perintah" style="background: none; border: none; cursor: pointer; color: var(--text-secondary); display: flex; align-items: center; padding: 4px;">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="14" height="14"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path></svg>
+                          </button>
+                        </div>
+                      </div>
+                      <div class="command-example-box" style="display: flex; align-items: center; justify-content: space-between; background: #F7F6F3; border: 1px solid var(--border-color); padding: 8px 12px; border-radius: var(--radius-md);">
+                        <code style="font-family: monospace; font-size: 13px; color: #1E1E1E;">tanya web siapa pemenang piala dunia terakhir</code>
+                        <div style="display: flex; align-items: center; gap: 8px;">
+                          <button class="btn btn-xs btn-outline btn-simulate-command" data-cmd="tanya web siapa pemenang piala dunia terakhir" title="Simulasikan di Live Chat">Simulasikan ⚡</button>
+                          <button class="btn-copy-command" data-cmd="tanya web siapa pemenang piala dunia terakhir" title="Salin Perintah" style="background: none; border: none; cursor: pointer; color: var(--text-secondary); display: flex; align-items: center; padding: 4px;">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="14" height="14"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path></svg>
+                          </button>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
+                <!-- Toggle 11: Percakapan Bebas (AI Chat) -->
+                <div class="notion-toggle-item">
+                  <div class="notion-toggle-header" data-toggle="free-chat" style="display: flex; align-items: center; gap: 8px; cursor: pointer; user-select: none; padding: 6px 4px; border-radius: var(--radius-sm); transition: background-color 0.15s ease;">
+                    <span class="notion-toggle-arrow" style="font-size: 10px; color: var(--text-secondary); transition: transform 0.15s ease; display: inline-block;">▶</span>
+                    <span style="font-size: 14px; font-weight: 600; color: var(--text-primary);">💡 Percakapan Bebas (AI Chat)</span>
+                    <span class="badge" style="font-size: 10px; padding: 1px 6px; background-color: rgba(34, 197, 94, 0.1); color: var(--success); border-radius: 4px; font-weight: 600; margin-left: auto;">Semua Paket</span>
+                  </div>
+                  <div class="notion-toggle-content" id="toggle-content-free-chat" style="display: none; padding-left: 20px; margin-top: 6px; margin-bottom: 10px;">
+                    <p style="margin: 0; color: var(--text-secondary); font-size: 12.5px; line-height: 1.4;">
+                      Kirim pesan teks biasa untuk mengobrol santai. Didukung teknologi <strong>RAG (Retrieval-Augmented Generation)</strong>, asisten akan mengingat info-info yang pernah Anda simpan dengan perintah <code>catat</code>.
+                    </p>
                   </div>
                 </div>
 
