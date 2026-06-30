@@ -289,33 +289,89 @@ export class IntentRouterService {
       }
     }
 
-    // 7. FALLBACK: AI ASSISTANT CHAT (with RAG context & conversation history)
+    // 7. FALLBACK: AI ASSISTANT CHAT (with dynamic contexts & conversation history)
     // Retrieve relevant memories for RAG context
     const memories = await this.aiService.semanticSearch(userId, text);
-    let contextPrompt = '';
-    if (memories && memories.length > 0) {
-      // Limit to top 3 relevant memories
-      const contextItems = memories.slice(0, 3).map((m, idx) => {
-        return `[Memori #${idx + 1}] Kategori: ${m.category}\nJudul: ${m.title}\nKonten:\n${m.content}`;
-      }).join('\n\n');
 
-      contextPrompt = `Berikut adalah beberapa informasi relevan dari Memory Center (Second Brain) pengguna yang bisa membantu Anda menjawab pertanyaan mereka:\n\n${contextItems}\n\nInstruksi: Gunakan informasi di atas jika relevan untuk menjawab pertanyaan pengguna. Berikan jawaban yang natural dalam bahasa yang sama dengan pengguna, dan sebutkan bahwa informasi ini berasal dari catatan/link yang mereka simpan jika sesuai. Jika informasi di atas tidak relevan, abaikan saja dan jawablah secara normal.`;
+    // Gather required contexts dynamically
+    const requestedContexts = classification.requiredContexts || [];
+
+    // Fallback: simple keyword checks for fail-safe context loading
+    const isExpenseQuery = /(pengeluaran|jajan|belanja|keuangan|finansial|biaya|expense|spend|transaksi|beli|saldo|duit|uang|outlay)/i.test(text);
+    if (isExpenseQuery && !requestedContexts.includes('expenses')) {
+      requestedContexts.push('expenses');
+    }
+    const isTaskQuery = /(tugas|todo|list tugas|kerjaan|task)/i.test(text);
+    if (isTaskQuery && !requestedContexts.includes('tasks')) {
+      requestedContexts.push('tasks');
+    }
+    const isReminderQuery = /(reminder|pengingat|jadwal|agenda|janji|acara|calendar|kalender|event|meet)/i.test(text);
+    if (isReminderQuery && !requestedContexts.includes('reminders')) {
+      requestedContexts.push('reminders');
+    }
+    const isMemoryQuery = /(catat|ingat|note|memori|second brain)/i.test(text);
+    if (isMemoryQuery && !requestedContexts.includes('memories')) {
+      requestedContexts.push('memories');
     }
 
-    // Retrieve user expenses if the query is financial/money related
-    const isExpenseQuery = /(pengeluaran|jajan|belanja|keuangan|finansial|biaya|expense|spend|transaksi|beli|saldo|duit|uang|outlay)/i.test(text);
-    if (isExpenseQuery) {
+    let compiledContext = '';
+
+    // 1. MEMORIES CONTEXT
+    if (requestedContexts.includes('memories') || memories.length > 0) {
+      const contextItems = memories.slice(0, 5).map((m, idx) => {
+        return `[Memori #${idx + 1}] Kategori: ${m.category}\nJudul: ${m.title}\nKonten:\n${m.content}`;
+      }).join('\n\n');
+      compiledContext += `\n\n[Data Memori/Catatan Pengguna (Second Brain)]\n${contextItems}\n\nInstruksi: Gunakan data di atas jika relevan untuk menjawab pertanyaan/instruksi catatan pengguna.`;
+    }
+
+    // 2. EXPENSES CONTEXT
+    if (requestedContexts.includes('expenses')) {
       const expenses = await this.expenseService.findAll(userId);
       if (expenses && expenses.length > 0) {
-        const expenseList = expenses.map(e => {
+        const expenseList = expenses.slice(0, 50).map(e => {
           const dateStr = new Date(e.createdAt).toLocaleDateString('id-ID', { timeZone: 'Asia/Jakarta' });
           return `- Tanggal: ${dateStr}, Deskripsi: ${e.description}, Kategori: ${e.category}, Jumlah: Rp ${e.amount.toLocaleString('id-ID')}`;
         }).join('\n');
 
-        const expenseContext = `\n\n[Data Keuangan/Pengeluaran Pengguna]\nBerikut adalah seluruh riwayat pengeluaran yang pernah dicatat oleh pengguna:\n${expenseList}\n\nInstruksi: Gunakan data pengeluaran di atas untuk menjawab pertanyaan finansial/pengeluaran pengguna dengan akurat. Jika pengguna menanyakan total pengeluaran dalam jangka waktu tertentu (misal: hari ini, minggu ini, bulan ini), hitunglah totalnya berdasarkan tanggal transaksi yang tertera di atas secara presisi. Jawab dengan gaya singkat dan jelas.`;
-
-        contextPrompt = contextPrompt ? `${contextPrompt}\n\n${expenseContext}` : expenseContext;
+        compiledContext += `\n\n[Data Keuangan/Pengeluaran Pengguna]\nBerikut adalah riwayat pengeluaran terbaru:\n${expenseList}\n\nInstruksi: Gunakan data pengeluaran di atas untuk menjawab pertanyaan finansial/pengeluaran pengguna dengan akurat. Jika pengguna menanyakan total pengeluaran dalam jangka waktu tertentu (misal: hari ini, minggu ini, bulan ini), hitunglah totalnya secara presisi berdasarkan tanggal transaksi yang tertera.`;
+      } else {
+        compiledContext += `\n\n[Data Keuangan/Pengeluaran Pengguna]\nPengguna belum mencatat pengeluaran apa pun.`;
       }
+    }
+
+    // 3. TASKS CONTEXT
+    if (requestedContexts.includes('tasks')) {
+      const tasks = await this.taskService.findAll(userId);
+      if (tasks && tasks.length > 0) {
+        const taskList = tasks.map(t => {
+          const deadlineStr = t.deadline ? new Date(t.deadline).toLocaleDateString('id-ID', { timeZone: 'Asia/Jakarta' }) : 'Tidak ada';
+          return `- Tugas: ${t.title}, Deskripsi: ${t.description || 'Tidak ada'}, Status: ${t.status}, Prioritas: ${t.priority}, Deadline: ${deadlineStr}`;
+        }).join('\n');
+
+        compiledContext += `\n\n[Data Daftar Tugas/To-Do List Pengguna]\nBerikut adalah daftar tugas pengguna:\n${taskList}\n\nInstruksi: Gunakan data tugas di atas untuk menjawab pertanyaan mengenai tugas, pekerjaan, atau To-Do list pengguna secara akurat.`;
+      } else {
+        compiledContext += `\n\n[Data Daftar Tugas/To-Do List Pengguna]\nPengguna tidak memiliki tugas dalam daftar.`;
+      }
+    }
+
+    // 4. REMINDERS/CALENDAR CONTEXT
+    if (requestedContexts.includes('reminders')) {
+      const reminders = await this.reminderService.findAll(userId);
+      if (reminders && reminders.length > 0) {
+        const reminderList = reminders.map(r => {
+          const timeStr = new Date(r.scheduledAt).toLocaleString('id-ID', { timeZone: 'Asia/Jakarta' });
+          return `- Pengingat/Acara: ${r.title}, Deskripsi: ${r.description || 'Tidak ada'}, Waktu: ${timeStr}, Status: ${r.status}`;
+        }).join('\n');
+
+        compiledContext += `\n\n[Data Pengingat & Acara Kalender Pengguna]\nBerikut adalah daftar pengingat/jadwal acara pengguna:\n${reminderList}\n\nInstruksi: Gunakan data di atas untuk menginformasikan agenda, jadwal, janji temu, atau pengingat pengguna secara tepat.`;
+      } else {
+        compiledContext += `\n\n[Data Pengingat & Acara Kalender Pengguna]\nPengguna tidak memiliki jadwal/pengingat saat ini.`;
+      }
+    }
+
+    let contextPrompt = '';
+    if (compiledContext) {
+      contextPrompt = `Sistem memberikan Anda data internal pengguna berikut untuk membantu menjawab chat secara cerdas dan kontekstual:\n${compiledContext.trim()}\n\nHarap sesuaikan jawaban Anda berdasarkan data di atas dengan gaya bahasa asisten (sangat singkat, padat, dan ramah).`;
     }
 
     // Retrieve conversation history

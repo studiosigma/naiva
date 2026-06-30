@@ -17,6 +17,7 @@ export interface IntentClassification {
     query?: string;
     isMeeting?: boolean;
   };
+  requiredContexts?: ('tasks' | 'reminders' | 'expenses' | 'memories')[];
 }
 
 @Injectable()
@@ -700,9 +701,14 @@ Instructions:
 - "description": Description of expense (e.g. "beli kopi", "bayar listrik").
 - "category": Category of expense (e.g. "Food", "Bills", "Transportation", "Other") or category of memory (default to "Notes").
 - "name": Contact name.
-- "phone": Contact phone number.
 - "query": Query term for searches (email search, memory search, web search).
 - "isMeeting": boolean flag for calendar events. Set to true if words like "meeting", "rapat", "pertemuan", "zoom", "meet" are present.
+
+3. Identify if the AI needs access to any of the user's personal databases to answer this message. Add one or more of these strings to the "requiredContexts" array (return an empty array if none apply):
+- "tasks": If the user is asking to view, list, count, or query their tasks/to-do list (e.g. "what are my tasks?", "tampilkan todo list saya hari ini", "apa saja task saya hari ini?").
+- "reminders": If the user is asking to view, check, list, or query their reminders or calendar events/agenda (e.g. "ada jadwal apa besok?", "lihat pengingat saya", "jadwal besok apa?").
+- "expenses": If the user is asking about their financial records, total spendings, jajan history, or expense stats (e.g. "berapa pengeluaran saya?", "jajan kopi habis berapa bulan ini?", "berapa pengeluaran saya 1 pekan ini?").
+- "memories": If the user is asking to lookup, search, or retrieve general notes/memories (e.g. "apa password wifi?", "catatan tentang resep", "kemarin catat apa?").
 
 Return response strictly in this JSON format:
 {
@@ -718,7 +724,8 @@ Return response strictly in this JSON format:
     "phone": "...",
     "query": "...",
     "isMeeting": false
-  }
+  },
+  "requiredContexts": []
 }
 `;
 
@@ -754,6 +761,7 @@ Return response strictly in this JSON format:
         intent: parsed.intent || 'CHAT',
         confidence: parsed.confidence || 1.0,
         extracted: parsed.extracted || {},
+        requiredContexts: parsed.requiredContexts || [],
       };
     } catch (error) {
       this.logger.error(`Gemini ClassifyIntent Error: ${error.message}`);
