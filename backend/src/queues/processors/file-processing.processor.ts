@@ -188,7 +188,28 @@ export class FileProcessingProcessor extends WorkerHost {
 
       // 5. Send reply via WhatsApp API
       await this.whatsappApiService.sendMessage(fromPhone, replyText);
-      this.logger.log(`Sent voice note summary reply to ${fromPhone}`);
+      this.logger.log(`Sent voice note summary text reply to ${fromPhone}`);
+
+      // 6. Generate and send TTS voice reply
+      try {
+        this.logger.log(`Generating TTS audio reply for ${fromPhone}...`);
+        const audioBuffer = await this.aiService.generateSpeech(summary);
+        
+        const mediaId = await this.whatsappApiService.uploadMedia(
+          audioBuffer,
+          'summary.mp3',
+          'audio/mpeg',
+        );
+
+        if (mediaId) {
+          await this.whatsappApiService.sendAudio(fromPhone, mediaId);
+          this.logger.log(`Sent voice note summary audio reply to ${fromPhone}`);
+        } else {
+          this.logger.warn(`Failed to upload TTS audio to WhatsApp for ${fromPhone}`);
+        }
+      } catch (ttsErr) {
+        this.logger.error(`Failed to generate/send TTS audio reply: ${ttsErr.message}`);
+      }
     } catch (error) {
       this.logger.error(`Error processing voice note job: ${error.message}`);
       await this.whatsappApiService.sendMessage(

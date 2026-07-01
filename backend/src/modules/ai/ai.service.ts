@@ -949,5 +949,94 @@ Instructions:
       return {};
     }
   }
+
+  async generateSpeech(text: string): Promise<Buffer> {
+    const openaiKey = this.configService.get<string>('OPENAI_API_KEY');
+    
+    // Check if the OpenAI key is valid and not a mock/dummy
+    if (openaiKey && openaiKey.startsWith('sk-') && !openaiKey.includes('xxxxxx')) {
+      try {
+        this.logger.log('Generating speech using OpenAI TTS API...');
+        const response = await fetch('https://api.openai.com/v1/audio/speech', {
+          method: 'POST',
+          headers: {
+            'Authorization': `Bearer ${openaiKey}`,
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({
+            model: 'tts-1',
+            input: text,
+            voice: 'alloy',
+            response_format: 'mp3',
+          }),
+        });
+
+        if (response.ok) {
+          const arrayBuffer = await response.arrayBuffer();
+          return Buffer.from(arrayBuffer);
+        }
+        
+        const errData = await response.json();
+        this.logger.error(`OpenAI TTS API error: ${JSON.stringify(errData)}`);
+      } catch (err) {
+        this.logger.error(`Failed to generate speech with OpenAI: ${err.message}`);
+      }
+    }
+
+    // Fallback: Free Translate Google TTS (with 150-char splitting and chunk concatenation)
+    this.logger.log('Generating speech using Translate Google TTS fallback...');
+    try {
+      const cleanText = text.replace(/[*_#`~[\]()]/g, '').trim();
+      const chunks = this.splitTextIntoChunks(cleanText, 150);
+      const chunkBuffers: Buffer[] = [];
+
+      for (const chunk of chunks) {
+        const url = `https://translate.google.com/translate_tts?ie=UTF-8&tl=id&client=tw-ob&q=${encodeURIComponent(chunk)}`;
+        const res = await fetch(url, {
+          headers: {
+            'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36',
+          },
+        });
+
+        if (!res.ok) {
+          throw new Error(`Google TTS returned status: ${res.status}`);
+        }
+
+        const arrayBuffer = await res.arrayBuffer();
+        chunkBuffers.push(Buffer.from(arrayBuffer));
+        
+        // Brief delay between requests to avoid rate limits
+        await new Promise(resolve => setTimeout(resolve, 300));
+      }
+
+      if (chunkBuffers.length === 0) {
+        throw new Error('No audio buffers generated.');
+      }
+
+      return Buffer.concat(chunkBuffers);
+    } catch (err) {
+      this.logger.error(`Failed to generate speech with Google TTS fallback: ${err.message}`);
+      throw err;
+    }
+  }
+
+  private splitTextIntoChunks(text: string, maxLength: number): string[] {
+    const words = text.split(/\s+/);
+    const chunks: string[] = [];
+    let currentChunk = '';
+
+    for (const word of words) {
+      if ((currentChunk + ' ' + word).trim().length <= maxLength) {
+        currentChunk = (currentChunk + ' ' + word).trim();
+      } else {
+        if (currentChunk) chunks.push(currentChunk);
+        currentChunk = word;
+      }
+    }
+    if (currentChunk) {
+      chunks.push(currentChunk);
+    }
+    return chunks;
+  }
 }
 

@@ -139,4 +139,69 @@ export class WhatsAppApiService {
       return this.sendMessage(to, text);
     }
   }
+
+  async uploadMedia(buffer: Buffer, filename: string, mimeType: string): Promise<string | null> {
+    const url = `https://graph.facebook.com/${this.version}/${this.phoneNumberId}/media`;
+    
+    const formData = new FormData();
+    const blob = new Blob([new Uint8Array(buffer)], { type: mimeType });
+    formData.append('file', blob, filename);
+    formData.append('type', mimeType);
+    formData.append('messaging_product', 'whatsapp');
+
+    try {
+      this.logger.log(`Uploading media "${filename}" (${buffer.length} bytes) to WhatsApp...`);
+      const response = await fetch(url, {
+        method: 'POST',
+        headers: {
+          'Authorization': `Bearer ${this.token}`,
+        },
+        body: formData,
+      });
+
+      const data = await response.json() as any;
+      if (!response.ok) {
+        this.logger.error(`WhatsApp Media Upload Error: ${JSON.stringify(data)}`);
+        return null;
+      }
+      this.logger.log(`WhatsApp media uploaded successfully. Media ID: ${data.id}`);
+      return data.id;
+    } catch (error) {
+      this.logger.error(`Failed to upload WhatsApp media: ${error.message}`);
+      return null;
+    }
+  }
+
+  async sendAudio(to: string, mediaId: string): Promise<boolean> {
+    const url = `https://graph.facebook.com/${this.version}/${this.phoneNumberId}/messages`;
+    
+    this.logger.log(`[WhatsApp API] Sending audio to ${to} (Media ID: ${mediaId})`);
+    
+    try {
+      const response = await fetch(url, {
+        method: 'POST',
+        headers: {
+          'Authorization': `Bearer ${this.token}`,
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          messaging_product: 'whatsapp',
+          recipient_type: 'individual',
+          to,
+          type: 'audio',
+          audio: { id: mediaId },
+        }),
+      });
+      const data = await response.json();
+      if (!response.ok) {
+        this.logger.error(`WhatsApp Send Audio Error: ${JSON.stringify(data)}`);
+        return false;
+      }
+      this.logger.log(`WhatsApp audio sent successfully.`);
+      return true;
+    } catch (error) {
+      this.logger.error(`Failed to send WhatsApp audio: ${error.message}`);
+      return false;
+    }
+  }
 }
