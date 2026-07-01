@@ -806,7 +806,7 @@ Instructions:
 2. Extract parameters if applicable in the "extracted" object:
 - "title": Clean title for tasks/reminders/calendar events (strip time-relative words like "besok", "nanti", "jam 5").
 - "scheduledAt": Calculate the exact ISO-8601 date-time string (YYYY-MM-DDTHH:mm:ss) based on the reference time for reminders/events. Do NOT include offset/timezone (e.g. "2026-06-30T17:00:00"). If relative time is given, calculate it.
-- "amount": Extract numeric value of money for TRACK_EXPENSE (e.g. "25rb" -> 25000, "1.5 juta" -> 1500000).
+- "amount": Extract numeric value of money for TRACK_EXPENSE (e.g. "25rb" -> 25000, "1.5 juta" -> 1500000). If the user specifies arithmetic, quantities, or discounts (e.g. "beli kopi 15rb kali 3", "bayar 150 ribu plus ppn 10%", "beli baju 100rb diskon 15rb"), calculate the final total amount and return it as a single integer (e.g. 45000, 165000, or 85000).
 - "description": Description of expense (e.g. "beli kopi", "bayar listrik").
 - "category": Category of expense (e.g. "Food", "Bills", "Transportation", "Other") or category of memory (default to "Notes").
 - "name": Contact name.
@@ -914,8 +914,8 @@ But some mandatory parameter was missing. The user was asked for clarification a
 
 Instructions:
 1. Extract the missing parameter from the user's reply.
-- If the action is "CREATE_REMINDER" or "CREATE_CALENDAR_EVENT", extract "scheduledAt" as an ISO-8601 date-time string (YYYY-MM-DDTHH:mm:ss) without timezone/offset. Calculate it based on the reference time.
-- If the action is "TRACK_EXPENSE", extract "amount" as a numeric value (e.g. "25rb" -> 25000, "150.000" -> 150000).
+- If the action is "CREATE_REMINDER" or "CREATE_CALENDAR_EVENT", extract "scheduledAt" as an ISO-8601 date-time string (YYYY-MM-DDTHH:mm:ss) without timezone/offset. Calculate it based on the reference time. If a relative date/time is mentioned (e.g. "Senin depan jam 2 siang", "besok sore jam 5", "3 jam lagi"), calculate the exact target date-time based on reference time.
+- If the action is "TRACK_EXPENSE", extract "amount" as a numeric value. If the user specifies arithmetic, quantities, or discounts (e.g. "tadi habis 150 ribu rupiah ditambah ppn 10%", "habis 50 ribu terus dapet kembalian 10 ribu", "totalnya 15rb kali 3"), calculate the final total amount and return it as a single integer (e.g. 165000, 40000, or 45000).
 2. Return the result strictly in this JSON format:
 {
   "scheduledAt": "...",
