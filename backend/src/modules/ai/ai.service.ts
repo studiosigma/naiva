@@ -1038,5 +1038,52 @@ Instructions:
     }
     return chunks;
   }
+
+  async generateClarificationQuestion(
+    intent: string,
+    userMessage: string,
+    missingParam: string,
+  ): Promise<string> {
+    const apiKey = this.geminiApiKey;
+    if (!apiKey) {
+      if (intent === 'CREATE_REMINDER') return `Baik! Kapan saya harus mengingatkan Anda?`;
+      if (intent === 'CREATE_CALENDAR_EVENT') return `Baik! Kapan jadwal acara tersebut?`;
+      if (intent === 'TRACK_EXPENSE') return `Berapa nominal pengeluaran untuk transaksi ini?`;
+      return `Bisa tolong perjelas instruksi Anda?`;
+    }
+
+    try {
+      const prompt = `Anda adalah MyVA, asisten AI pribadi WhatsApp yang ramah, profesional, dan cerdas.
+Pengguna mengirimkan pesan berikut: "${userMessage}"
+Mereka ingin melakukan aksi dengan intent "${intent}", namun parameter "${missingParam}" belum lengkap atau masih ambigu.
+
+Tugas Anda: Buatlah sebuah pertanyaan klarifikasi follow-up yang sangat ramah, alami, interaktif, dan kontekstual berdasarkan pesan mereka untuk menanyakan detail "${missingParam}" yang kurang tersebut.
+Berikan alternatif/pilihan yang wajar sesuai konteks jika memungkinkan (seperti: "besok jam berapa? sebelum berangkat kerja atau sepulang kerja?").
+
+Aturan:
+1. Jawab langsung dengan kalimat pertanyaan tersebut (tanpa salam pembuka formal seperti "Halo!" atau penjelasan tambahan).
+2. Maksimal 2 kalimat.
+3. Gunakan bahasa Indonesia yang santai tapi sopan.`;
+
+      const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${apiKey}`;
+      const payload = {
+        contents: [{ parts: [{ text: prompt }] }],
+      };
+
+      const response = await fetch(url, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(payload),
+      });
+
+      if (!response.ok) throw new Error(`Status ${response.status}`);
+      const data = await response.json() as any;
+      const textResult = data.candidates?.[0]?.content?.parts?.[0]?.text;
+      return textResult ? textResult.trim() : `Bisa tolong perjelas kapan waktunya?`;
+    } catch (error) {
+      this.logger.error(`Error generating clarification question: ${error.message}`);
+      return `Baik! Kapan waktu spesifiknya?`;
+    }
+  }
 }
 

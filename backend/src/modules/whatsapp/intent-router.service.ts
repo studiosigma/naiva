@@ -134,7 +134,12 @@ export class IntentRouterService {
             },
             timestamp: Date.now(),
           });
-          return `Siap! Kapan Anda ingin diingatkan untuk *"${title || 'WhatsApp Reminder'}"*? (contoh: "besok jam 10 pagi", "nanti malam jam 8")`;
+          const question = await this.aiService.generateClarificationQuestion(
+            'CREATE_REMINDER',
+            text,
+            'waktu pengingat (scheduledAt)',
+          );
+          return question;
         }
 
         const scheduledAt = new Date(`${extracted.scheduledAt}+07:00`);
@@ -199,7 +204,12 @@ export class IntentRouterService {
             },
             timestamp: Date.now(),
           });
-          return `Baik! Kapan jadwal acara *"${title || 'Acara Kalender'}"* tersebut? (contoh: "jumat depan jam 2 siang", "besok jam 9 pagi")`;
+          const question = await this.aiService.generateClarificationQuestion(
+            'CREATE_CALENDAR_EVENT',
+            text,
+            'waktu acara (scheduledAt)',
+          );
+          return question;
         }
 
         const scheduledAt = new Date(`${extracted.scheduledAt}+07:00`);
@@ -351,7 +361,12 @@ export class IntentRouterService {
             },
             timestamp: Date.now(),
           });
-          return `Siap! Berapa nominal pengeluaran untuk *"${description}"*? (contoh: "25rb", "150.000")`;
+          const question = await this.aiService.generateClarificationQuestion(
+            'TRACK_EXPENSE',
+            text,
+            'nominal uang (amount)',
+          );
+          return question;
         }
 
         const expense = await this.expenseService.create(userId, {
