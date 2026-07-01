@@ -696,6 +696,27 @@ export class IntentRouterService {
       }
 
       if (results.length === 0) {
+        this.logger.log(`DuckDuckGo returned no results. Trying Wikipedia search as fallback...`);
+        try {
+          const wikiUrl = `https://id.wikipedia.org/w/api.php?action=query&list=search&srsearch=${encodeURIComponent(cleanSearchQuery)}&utf8=&format=json&origin=*`;
+          const response = await fetch(wikiUrl);
+          if (response.ok) {
+            const data = await response.json() as any;
+            const wikiResults = data.query?.search || [];
+            for (const item of wikiResults.slice(0, 3)) {
+              results.push({
+                title: item.title,
+                url: `https://id.wikipedia.org/wiki/${encodeURIComponent(item.title.replace(/\s+/g, '_'))}`,
+                snippet: item.snippet ? item.snippet.replace(/<[^>]+>/g, '').trim() : '',
+              });
+            }
+          }
+        } catch (wikiErr) {
+          this.logger.warn(`Wikipedia fallback search failed: ${wikiErr.message}`);
+        }
+      }
+
+      if (results.length === 0) {
         return `🔍 *Pencarian Web untuk "${query}"*:\n\nMaaf, asisten tidak menemukan hasil pencarian di internet saat ini.`;
       }
 

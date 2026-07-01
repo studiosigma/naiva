@@ -800,8 +800,8 @@ Instructions:
 - "CREATE_CONTACT": The user wants to save a contact (e.g. "kontak John Doe +628991234567", "simpan kontak Budi 081234567").
 - "READ_EMAIL": The user wants to read, check, or search emails (e.g. "cek email terbaru", "cari email dari Sarah", "baca inbox gmail").
 - "SUMMARIZE_FILE": The user is asking to summarize a document (e.g. "ringkas file ini", "rangkum dokumen di atas").
-- "WEB_SEARCH": The user wants to search the internet/web for real-time information (e.g. "cari di internet harga emas hari ini", "browsing pemenang piala dunia", "tanya web berita terbaru").
-- "CHAT": Any general conversational message, greeting, or question that doesn't fit the above specific database-mutating intents (e.g. "halo", "apa kabar?", "siapa presiden Indonesia?", "bagaimana menurutmu?").
+- "WEB_SEARCH": The user wants to search the internet/web for real-time information, current events, news, weather, stock/gold prices, match results, or factual questions that require up-to-date internet search (e.g. "siapa presiden Indonesia saat ini?", "cuaca Jakarta hari ini", "berita terupdate", "cari di internet harga emas hari ini", "browsing pemenang piala dunia").
+- "CHAT": Any general conversational message, greeting, or subjective/personal opinion question that doesn't fit the above specific database-mutating intents or require real-time web facts (e.g. "halo", "apa kabar?", "bagaimana menurutmu?", "ceritakan lelucon").
 
 2. Extract parameters if applicable in the "extracted" object:
 - "title": Clean title for tasks/reminders/calendar events (strip time-relative words like "besok", "nanti", "jam 5").
