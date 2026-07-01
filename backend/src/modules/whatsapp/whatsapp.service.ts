@@ -6,6 +6,8 @@ import { UsersService } from '../users/users.service';
 import { WhatsAppApiService } from '../../integrations/whatsapp-api.service';
 import { IntentRouterService } from './intent-router.service';
 import { normalizePhoneNumber } from '../../common/utils/phone-utils';
+import { S3Service } from '../../integrations/s3.service';
+import { AIService } from '../ai/ai.service';
 
 @Injectable()
 export class WhatsAppService {
@@ -48,6 +50,8 @@ export class WhatsAppService {
     private readonly usersService: UsersService,
     private readonly whatsappApiService: WhatsAppApiService,
     private readonly intentRouterService: IntentRouterService,
+    private readonly s3Service: S3Service,
+    private readonly aiService: AIService,
     @InjectQueue('file_processing_queue') private readonly fileProcessingQueue: Queue,
     @InjectQueue('reminder_queue') private readonly reminderQueue: Queue,
   ) {}
@@ -500,5 +504,212 @@ export class WhatsAppService {
     });
 
     return replyText;
+  }
+
+  async handleIncomingDocument(
+    fromRaw: string,
+    document: { id: string; filename: string; mime_type: string; caption?: string },
+    waMessageId?: string,
+  ): Promise<void> {
+    const from = normalizePhoneNumber(fromRaw);
+    this.logger.log(`Handling incoming document webhook from ${from} (raw: ${fromRaw}). Media ID: ${document.id}, Filename: ${document.filename} (ID: ${waMessageId || 'N/A'})`);
+
+    if (waMessageId) {
+      const existingMessage = await this.prisma.message.findUnique({
+        where: { whatsappMessageId: waMessageId },
+      });
+      if (existingMessage) {
+        this.logger.warn(`Duplicate WhatsApp document message ID detected: ${waMessageId}. Skipping processing.`);
+        return;
+      }
+    }
+
+    if (!this.checkRateLimit(from)) {
+      this.logger.warn(`Rate limit exceeded for document from ${from}`);
+      return;
+    }
+
+    let user = await this.usersService.findOneByWaNumber(from);
+    if (!user) {
+      this.logger.log(`User not found with WhatsApp number ${from}. Creating trial account.`);
+      user = await this.usersService.create({
+        email: `${from}@trial.myva.ai`,
+        waNumber: from,
+        name: `WhatsApp User (${from})`,
+        plan: 'free',
+        status: 'active',
+      });
+    }
+
+    if (user.plan === 'free') {
+      const warning = `⚠️ *Fitur Kirim Dokumen Terbatas* ⚠️\n\nFitur pengiriman & rangkuman berkas dokumen via WhatsApp hanya tersedia pada paket *Basic* atau *Pro*. Silakan upgrade paket Anda di dasbor MyVA! 📂`;
+      await this.whatsappApiService.sendMessage(from, warning);
+      return;
+    }
+
+    await this.whatsappApiService.sendMessage(
+      from,
+      `📂 Berkas Anda *${document.filename}* telah diterima dan sedang diproses oleh MyVA untuk dimasukkan ke Files Vault & Memory Center Anda...`
+    );
+
+    try {
+      const mediaUrl = await this.whatsappApiService.getMediaUrl(document.id);
+      const fileBuffer = await this.whatsappApiService.downloadMedia(mediaUrl);
+
+      const storageKey = `vault/${user.id}/${Date.now()}-${document.filename}`;
+      await this.s3Service.upload(storageKey, fileBuffer, document.mime_type);
+
+      const fileRecord = await this.prisma.file.create({
+        data: {
+          userId: user.id,
+          filename: document.filename,
+          mimeType: document.mime_type,
+          size: fileBuffer.length,
+          storagePath: storageKey,
+        },
+      });
+
+      await this.fileProcessingQueue.add('analyze_document', {
+        fileId: fileRecord.id,
+        userId: user.id,
+      });
+
+      this.logger.log(`Successfully uploaded document ${document.filename} and queued file analysis.`);
+    } catch (error) {
+      this.logger.error(`Error processing incoming document: ${error.message}`);
+      await this.whatsappApiService.sendMessage(
+        from,
+        `❌ *Gagal memproses dokumen*:\nMaaf, asisten gagal menyimpan atau memproses berkas *${document.filename}* Anda saat ini.`
+      );
+    }
+  }
+
+  async handleIncomingImage(
+    fromRaw: string,
+    image: { id: string; mime_type: string; caption?: string },
+    waMessageId?: string,
+  ): Promise<void> {
+    const from = normalizePhoneNumber(fromRaw);
+    this.logger.log(`Handling incoming image webhook from ${from} (raw: ${fromRaw}). Media ID: ${image.id} (ID: ${waMessageId || 'N/A'})`);
+
+    if (waMessageId) {
+      const existingMessage = await this.prisma.message.findUnique({
+        where: { whatsappMessageId: waMessageId },
+      });
+      if (existingMessage) {
+        this.logger.warn(`Duplicate WhatsApp image message ID detected: ${waMessageId}. Skipping processing.`);
+        return;
+      }
+    }
+
+    if (!this.checkRateLimit(from)) {
+      this.logger.warn(`Rate limit exceeded for image from ${from}`);
+      return;
+    }
+
+    let user = await this.usersService.findOneByWaNumber(from);
+    if (!user) {
+      this.logger.log(`User not found with WhatsApp number ${from}. Creating trial account.`);
+      user = await this.usersService.create({
+        email: `${from}@trial.myva.ai`,
+        waNumber: from,
+        name: `WhatsApp User (${from})`,
+        plan: 'free',
+        status: 'active',
+      });
+    }
+
+    if (user.plan === 'free') {
+      const warning = `⚠️ *Fitur Kirim Gambar Terbatas* ⚠️\n\nFitur pengiriman & analisis gambar (multimodal OCR) via WhatsApp hanya tersedia pada paket *Basic* atau *Pro*. Silakan upgrade paket Anda di dasbor MyVA! 🖼️`;
+      await this.whatsappApiService.sendMessage(from, warning);
+      return;
+    }
+
+    await this.whatsappApiService.sendMessage(
+      from,
+      `🖼️ Gambar Anda telah diterima. MyVA sedang menganalisis konten gambar secara visual & melakukan ekstraksi teks...`
+    );
+
+    try {
+      const mediaUrl = await this.whatsappApiService.getMediaUrl(image.id);
+      const fileBuffer = await this.whatsappApiService.downloadMedia(mediaUrl);
+
+      const extension = image.mime_type.split('/')?.[1] || 'jpg';
+      const filename = `photo-${Date.now()}.${extension}`;
+      const storageKey = `vault/${user.id}/${filename}`;
+      await this.s3Service.upload(storageKey, fileBuffer, image.mime_type);
+
+      await this.prisma.file.create({
+        data: {
+          userId: user.id,
+          filename,
+          mimeType: image.mime_type,
+          size: fileBuffer.length,
+          storagePath: storageKey,
+        },
+      });
+
+      const analysis = await this.aiService.analyzeImage(fileBuffer, image.mime_type);
+
+      const memoryContent = `🖼️ *Gambar*: ${filename}\n\n📝 *Deskripsi Visual*:\n${analysis.description}\n\n🔍 *Teks Diekstrak (OCR)*:\n${analysis.extractedText || 'Tidak ada teks yang terdeteksi.'}`;
+      
+      await this.prisma.memory.create({
+        data: {
+          userId: user.id,
+          title: `Gambar: ${analysis.description.substring(0, 40)}...`,
+          content: memoryContent,
+          category: 'Notes',
+        },
+      });
+
+      let conversation = await this.prisma.conversation.findUnique({
+        where: {
+          userId_waRoomId: {
+            userId: user.id,
+            waRoomId: from,
+          },
+        },
+      });
+
+      if (!conversation) {
+        conversation = await this.prisma.conversation.create({
+          data: {
+            userId: user.id,
+            waRoomId: from,
+          },
+        });
+      }
+
+      await this.prisma.message.create({
+        data: {
+          conversationId: conversation.id,
+          senderType: 'user',
+          text: `[Kirim Gambar: ${filename}]`,
+          whatsappMessageId: waMessageId || null,
+        },
+      });
+
+      const replyText = `📸 *Hasil Analisis Gambar Anda*:\n\n📝 *Deskripsi*:\n${analysis.description}\n\n${
+        analysis.extractedText
+          ? `🔍 *Teks yang Ditemukan (OCR)*:\n_${analysis.extractedText.trim()}_\n\n`
+          : ''
+      }_Hasil analisis ini telah disimpan dengan aman di Memory Center Anda._`;
+
+      await this.prisma.message.create({
+        data: {
+          conversationId: conversation.id,
+          senderType: 'assistant',
+          text: replyText,
+        },
+      });
+
+      await this.whatsappApiService.sendMessage(from, replyText);
+    } catch (error) {
+      this.logger.error(`Error processing incoming image: ${error.message}`);
+      await this.whatsappApiService.sendMessage(
+        from,
+        `❌ *Gagal menganalisis gambar*:\nMaaf, asisten gagal menganalisis atau menyimpan gambar Anda saat ini.`
+      );
+    }
   }
 }

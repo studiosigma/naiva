@@ -105,6 +105,10 @@ export class WhatsAppController {
           await this.whatsappService.handleIncomingMessage(from, message.text.body, messageId);
         } else if (type === 'audio' && message.audio) {
           await this.whatsappService.handleIncomingAudio(from, message.audio, messageId);
+        } else if (type === 'document' && message.document) {
+          await this.whatsappService.handleIncomingDocument(from, message.document, messageId);
+        } else if (type === 'image' && message.image) {
+          await this.whatsappService.handleIncomingImage(from, message.image, messageId);
         } else if (type === 'interactive' && message.interactive?.type === 'button_reply') {
           const buttonId = message.interactive.button_reply.id;
           if (buttonId.startsWith('complete_reminder_') || buttonId.startsWith('snooze_reminder_')) {

@@ -648,6 +648,77 @@ Do NOT include timezone offset in scheduledAt string. Keep it in local Asia/Jaka
     }
   }
 
+  async analyzeImage(
+    imageBuffer: Buffer,
+    mimeType: string,
+  ): Promise<{ description: string; extractedText?: string }> {
+    const geminiKey = this.geminiApiKey;
+    if (!geminiKey) {
+      this.logger.warn('GEMINI_API_KEY is not configured. Bypassing image analysis.');
+      return {
+        description: 'Analisis gambar dinonaktifkan karena GEMINI_API_KEY tidak dikonfigurasi.',
+        extractedText: '',
+      };
+    }
+
+    try {
+      this.logger.log(`Sending image (${imageBuffer.length} bytes, mimeType: ${mimeType}) to Gemini API`);
+      const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${geminiKey}`;
+
+      const payload = {
+        contents: [
+          {
+            parts: [
+              {
+                inlineData: {
+                  mimeType,
+                  data: imageBuffer.toString('base64'),
+                },
+              },
+              {
+                text: 'Lakukan analisis pada gambar ini. Ekstrak semua teks yang terlihat di dalam gambar secara verbatim ke kolom "extractedText", dan berikan deskripsi/ringkasan mengenai gambar ini (misal apa isi gambar, jika ini berupa kwitansi/catatan jelaskan isinya) ke kolom "description". Format respon harus berupa JSON dengan struktur persis seperti ini: {\n  "description": "deskripsi gambar di sini",\n  "extractedText": "semua teks yang diekstrak di sini"\n}',
+              },
+            ],
+          },
+        ],
+        generationConfig: {
+          responseMimeType: 'application/json',
+        },
+      };
+
+      const response = await fetch(url, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(payload),
+      });
+
+      if (!response.ok) {
+        throw new Error(`Gemini API responded with status ${response.status}: ${response.statusText}`);
+      }
+
+      const data = (await response.json()) as any;
+      const responseText = data.candidates?.[0]?.content?.parts?.[0]?.text;
+
+      if (!responseText) {
+        throw new Error('Empty response from Gemini API.');
+      }
+
+      const parsed = JSON.parse(responseText);
+      return {
+        description: parsed.description || 'Tidak ada deskripsi gambar.',
+        extractedText: parsed.extractedText || '',
+      };
+    } catch (error) {
+      this.logger.error(`Gemini Image Processing Error: ${error.message}`);
+      return {
+        description: `Gagal memproses gambar: ${error.message}`,
+        extractedText: '',
+      };
+    }
+  }
+
   async classifyIntent(
     text: string,
     history?: { role: 'user' | 'assistant'; content: string }[],
