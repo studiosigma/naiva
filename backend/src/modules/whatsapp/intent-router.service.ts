@@ -15,7 +15,7 @@ import { google } from 'googleapis';
 export class IntentRouterService {
   private readonly logger = new Logger(IntentRouterService.name);
   private pendingActions = new Map<string, {
-    intent: 'CREATE_REMINDER' | 'CREATE_CALENDAR_EVENT' | 'CREATE_TASK' | 'TRACK_EXPENSE';
+    intent: 'CREATE_REMINDER' | 'CREATE_CALENDAR_EVENT' | 'CREATE_TASK' | 'TRACK_EXPENSE' | 'RESCHEDULE_EVENT';
     extracted: any;
     timestamp: number;
   }>();
@@ -41,6 +41,9 @@ export class IntentRouterService {
     if (pending && (now - pending.timestamp < 5 * 60 * 1000)) {
       if (/(batal|cancel|tidak jadi|gak jadi)/i.test(cleanText)) {
         this.pendingActions.delete(userId);
+        if (pending.intent === 'RESCHEDULE_EVENT') {
+          return `❌ Penjadwalan ulang acara telah dibatalkan. Acara tetap pada waktu semula.`;
+        }
         return `❌ Pembuatan ${pending.intent === 'TRACK_EXPENSE' ? 'catatan pengeluaran' : 'pengingat/agenda'} telah dibatalkan.`;
       }
       this.pendingActions.delete(userId);
@@ -208,6 +211,7 @@ export class IntentRouterService {
         const isGcalConnected = user?.gcalConnected || false;
         let generatedMeetLink = null;
         let syncError = false;
+        let gcalEventId = null;
 
         if (isGcalConnected) {
           try {
@@ -245,6 +249,7 @@ export class IntentRouterService {
               conferenceDataVersion: isMeeting ? 1 : 0,
             })) as any;
 
+            gcalEventId = response.data?.id || null;
             generatedMeetLink = response.data.conferenceData?.entryPoints?.find(
               ep => ep.entryPointType === 'video'
             )?.uri || null;
@@ -254,6 +259,39 @@ export class IntentRouterService {
             this.logger.error(`Error syncing event to Google Calendar: ${error.message}`);
             syncError = true;
           }
+        }
+
+        // Check for calendar conflicts
+        const conflictCheck = await this.checkCalendarConflict(
+          userId,
+          scheduledAt,
+          title || 'Acara Kalender',
+          isGcalConnected,
+        );
+
+        if (conflictCheck.hasConflict) {
+          this.pendingActions.set(userId, {
+            intent: 'RESCHEDULE_EVENT',
+            extracted: {
+              reminderId: reminder.id,
+              gcalEventId,
+              title: title || 'Acara Kalender',
+            },
+            timestamp: Date.now(),
+          });
+
+          let responsePrefix = '';
+          if (isGcalConnected && !syncError) {
+            responsePrefix = `🗓️ *Event Berhasil Dibuat & Disinkronkan ke Google Calendar!*\n\n*Acara:* ${title || 'Acara Kalender'}\n*Waktu:* ${reminder.scheduledAt.toLocaleString('id-ID', { timeZone: 'Asia/Jakarta' })}${
+              generatedMeetLink ? `\n*Google Meet:* ${generatedMeetLink}` : ''
+            }\n\n`;
+          } else if (syncError) {
+            responsePrefix = `🗓️ *Event Berhasil Dibuat secara Lokal!* (Koneksi Google Bermasalah)\n\n*Acara:* ${title || 'Acara Kalender'}\n*Waktu:* ${reminder.scheduledAt.toLocaleString('id-ID', { timeZone: 'Asia/Jakarta' })}\n\n`;
+          } else {
+            responsePrefix = `🗓️ *Event Berhasil Dibuat secara Lokal!*\n\n*Acara:* ${title || 'Acara Kalender'}\n*Waktu:* ${reminder.scheduledAt.toLocaleString('id-ID', { timeZone: 'Asia/Jakarta' })}\n\n`;
+          }
+
+          return responsePrefix + conflictCheck.message;
         }
 
         if (isGcalConnected && !syncError) {
@@ -939,6 +977,7 @@ Instruksi: Gunakan data keuangan di atas untuk menjawab pertanyaan pengguna deng
       });
 
       let gcalLink = '';
+      let gcalEventId = null;
       if (isGcalConnected) {
         try {
           const oauth2Client = await this.googleApiService.getClientForUser(userId);
@@ -966,9 +1005,35 @@ Instruksi: Gunakan data keuangan di atas untuk menjawab pertanyaan pengguna deng
           });
 
           gcalLink = event.data.htmlLink || '';
+          gcalEventId = event.data.id || null;
         } catch (err) {
           this.logger.error(`Google Calendar Event sync failed: ${err.message}`);
         }
+      }
+
+      // Check for calendar conflicts
+      const conflictCheck = await this.checkCalendarConflict(
+        userId,
+        scheduledAt,
+        pending.extracted.title,
+        isGcalConnected,
+      );
+
+      if (conflictCheck.hasConflict) {
+        this.pendingActions.set(userId, {
+          intent: 'RESCHEDULE_EVENT',
+          extracted: {
+            reminderId: reminder.id,
+            gcalEventId,
+            title: pending.extracted.title,
+          },
+          timestamp: Date.now(),
+        });
+
+        const timeStr = scheduledAt.toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit', timeZone: 'Asia/Jakarta' });
+        const dateStr = scheduledAt.toLocaleDateString('id-ID', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric', timeZone: 'Asia/Jakarta' });
+
+        return `📅 *Acara Kalender Dibuat!*\n\n*Judul:* ${reminder.title}\n*Waktu:* ${dateStr} pukul ${timeStr} WIB\n\n` + conflictCheck.message;
       }
 
       const timeStr = scheduledAt.toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit', timeZone: 'Asia/Jakarta' });
@@ -977,6 +1042,54 @@ Instruksi: Gunakan data keuangan di atas untuk menjawab pertanyaan pengguna deng
       return `📅 *Acara Kalender Dibuat!*\n\n*Judul:* ${reminder.title}\n*Waktu:* ${dateStr} pukul ${timeStr} WIB\n${
         isGcalConnected ? `\n🔗 *Google Calendar:* Terhubung\n` : ''
       }_Agenda berhasil ditambahkan ke jadwal Anda._`;
+    }
+
+    if (pending.intent === 'RESCHEDULE_EVENT') {
+      const clarified = await this.aiService.extractClarifiedParameter('CREATE_CALENDAR_EVENT', {}, text);
+      const scheduledAtStr = clarified?.scheduledAt;
+      if (!scheduledAtStr) {
+        return `Format waktu tidak dipahami. Batal menggeser jadwal acara. Silakan coba lagi dengan format yang lebih jelas (contoh: "geser ke jam 3 sore").`;
+      }
+
+      const newScheduledAt = new Date(`${scheduledAtStr}+07:00`);
+
+      // Update local reminder
+      if (pending.extracted.reminderId) {
+        await this.prisma.reminder.update({
+          where: { id: pending.extracted.reminderId },
+          data: { scheduledAt: newScheduledAt.toISOString() },
+        });
+      }
+
+      // Update Google Calendar Event if connected
+      const isGcalConnected = user?.gcalConnected || false;
+      if (isGcalConnected && pending.extracted.gcalEventId) {
+        try {
+          const oauth2Client = await this.googleApiService.getClientForUser(userId);
+          const calendar = google.calendar({ version: 'v3', auth: oauth2Client });
+          
+          await calendar.events.patch({
+            calendarId: 'primary',
+            eventId: pending.extracted.gcalEventId,
+            requestBody: {
+              start: {
+                dateTime: newScheduledAt.toISOString(),
+                timeZone: 'Asia/Jakarta',
+              },
+              end: {
+                dateTime: new Date(newScheduledAt.getTime() + 60 * 60 * 1000).toISOString(),
+                timeZone: 'Asia/Jakarta',
+              },
+            },
+          });
+        } catch (err) {
+          this.logger.error(`Failed to reschedule Google Calendar event: ${err.message}`);
+        }
+      }
+
+      const timeStr = newScheduledAt.toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit', timeZone: 'Asia/Jakarta' });
+      const dateStr = newScheduledAt.toLocaleDateString('id-ID', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric', timeZone: 'Asia/Jakarta' });
+      return `🔄 *Jadwal Acara Berhasil Diperbarui!*\n\n*Acara:* ${pending.extracted.title}\n*Waktu Baru:* ${dateStr} pukul ${timeStr} WIB\n\n_Jadwal Anda telah dipindahkan ke slot waktu baru._`;
     }
 
     if (pending.intent === 'TRACK_EXPENSE') {
@@ -1046,5 +1159,167 @@ Anda dapat berbicara dengan saya menggunakan bahasa alami biasa (misal: "tolong 
     - Format: \`cari di internet <kueri>\` atau \`browsing <kueri>\`
 
 💡 *Tips:* Ketik *bantuan* atau *help* kapan saja untuk memunculkan pesan panduan ini.`;
+  }
+
+  private async checkCalendarConflict(
+    userId: string,
+    scheduledAt: Date,
+    title: string,
+    isGcalConnected: boolean,
+  ): Promise<{ hasConflict: boolean; message: string; alternatives?: Date[] }> {
+    const eventDurationMs = 60 * 60 * 1000;
+    const newEventStart = scheduledAt;
+    const newEventEnd = new Date(scheduledAt.getTime() + eventDurationMs);
+
+    // 1. Check local DB for overlapping events
+    const localOverlaps = await this.prisma.reminder.findMany({
+      where: {
+        userId,
+        title: {
+          startsWith: '[Calendar]',
+        },
+        status: 'pending',
+        scheduledAt: {
+          gt: new Date(newEventStart.getTime() - eventDurationMs),
+          lt: new Date(newEventStart.getTime() + eventDurationMs),
+        },
+      },
+    });
+
+    const overlappingLocal = localOverlaps.filter(e => {
+      const eStart = new Date(e.scheduledAt);
+      const eEnd = new Date(eStart.getTime() + eventDurationMs);
+      return eStart < newEventEnd && newEventStart < eEnd;
+    });
+
+    // 2. Check Google Calendar for overlapping events
+    let overlappingGcal: any[] = [];
+    let gcalEvents: any[] = [];
+    if (isGcalConnected) {
+      try {
+        const oauth2Client = await this.googleApiService.getClientForUser(userId);
+        const calendar = google.calendar({ version: 'v3', auth: oauth2Client });
+        
+        const timeMin = new Date(newEventStart.getTime() - 24 * 60 * 60 * 1000).toISOString();
+        const timeMax = new Date(newEventStart.getTime() + 24 * 60 * 60 * 1000).toISOString();
+        
+        const eventsRes = await calendar.events.list({
+          calendarId: 'primary',
+          timeMin,
+          timeMax,
+          singleEvents: true,
+          orderBy: 'startTime',
+        });
+        
+        gcalEvents = eventsRes.data.items || [];
+        overlappingGcal = gcalEvents.filter(e => {
+          const startStr = e.start?.dateTime || e.start?.date;
+          const endStr = e.end?.dateTime || e.end?.date;
+          if (!startStr || !endStr) return false;
+          
+          const eStart = new Date(startStr);
+          const eEnd = new Date(endStr);
+          return eStart < newEventEnd && newEventStart < eEnd;
+        });
+      } catch (err) {
+        this.logger.error(`Error querying Google Calendar for conflicts: ${err.message}`);
+      }
+    }
+
+    const hasConflict = overlappingLocal.length > 0 || overlappingGcal.length > 0;
+    if (!hasConflict) {
+      return { hasConflict: false, message: '' };
+    }
+
+    // Identify the conflicting event title/time
+    let conflictTitle = 'Acara Lain';
+    let conflictTimeStr = '';
+    if (overlappingGcal.length > 0) {
+      const first = overlappingGcal[0];
+      conflictTitle = first.summary || 'Rapat/Acara Kalender';
+      const start = new Date(first.start?.dateTime || first.start?.date);
+      const end = new Date(first.end?.dateTime || first.end?.date);
+      conflictTimeStr = `${start.toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit', timeZone: 'Asia/Jakarta' })} - ${end.toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit', timeZone: 'Asia/Jakarta' })}`;
+    } else if (overlappingLocal.length > 0) {
+      const first = overlappingLocal[0];
+      conflictTitle = first.title.replace(/^\[Calendar\]\s*/, '');
+      const start = new Date(first.scheduledAt);
+      const end = new Date(start.getTime() + eventDurationMs);
+      conflictTimeStr = `${start.toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit', timeZone: 'Asia/Jakarta' })} - ${end.toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit', timeZone: 'Asia/Jakarta' })}`;
+    }
+
+    // Find alternatives
+    const alternatives = this.findAlternativeSlots(scheduledAt, localOverlaps, gcalEvents);
+
+    const alternativeLines = alternatives.map(alt => {
+      const timeStr = alt.toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit', timeZone: 'Asia/Jakarta' });
+      const dayStr = alt.toLocaleDateString('id-ID', { weekday: 'long', timeZone: 'Asia/Jakarta' });
+      return `- ${dayStr} pukul ${timeStr} WIB`;
+    }).join('\n');
+
+    const warningMessage = `⚠️ *Jadwal Bentrok Terdeteksi!* ⚠️\n\nJadwal baru Anda bertabrakan dengan agenda lain:\n- *"${conflictTitle}"* (${conflictTimeStr} WIB)\n\n💡 *Saran Slot Waktu Alternatif:*\n${alternativeLines || '- Tidak ada slot alternatif yang dekat'}\n\nApakah Anda ingin memindahkan acara baru ini? Balas dengan slot waktu baru (contoh: *"geser ke jam 3 sore"*, *"pindahkan ke jam 5 sore"*) atau ketik *"batal"* untuk membatalkan.`;
+
+    return { hasConflict: true, message: warningMessage, alternatives };
+  }
+
+  private findAlternativeSlots(baseDate: Date, localOverlaps: any[], gcalEvents: any[]): Date[] {
+    const eventDurationMs = 60 * 60 * 1000;
+    const alternatives: Date[] = [];
+    
+    // Check hourly slots starting from 1 to 8 hours after original scheduledAt
+    for (let offsetHours = 1; offsetHours <= 8; offsetHours++) {
+      const candidateStart = new Date(baseDate.getTime() + offsetHours * 60 * 60 * 1000);
+      const candidateEnd = new Date(candidateStart.getTime() + eventDurationMs);
+      
+      const hasLocalOverlap = localOverlaps.some(e => {
+        const eStart = new Date(e.scheduledAt);
+        const eEnd = new Date(eStart.getTime() + eventDurationMs);
+        return eStart < candidateEnd && candidateStart < eEnd;
+      });
+      
+      const hasGcalOverlap = gcalEvents.some(e => {
+        const startStr = e.start?.dateTime || e.start?.date;
+        if (!startStr) return false;
+        const eStart = new Date(startStr);
+        const eEnd = e.end?.dateTime || e.end?.date ? new Date(e.end?.dateTime || e.end?.date) : new Date(eStart.getTime() + eventDurationMs);
+        return eStart < candidateEnd && candidateStart < eEnd;
+      });
+      
+      if (!hasLocalOverlap && !hasGcalOverlap) {
+        alternatives.push(candidateStart);
+        if (alternatives.length >= 2) break;
+      }
+    }
+    
+    if (alternatives.length < 2) {
+      // Try next day starting from 09:00 AM
+      const nextDay = new Date(baseDate.getTime() + 24 * 60 * 60 * 1000);
+      nextDay.setHours(9, 0, 0, 0);
+      
+      for (let offsetHours = 0; offsetHours <= 8; offsetHours++) {
+        const candidateStart = new Date(nextDay.getTime() + offsetHours * 60 * 60 * 1000);
+        const candidateEnd = new Date(candidateStart.getTime() + eventDurationMs);
+        
+        const hasLocalOverlap = localOverlaps.some(e => {
+          const eStart = new Date(e.scheduledAt);
+          const eEnd = new Date(eStart.getTime() + eventDurationMs);
+          return eStart < candidateEnd && candidateStart < eEnd;
+        });
+        
+        const hasGcalOverlap = gcalEvents.some(e => {
+          const startStr = e.start?.dateTime || e.start?.date;
+          if (!startStr) return false;
+          const eStart = new Date(startStr);
+          const eEnd = e.end?.dateTime || e.end?.date ? new Date(e.end?.dateTime || e.end?.date) : new Date(eStart.getTime() + eventDurationMs);
+          return eStart < candidateEnd && candidateStart < eEnd;
+        });
+        
+        if (!hasLocalOverlap && !hasGcalOverlap) {
+          alternatives.push(candidateStart);
+          if (alternatives.length >= 2) break;
+        }
+      }
+    }
+    return alternatives;
   }
 }
