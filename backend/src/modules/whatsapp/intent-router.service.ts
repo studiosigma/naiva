@@ -506,13 +506,40 @@ export class IntentRouterService {
     // 2. EXPENSES CONTEXT
     if (requestedContexts.includes('expenses')) {
       const expenses = await this.expenseService.findAll(userId);
+      const monthlyTotal = await this.expenseService.getMonthlyTotal(userId);
+      const monthlyStats = await this.expenseService.getMonthlyStats(userId);
+
+      const formattedMonthlyTotal = new Intl.NumberFormat('id-ID', {
+        style: 'currency',
+        currency: 'IDR',
+        maximumFractionDigits: 0
+      }).format(monthlyTotal);
+
+      const statsList = monthlyStats.map(s => {
+        const formattedTotal = new Intl.NumberFormat('id-ID', {
+          style: 'currency',
+          currency: 'IDR',
+          maximumFractionDigits: 0
+        }).format(s.total);
+        return `- Kategori ${s.category}: ${formattedTotal}`;
+      }).join('\n');
+
       if (expenses && expenses.length > 0) {
         const expenseList = expenses.slice(0, 50).map(e => {
           const dateStr = new Date(e.createdAt).toLocaleDateString('id-ID', { timeZone: 'Asia/Jakarta' });
           return `- Tanggal: ${dateStr}, Deskripsi: ${e.description}, Kategori: ${e.category}, Jumlah: Rp ${e.amount.toLocaleString('id-ID')}`;
         }).join('\n');
 
-        compiledContext += `\n\n[Data Keuangan/Pengeluaran Pengguna]\nBerikut adalah riwayat pengeluaran terbaru:\n${expenseList}\n\nInstruksi: Gunakan data pengeluaran di atas untuk menjawab pertanyaan finansial/pengeluaran pengguna dengan akurat. Jika pengguna menanyakan total pengeluaran dalam jangka waktu tertentu (misal: hari ini, minggu ini, bulan ini), hitunglah totalnya secara presisi berdasarkan tanggal transaksi yang tertera.`;
+        compiledContext += `\n\n[Data Keuangan/Pengeluaran Pengguna]
+Berikut adalah ringkasan pengeluaran BULAN INI:
+• Total Pengeluaran Bulan Ini: ${formattedMonthlyTotal}
+• Breakdown Kategori Bulan Ini:
+${statsList || '- Belum ada data per kategori.'}
+
+Berikut adalah riwayat 50 transaksi pengeluaran terbaru:
+${expenseList}
+
+Instruksi: Gunakan data keuangan di atas untuk menjawab pertanyaan pengguna dengan sangat akurat. Berikan rekap bulanan yang terstruktur, visualisasikan perbandingan antar kategori secara sederhana menggunakan emoji atau bullet points, dan bantu lakukan analisis keuangan (misalnya kategori apa yang paling boros, atau saran hemat) jika diminta.`;
       } else {
         compiledContext += `\n\n[Data Keuangan/Pengeluaran Pengguna]\nPengguna belum mencatat pengeluaran apa pun.`;
       }
